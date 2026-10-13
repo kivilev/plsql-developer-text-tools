@@ -1,0 +1,19 @@
+name: Feature request
+description: A new conversion or tool for the PL/SQL Developer editor
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you do by hand today?
+      description: The routine task this command would remove.
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: Input you would select and the output you expect.
+      render: sql
+    validations:
+      required: true

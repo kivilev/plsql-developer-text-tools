@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!-- Coverage gate (applies when CollectCoverage=true): our code only, the regex source generator output excluded. -->
+    <Include>[TextTools.Core]*</Include>
+    <ExcludeByFile>**/*.g.cs</ExcludeByFile>
+    <Threshold>95</Threshold>
+    <ThresholdType>line</ThresholdType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.msbuild" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TextTools.Core\TextTools.Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,136 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
+using TextTools.Core;
+
+namespace TextTools.Plugin;
+
+/// <summary>Applies a command to the editor of the current window.</summary>
+internal static class Editor
+{
+    public static void Apply(Command cmd)
+    {
+        if (!Ide.WindowHasEditor(false))
+        {
+            Status("no editor in the current window");
+            return;
+        }
+        if (Ide.GetReadOnly)
+        {
+            Status("editor is read-only");
+            return;
+        }
+        if (!TextRoundTripsSafely(Ide.GetText()))
+        {
+            // Writing it back would replace characters with '?' / U+FFFD and silently corrupt the script.
+            Status("text encoding not supported by the plug-in interface, nothing changed");
+            return;
+        }
+
+        try
+        {
+            switch (cmd)
+            {
+                case TransformCommand t:
+                    Transform(t);
+                    break;
+                case InsertCommand i:
+                    Insert(i);
+                    break;
+            }
+        }
+        catch (FormatException e)
+        {
+            // Bad input (not a date, not Base64, ...) is a user-level message, not an error dialog.
+            // A message without spaces is a stripped framework resource key (Native AOT) — replace it.
+            Status(e.Message.Contains(' ', StringComparison.Ordinal) ? e.Message : $"{cmd.Name}: invalid input");
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            // Every regex has Limits.RegexTimeoutMs: a pathological selection must not freeze the IDE.
+            Status($"{cmd.Name}: selection too complex, nothing changed");
+        }
+    }
+
+    /// <summary>Replaces the selection, or the whole text when nothing is selected.</summary>
+    private static void Transform(TransformCommand cmd)
+    {
+        var text = Ide.GetText();
+        var selected = Ide.GetSelectedText();
+        int x = Ide.GetCursorX(), y = Ide.GetCursorY();
+
+        if (selected.Length == 0)
+        {
+            Ide.SetText(cmd.Transform(text));
+            Ide.SetCursor(x, y);
+        }
+        else
+        {
+            var r = SelectionLocator.Replace(text, selected, x, y, cmd.Transform);
+            if (r is null)
+            {
+                Status("could not locate the selection, select a unique fragment");
+                return;
+            }
+            Ide.SetText(r.Value.Text);
+            Ide.SetCursor(r.Value.CursorX, r.Value.CursorY);
+        }
+        Status(cmd.Example is { } example ? $"{cmd.Name}  (e.g. {example})" : cmd.Name);
+    }
+
+    /// <summary>Inserts a "now" value at the cursor, replacing the selection if there is one.</summary>
+    private static void Insert(InsertCommand cmd)
+    {
+        var (now, source) = Now();
+        var value = cmd.Format(now);
+        var text = Ide.GetText();
+        var selected = Ide.GetSelectedText();
+        int x = Ide.GetCursorX(), y = Ide.GetCursorY();
+
+        var r = selected.Length > 0
+            ? SelectionLocator.Replace(text, selected, x, y, _ => value)
+            : SelectionLocator.Insert(text, x, y, value);
+        if (r is null)
+        {
+            Status("could not locate the cursor position");
+            return;
+        }
+        Ide.SetText(r.Value.Text);
+        Ide.SetCursor(r.Value.CursorX, r.Value.CursorY);
+        Status($"{value} (from {source})");
+    }
+
+    /// <summary>
+    /// Database time when connected (SYSTIMESTAMP), otherwise the PC clock. The query runs in the main IDE session,
+    /// so it is skipped while the current window is executing (it would wait for the user's statement), and any
+    /// failure falls back to the PC clock instead of an error.
+    /// </summary>
+    private static (DateTimeOffset Now, string Source) Now()
+    {
+        try
+        {
+            if (Ide.Connected && !Ide.WindowIsRunning)
+            {
+                var s = Ide.QuerySingleValue("select to_char(systimestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.FF6TZH:TZM') from dual");
+                if (s is not null && DateTimeOffset.TryParseExact(s, "yyyy-MM-dd'T'HH:mm:ss.ffffffzzz",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out var db))
+                {
+                    return (db, "database");
+                }
+            }
+        }
+        catch
+        {
+            // fall through to the PC clock
+        }
+        return (DateTimeOffset.Now, "PC clock");
+    }
+
+    /// <summary>
+    /// Text can be rewritten only if it survived the trip through the char* interface: in UTF-8 mode undecodable
+    /// bytes show up as U+FFFD; without UTF-8 mode any non-ASCII character may already be lost.
+    /// </summary>
+    private static bool TextRoundTripsSafely(string text) =>
+        !text.Contains('�') && (Ide.Utf8 || text.All(char.IsAscii));
+
+    private static void Status(string message) => Ide.SetStatusMessage($"{Menu.Title}: {message}");
+}

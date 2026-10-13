@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Managed-side tests of the plugin layer (menu layout). Interop is covered by tools/HostEmulator. -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <!-- Coverage of the plugin assembly is reported, not gated: interop is tested by tools/HostEmulator. -->
+    <Include>[TextTools]*</Include>
+    <ExcludeByFile>**/*.g.cs</ExcludeByFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="coverlet.msbuild" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TextTools.Plugin\TextTools.Plugin.csproj" />
+  </ItemGroup>
+
+</Project>

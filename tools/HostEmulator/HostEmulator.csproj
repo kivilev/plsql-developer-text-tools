@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Integration test host: loads the native TextTools.dll like PL/SQL Developer and checks its behavior. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>HostEmulator</AssemblyName>
+    <RootNamespace>TextTools.HostEmulator</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>

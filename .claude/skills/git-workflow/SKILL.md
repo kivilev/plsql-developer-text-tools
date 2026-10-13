@@ -1,0 +1,40 @@
+---
+name: git-workflow
+description: Git and GitHub rules of Text Tools — branch names, commit message and PR title format (feat|fix|opt[#issue]), squash-only merges into protected master, required CI checks, and how the repository settings are configured. Use when committing, creating a branch or PR, writing a commit message, or changing repository settings.
+---
+
+# Git workflow
+
+Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enable the hook once per clone:
+`git config core.hooksPath .githooks`.
+
+## Names
+
+| What | Format | Examples |
+|---|---|---|
+| Commit message / PR title | `feat\|opt[#N] comment`, `fix[#N] comment` | `feat add ISO week mask`, `feat[#3] add JSON pretty print`, `fix[#12] keep CRLF when sorting lines`, `opt[#7] split DateText` |
+| Branch | `feat/slug`, `opt/[N-]slug`, `fix/N-slug` | `feat/iso-week-mask`, `fix/12-crlf-sort` |
+
+- `feat` new user-visible behavior; `fix` a bug (GitHub issue required); `opt` everything without behavior change:
+  refactoring, tests, CI, docs, dependencies.
+- `[#N]` is a GitHub issue (there is no Jira). Comment 1-200 chars, lower case start, imperative, English.
+- GitHub appends ` (#PR)` to squash commits; the rules accept it.
+
+## Flow
+
+1. `git switch -c <branch> origin/master`, commit (hook checks the message), `scripts/verify.ps1` green.
+2. `git push -u origin <branch>`, `gh pr create` — the title must follow the format (it becomes the commit on master).
+   Body: what/why, `Fixes #N` for bugs, checklist from the template.
+3. CI: `commit-rules`, `verify`, `secrets` must pass. Squash merge (the only allowed method); the branch is deleted.
+4. Never push to `master` directly, never force-push it, never merge with failing checks.
+
+## Repository settings (already applied; re-apply with gh if the repo is recreated)
+
+- Merge: squash only (`allow_merge_commit=false`, `allow_rebase_merge=false`), squash title = PR title,
+  squash message = PR body, delete branch on merge, suggest updating branches.
+- `master` protection (branch protection / ruleset): PR required, required checks `commit-rules`, `verify`, `secrets`
+  up to date with master, linear history, no force-push, no deletion, conversations resolved, applies to admins.
+  No required approvals (single maintainer; raise to 1 when a second maintainer joins).
+- Dependabot: NuGet and GitHub Actions weekly (`opt` prefix), security alerts and updates on.
+- Private repositories on a free GitHub plan cannot use branch protection/rulesets: then either the repo is public
+  or the account needs GitHub Pro.

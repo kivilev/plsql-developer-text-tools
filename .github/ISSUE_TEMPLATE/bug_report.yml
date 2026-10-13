@@ -1,0 +1,63 @@
+name: Bug report
+description: Something in Text Tools does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The fix will be committed as `fix[#<this issue number>] ...`.
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Plugin version
+      description: Configure > Plug-Ins > Text Tools > About
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: input
+    id: ide-version
+    attributes:
+      label: PL/SQL Developer version
+      description: Help > About (and whether the ribbon or the classic menu is used)
+      placeholder: "16.0.2, ribbon"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "Windows 11 23H2"
+  - type: input
+    id: command
+    attributes:
+      label: Menu command
+      placeholder: "Date Tools > Date -> TO_DATE(...)"
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Selected text (input)
+      description: Paste the exact text you selected. Remove anything confidential.
+      render: sql
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      render: sql
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Resulting text, status bar message, error dialog text, or "IDE crashed".
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else
+      description: Tabs or Cyrillic in the text, selection direction, whether Ctrl+Z restored the text, etc.

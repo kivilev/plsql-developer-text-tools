@@ -1,0 +1,71 @@
+# CI gates for every pull request and for master. Required checks on master: commit-rules, verify, secrets.
+#   commit-rules  PR title (= the squash commit message) and branch name, rules in scripts/commit-rules.sh
+#   verify        scripts/verify.ps1: format, build with analyzers as errors, tests + coverage gate,
+#                 vulnerable packages, Native AOT publish, exports, host emulator (smoke/nocallbacks/noutf8/unload/stress)
+#   secrets       gitleaks over the full history
+name: ci
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-rules:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - name: PR title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: sh scripts/commit-rules.sh title "$TITLE"
+      - name: Branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: sh scripts/commit-rules.sh branch "$BRANCH"
+
+  verify:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6.1.0
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Verify (same script as locally)
+        shell: pwsh
+        run: ./scripts/verify.ps1
+      - name: Upload plugin DLL
+        if: success()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: TextTools-win-x64
+          path: src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll
+          if-no-files-found: error
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: coverage
+          path: tests/**/coverage.cobertura.xml
+          if-no-files-found: ignore
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2.3.9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

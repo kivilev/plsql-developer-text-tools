@@ -1,0 +1,5 @@
+#!/bin/sh
+# Checks the commit message format (rules in scripts/commit-rules.sh).
+# Enable once per clone: git config core.hooksPath .githooks
+first_line=$(grep -v '^#' "$1" | sed -n '1p')
+exec sh "$(git rev-parse --show-toplevel)/scripts/commit-rules.sh" title "$first_line"

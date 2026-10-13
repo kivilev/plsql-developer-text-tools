@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      analyzers:
+        patterns: ["Meziantou.*", "SonarAnalyzer.*"]
+      tests:
+        patterns: ["xunit*", "Microsoft.NET.Test.Sdk", "coverlet.*"]
+    commit-message:
+      prefix: "opt"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "opt"
