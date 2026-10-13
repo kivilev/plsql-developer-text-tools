@@ -28,14 +28,14 @@ Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enab
 3. CI: `commit-rules`, `verify`, `secrets` must pass. Squash merge (the only allowed method); the branch is deleted.
 4. Never push to `master` directly, never force-push it, never merge with failing checks.
 
-## Repository settings (already applied; re-apply with gh if the repo is recreated)
+## Repository settings
 
-- Merge: squash only (`allow_merge_commit=false`, `allow_rebase_merge=false`), squash title = PR title,
+- Applied: merge squash only (`allow_merge_commit=false`, `allow_rebase_merge=false`), squash title = PR title,
   squash message = PR body, delete branch on merge, suggest updating branches.
-- `master` protection (branch protection / ruleset): PR required, required checks `commit-rules`, `verify`, `secrets`
+- Pending (see below): `master` ruleset — PR required, required checks `commit-rules`, `verify`, `secrets`
   up to date with master, linear history, no force-push, no deletion, conversations resolved, applies to admins.
   No required approvals (single maintainer; raise to 1 when a second maintainer joins).
-- Dependabot: NuGet and GitHub Actions weekly (`opt` prefix), security alerts and updates on.
+- Applied: Dependabot NuGet and GitHub Actions weekly (`opt` prefix), security alerts and updates on.
 - The `master` ruleset is stored in `.github/rulesets/master-protection.json`. Apply it with
   `gh api -X POST repos/kivilev/plsql-developer-text-tools/rulesets --input .github/rulesets/master-protection.json`.
   A private repository on the free GitHub plan rejects it (HTTP 403 "Upgrade to GitHub Pro or make this repository
