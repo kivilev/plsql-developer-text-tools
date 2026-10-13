@@ -132,18 +132,40 @@ internal static class Scenarios
             return p.PrivateMemorySize64;
         }
 
-        Round(3000);
-        var baseline = PrivateBytes();
-        var peak = baseline;
-        for (var checkpoint = 1; checkpoint <= 6; checkpoint++)
+        // The plugin's GC sizes its heap to the machine (cores, regions): the first rounds grow memory by 10-30 MB on
+        // CI runners without any leak, and later checkpoints fluctuate by a few MB. A leak is a steady trend, so skip
+        // the warm-up and take the least-squares slope of the remaining checkpoints.
+        var checkpoints = new List<double>();
+        for (var i = 0; i < Checkpoints; i++)
         {
-            Round(25_000);
-            peak = Math.Max(peak, PrivateBytes());
+            Round(ClicksPerCheckpoint);
+            checkpoints.Add(PrivateBytes() / 1048576.0);
         }
-        var last = PrivateBytes();
+        var slope = Slope(checkpoints.Skip(WarmUpCheckpoints).ToList());
         Console.WriteLine(string.Create(CultureInfo.InvariantCulture,
-            $"  153k random clicks: private bytes baseline {baseline / 1048576.0:F1} MB, peak {peak / 1048576.0:F1} MB, end {last / 1048576.0:F1} MB"));
-        Check(last - baseline < 16 * 1048576, "no memory growth (< 16 MB over 150k clicks)");
+            $"  {Checkpoints * ClicksPerCheckpoint / 1000}k random clicks, private MB per {ClicksPerCheckpoint / 1000}k: {string.Join(" ", checkpoints.Select(b => b.ToString("F1", CultureInfo.InvariantCulture)))}"));
+        Check(slope < LeakSlopeMbPerCheckpoint, string.Create(CultureInfo.InvariantCulture,
+            $"no leak: trend {slope:F2} MB per {ClicksPerCheckpoint / 1000}k clicks after warm-up (limit {LeakSlopeMbPerCheckpoint})"));
+    }
+
+    private const int Checkpoints = 12;
+    private const int WarmUpCheckpoints = 3;
+    private const int ClicksPerCheckpoint = 25_000;
+
+    /// <summary>0.6 MB per 25k clicks = 25 bytes per click; a leak in every SetText of ~50 bytes or more trips it.</summary>
+    private const double LeakSlopeMbPerCheckpoint = 0.6;
+
+    private static double Slope(List<double> ys)
+    {
+        var meanX = (ys.Count - 1) / 2.0;
+        var meanY = ys.Average();
+        double num = 0, den = 0;
+        for (var x = 0; x < ys.Count; x++)
+        {
+            num += (x - meanX) * (ys[x] - meanY);
+            den += (x - meanX) * (x - meanX);
+        }
+        return num / den;
     }
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
