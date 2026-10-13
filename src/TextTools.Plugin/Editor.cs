@@ -74,7 +74,7 @@ internal static class Editor
             Ide.SetText(r.Value.Text);
             Ide.SetCursor(r.Value.CursorX, r.Value.CursorY);
         }
-        Status(cmd.Example is { } example ? $"{cmd.Name}  (e.g. {example})" : cmd.Name);
+        Status(cmd.StatusExample is { } example ? $"{cmd.Name}  (e.g. {example})" : cmd.Name);
     }
 
     /// <summary>Inserts a "now" value at the cursor, replacing the selection if there is one.</summary>

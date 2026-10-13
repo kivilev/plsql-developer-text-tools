@@ -1,53 +1,104 @@
-# Text Tools for PL/SQL Developer
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+    <img src="docs/assets/logo.svg" alt="Text Tools for PL/SQL Developer" width="96">
+  </picture>
+</p>
 
-A native 64-bit plug-in for [Allround Automations PL/SQL Developer](https://www.allroundautomations.com/products/pl-sql-developer/)
-that transforms the selected editor text — in the spirit of StringManipulation for IntelliJ, tuned for Oracle SQL and PL/SQL.
+<h1 align="center">Text Tools for PL/SQL Developer</h1>
 
-> Status: pre-release, private. Tested on PL/SQL Developer 14 (x64).
+<p align="center">
+  Convert the selected text in <a href="https://www.allroundautomations.com/products/pl-sql-developer/">PL/SQL Developer</a>:
+  identifier case, SQL quoting, <code>IN</code> lists over 1000 values, Base64/HEX,
+  Oracle date literals and Java/.NET date masks. A native 64-bit plug-in, no runtime to install.
+</p>
+
+<p align="center">
+  <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>
+  <a href="https://github.com/kivilev/plsql-developer-text-tools/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/kivilev/plsql-developer-text-tools?sort=semver"></a>
+  <a href="https://github.com/kivilev/plsql-developer-text-tools/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/kivilev/plsql-developer-text-tools/total"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/github/license/kivilev/plsql-developer-text-tools"></a>
+  <br>
+  <img alt="Windows x64" src="https://img.shields.io/badge/platform-Windows%20x64-0078D6?logo=windows">
+  <img alt="PL/SQL Developer 12+ x64" src="https://img.shields.io/badge/PL%2FSQL%20Developer-12%2B%20x64-6E7781">
+  <img alt=".NET 10 Native AOT" src="https://img.shields.io/badge/.NET%2010-Native%20AOT-512BD4?logo=dotnet">
+</p>
+
+<!-- Demo GIF (to be recorded in the real IDE): docs/assets/demo.gif — lines -> IN (...) over 1000 values,
+     date -> TO_DATE, Java mask -> Oracle mask. -->
 
 ## Features
 
-**Plug-Ins → String Tools**
+Two submenus under **Plug-Ins**. Every command works on the selection (or the whole text when nothing is selected),
+shows an example in the status bar and never changes the text when the input is invalid.
+The full list with examples: [docs/commands.md](docs/commands.md).
 
-- Case: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (identifiers only; `$`, `#`, Cyrillic supported)
-- SQL: escape / unescape quotes, wrap in `q'[...]'`, lines → `IN (...)` (over 1000 values via
-  `sys.odcivarchar2list` / `sys.odcinumberlist`, no ORA-01795), lines → `'a' || chr(10) || 'b'`
-- Encode: Base64, URL, HEX (UTF-8, same as `UTL_RAW.CAST_TO_RAW` on AL32UTF8)
-- Lines: sort, reverse, remove duplicates / empty lines / trailing spaces, align by `:=` and `=>`
-
-**Plug-Ins → Date Tools**
-
-- Now: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch — from `SYSTIMESTAMP`
-  when connected, otherwise the PC clock
-- Convert (line by line): Unix epoch (s/ms/µs/ns) → `TIMESTAMP`, date → epoch, date → `TO_DATE` / `TO_TIMESTAMP` /
-  `TO_TIMESTAMP_TZ`, date → `DATE` / `TIMESTAMP` literal
-- Masks: Java / .NET date format ↔ Oracle format mask (`yyyy-MM-dd'T'HH:mm:ss.SSSXXX` → `YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM`),
-  ISO 8601 duration → `INTERVAL` (`PT1H30M` → `INTERVAL '1:30' HOUR TO MINUTE`)
-
-The status bar shows an example of each command. Invalid input never changes the text: the status bar explains why.
+| String Tools | Date Tools |
+|---|---|
+| **Case**: `first_name` → camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic supported) | **Now**: insert the current `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601 or Unix epoch — from `SYSTIMESTAMP` when connected |
+| **SQL**: escape / unescape quotes, `q'[...]'`, lines → `IN (...)` beyond 1000 values (no ORA-01795), lines → `'a' \|\| chr(10) \|\| 'b'` | **Convert**: epoch (s/ms/µs/ns) → `TIMESTAMP`, date → epoch, `13.10.2026 14:30` → `TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')` or a `DATE`/`TIMESTAMP` literal |
+| **Encode**: Base64, URL, HEX (UTF-8, as `UTL_RAW.CAST_TO_RAW`) | **Masks**: `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` ↔ `YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM` (Java and .NET), `PT1H30M` → `INTERVAL '1:30' HOUR TO MINUTE` |
+| **Lines**: sort, reverse, remove duplicates / empty lines / trailing spaces, align by `:=` and `=>` | |
 
 ## Install
 
-1. Close PL/SQL Developer.
-2. Copy `TextTools.dll` into `<PL/SQL Developer>\PlugIns` (administrator rights for Program Files).
-3. Start the IDE; if needed enable it in Configure → Plug-Ins.
+1. Download `TextTools.dll` from the [latest release](https://github.com/kivilev/plsql-developer-text-tools/releases/latest).
+2. Close PL/SQL Developer.
+3. Copy `TextTools.dll` into `<PL/SQL Developer>\PlugIns` (for example `C:\Program Files\PLSQL Developer 16\PlugIns`;
+   Windows asks for administrator rights there).
+4. Start PL/SQL Developer. If **Plug-Ins → String Tools / Date Tools** is missing, enable *Text Tools for PL/SQL Developer*
+   in **Configure → Plug-Ins** and restart.
 
-No .NET runtime is required: the DLL is compiled with .NET Native AOT.
+Downloaded the zip instead? Unpack it and run `Unblock-File TextTools.dll` in PowerShell before copying.
+Checksums are in `SHA256SUMS.txt` next to every release.
 
-## Build
+**Upgrade**: close the IDE, replace `TextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `TextTools.dll`.
+
+## Compatibility
+
+| PL/SQL Developer | Status |
+|---|---|
+| 14 x64 | tested |
+| 12, 13, 15, 16 x64 | expected to work (same plug-in interface), not tested yet |
+| 32-bit editions | not supported |
+
+A report that it works (or not) on your version is welcome in [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
+
+## FAQ
+
+**Do I need .NET?** No. The DLL is compiled with .NET Native AOT and has no runtime dependency.
+
+**Why only 64-bit?** PL/SQL Developer 16 is 64-bit only, and 32-bit plug-ins need a separate build. Ask in Discussions if you need it.
+
+**What happens without a selection?** Text commands apply to the whole editor text; "Now" commands insert at the cursor.
+
+**Can it break my script?** Invalid input (an unrecognized date, bad Base64, an ambiguous `01/02/2026`) never changes the text:
+the status bar explains why. The plug-in is fuzz-tested and checked in a host emulator for crashes and memory leaks.
+
+**My antivirus complains.** The DLL is not code-signed yet. Compare its SHA-256 with `SHA256SUMS.txt`, check the build
+provenance (`gh attestation verify TextTools.dll -R kivilev/plsql-developer-text-tools`) and report a false positive to the vendor.
+
+**Does it send anything anywhere?** No network access. When connected it runs one query, `SYSTIMESTAMP` from `dual`, for the "Now" commands.
+
+## Build from source
 
 Requirements: Windows x64, .NET 10 SDK, Visual Studio 2022 Build Tools with the C++ workload.
 
 ```powershell
-powershell -File scripts/verify.ps1      # format, analyzers, tests, coverage, AOT publish, host emulator
+powershell -File scripts/verify.ps1      # format, analyzers, tests, coverage, Native AOT publish, host emulator
 ```
 
 The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll`.
 
 ## Contributing
 
-Bugs and ideas: GitHub issues (templates provided). Commit and PR rules: [CLAUDE.md](CLAUDE.md#git-workflow).
+Questions and ideas: [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
+Bugs and feature requests: [issues](https://github.com/kivilev/plsql-developer-text-tools/issues/new/choose).
+Code: see [CONTRIBUTING.md](CONTRIBUTING.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
 [MIT](LICENSE) © 2026 Denis Kivilev
+
+PL/SQL Developer is a trademark of Allround Automations. Oracle and PL/SQL are trademarks of Oracle Corporation.
+This project is not affiliated with or endorsed by either company.

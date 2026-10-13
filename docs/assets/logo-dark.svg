@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Text Tools for PL/SQL Developer">
+  <title>Text Tools for PL/SQL Developer</title>
+  <!-- dark theme: a lighter tile with an outline so it does not merge with GitHub's dark background -->
+  <rect x="4" y="4" width="120" height="120" rx="26" fill="#334155" stroke="#64748B" stroke-width="2"/>
+  <rect x="66" y="40" width="34" height="56" rx="6" fill="#2DD4BF" opacity="0.35"/>
+  <text x="25" y="88" font-family="Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', monospace" font-size="62" font-weight="700" fill="#F8FAFC">T</text>
+  <text x="68" y="88" font-family="Consolas, 'Cascadia Mono', 'DejaVu Sans Mono', monospace" font-size="62" font-weight="700" fill="#99F6E4">t</text>
+  <rect x="103" y="38" width="5" height="60" rx="2" fill="#F8FAFC"/>
+</svg>
