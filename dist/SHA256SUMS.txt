@@ -1,2 +1,0 @@
-0f051ac473f1a011659fff99db1db707c40e2334ef50c0b22bf0ab7a263c0fa7  TextTools.dll
-8eef3659b30a8cbf41bf39f186ea582441eaf4f6385308d6fd2b7492457a8ea7  TextTools-0.1.0-rc.1-win-x64.zip
