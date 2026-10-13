@@ -7,7 +7,7 @@ conversion, Java/.NET ↔ Oracle date masks, ISO duration → INTERVAL).
 
 C# / .NET 10 **Native AOT** (`PublishAot`, `NativeLib=Shared`): one `TextTools.dll`, no CLR in the IDE process,
 exports via `[UnmanagedCallersOnly(EntryPoint = ...)]`. x64 only (PL/SQL Developer 16 is x64 only).
-Goal of the project: author visibility (Allround plug-ins page, GitHub, articles). Journal: [docs/journal.md](docs/journal.md).
+Development journal (in Russian): [docs/dev-journal.ru.md](docs/dev-journal.ru.md).
 
 ## Layout
 

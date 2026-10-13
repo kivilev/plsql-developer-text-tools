@@ -33,4 +33,4 @@ Start-Process "C:\Program Files\PLSQL Developer 14\plsqldev.exe"
 - [ ] Date Tools → Now: "from PC clock" without a connection, "from database" when connected.
 - [ ] Bad input (e.g. Base64 decode on `!!!`): status message, no dialog.
 
-Record results in `docs/journal.md`; a defect becomes a GitHub issue (skill `fix-bug`).
+Record results in `docs/dev-journal.ru.md`; a defect becomes a GitHub issue (skill `fix-bug`).

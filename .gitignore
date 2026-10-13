@@ -9,3 +9,6 @@ coverage/
 *.coverage
 *.cobertura.xml
 artifacts/
+
+# Claude Code local settings
+.claude/settings.local.json
