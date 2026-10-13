@@ -138,20 +138,19 @@ public class MenuLimitsTests
     public void CaptionsAreAscii() =>
         Assert.All(Commands.All, c => Assert.True((c.Group + c.Name).All(char.IsAscii), c.Name));
 
-    // Status bar hint: every sample must transform cleanly into one short line.
+    // Status bar hint: single-line commands must have an example that fits the status bar.
     [Fact]
-    public void ExamplesAreShortSingleLines() =>
-        Assert.All(Commands.All.OfType<TransformCommand>().Where(c => c.Sample is not null), c =>
-        {
-            var example = c.Example!;
-            Assert.DoesNotContain('\n', example);
-            Assert.True(example.Length <= 80, $"{c.Name}: {example}");
-        });
+    public void DateAndShortStringCommandsShowAStatusBarExample() =>
+        Assert.All(Commands.All.OfType<TransformCommand>().Where(c => string.Equals(c.Menu, Commands.DateMenu, StringComparison.Ordinal) || c.Group is "Case" or "Encode"),
+            c => Assert.NotNull(c.StatusExample));
 
     [Fact]
-    public void DateAndShortStringCommandsHaveExamples() =>
-        Assert.All(Commands.All.OfType<TransformCommand>().Where(c => string.Equals(c.Menu, Commands.DateMenu, StringComparison.Ordinal) || c.Group is "Case" or "Encode"),
-            c => Assert.NotNull(c.Sample));
+    public void MultiLineExamplesStayOutOfTheStatusBar()
+    {
+        var sort = Commands.All.OfType<TransformCommand>().Single(c => string.Equals(c.Name, "Sort A-Z", StringComparison.Ordinal));
+        Assert.Contains('\n', sort.Example!);
+        Assert.Null(sort.StatusExample);
+    }
 
     // The IDE treats "[...]" in a caption as options (like [tabindex=3]) and cuts it out.
     [Fact]

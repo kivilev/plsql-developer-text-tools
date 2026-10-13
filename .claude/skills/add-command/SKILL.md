@@ -15,8 +15,9 @@ description: Step-by-step recipe for adding a new menu command to Text Tools (a 
 2. **Register** one line in `Commands.All` (`src/TextTools.Core/Commands.cs`), in the right `Menu` and `Group`:
    `T(StringMenu, "SQL", "Caption", SqlText.Fn, "sample input")`.
    - Caption: ASCII only, no `[`/`]`, short, says input -> output (`"Lines -> IN (...)"`).
-   - Sample: a short single-line input; the status bar shows `Caption  (e.g. sample -> result)`. Give one for every
-     single-line command; skip it for multi-line commands (Lines group, IN list).
+   - Sample (required, test `EveryTransformCommandHasASample`): an input that shows what the command does. It is rendered
+     in `docs/commands.md`; when `sample -> result` is a single line of up to 80 chars it is also the status bar hint
+     (`Caption  (e.g. sample -> result)`). Single-line commands must fit (test `DateAndShortStringCommandsShowAStatusBarExample`).
    - Total menu indices must stay ≤ 99 (test `FitsIntoNinetyNineMenuIndices`).
 3. **Tests** in `tests/TextTools.Core.Tests`:
    - Behavior: `[Theory]` with typical inputs, edge cases (empty, CRLF, Cyrillic, trailing newline), and rejects
@@ -26,5 +27,6 @@ description: Step-by-step recipe for adding a new menu command to Text Tools (a 
    - Coverage gate: 95% lines of Core.
 4. **Verify**: `powershell -File scripts/verify.ps1` (skill `verify`). For commands that touch interop or the status bar,
    add a check to `tools/HostEmulator/Scenarios.cs` (`Smoke`).
-5. **Docs**: README feature list; CLAUDE.md overview if a new group appears.
+5. **Docs**: regenerate the command reference — `$env:UPDATE_DOCS=1; dotnet test tests/TextTools.Core.Tests; Remove-Item Env:UPDATE_DOCS`
+   — and commit `docs/commands.md` (test `CommandsReferenceIsUpToDate` fails otherwise). README feature table if a group changes.
 6. **Commit / PR**: branch `feat/<slug>` (or `feat/<issue>-<slug>`), title `feat[#N] add <command>` (skill `git-workflow`).

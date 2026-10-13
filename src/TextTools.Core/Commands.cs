@@ -5,13 +5,20 @@ public abstract record Command(string Menu, string Group, string Name);
 
 /// <summary>
 /// Replaces the selection (or the whole text when nothing is selected) with Transform(selection).
-/// <see cref="Sample"/> is a short input whose result is shown in the status bar as a usage hint.
+/// <see cref="Sample"/> is an input whose result documents the command (docs/commands.md) and, when it is a single
+/// short line, is shown in the status bar as a usage hint.
 /// </summary>
 public sealed record TransformCommand(string Menu, string Group, string Name, Func<string, string> Transform, string? Sample = null)
     : Command(Menu, Group, Name)
 {
     /// <summary>"sample -> Transform(sample)", computed from the real transform so it never drifts.</summary>
     public string? Example => Sample is null ? null : $"{Sample} -> {Transform(Sample)}";
+
+    /// <summary>The example for the status bar: only a single short line fits there.</summary>
+    public string? StatusExample =>
+        Example is { Length: <= MaxStatusExample } e && !e.Contains('\n', StringComparison.Ordinal) ? e : null;
+
+    public const int MaxStatusExample = 80;
 }
 
 /// <summary>Inserts Format(now) at the cursor, replacing the selection if there is one.</summary>
@@ -35,8 +42,8 @@ public static class Commands
         T(StringMenu, "SQL", "Escape quotes ( ' -> '' )", SqlText.Escape, "it's"),
         T(StringMenu, "SQL", "Unescape quotes ( '' -> ' )", SqlText.Unescape, "'it''s'"),
         T(StringMenu, "SQL", "Wrap in q'...' (alt quoting)", SqlText.QQuote, "it's"),
-        T(StringMenu, "SQL", "Lines -> IN (...)", SqlText.ToInList),
-        T(StringMenu, "SQL", "Lines -> 'a' || chr(10) || 'b'", SqlText.ToConcatenation),
+        T(StringMenu, "SQL", "Lines -> IN (...)", SqlText.ToInList, "42\nO'Neil"),
+        T(StringMenu, "SQL", "Lines -> 'a' || chr(10) || 'b'", SqlText.ToConcatenation, "Dear\nit's ok"),
 
         T(StringMenu, "Encode", "Base64 encode", Encode.ToBase64, "Hello"),
         T(StringMenu, "Encode", "Base64 decode", Encode.FromBase64, "SGVsbG8="),
@@ -45,15 +52,15 @@ public static class Commands
         T(StringMenu, "Encode", "HEX encode (UTF-8)", Encode.ToHex, "Hi"),
         T(StringMenu, "Encode", "HEX decode (UTF-8)", Encode.FromHex, "4869"),
 
-        T(StringMenu, "Lines", "Sort A-Z", LineOps.SortAsc),
-        T(StringMenu, "Lines", "Sort Z-A", LineOps.SortDesc),
-        T(StringMenu, "Lines", "Sort A-Z, ignore case", LineOps.SortIgnoreCase),
-        T(StringMenu, "Lines", "Reverse", LineOps.Reverse),
-        T(StringMenu, "Lines", "Remove duplicates", LineOps.RemoveDuplicates),
-        T(StringMenu, "Lines", "Remove empty lines", LineOps.RemoveEmpty),
-        T(StringMenu, "Lines", "Trim trailing spaces", LineOps.TrimTrailing),
-        T(StringMenu, "Lines", "Align by :=", t => LineOps.AlignBy(t, ":=")),
-        T(StringMenu, "Lines", "Align by =>", t => LineOps.AlignBy(t, "=>")),
+        T(StringMenu, "Lines", "Sort A-Z", LineOps.SortAsc, "b\nC\na"),
+        T(StringMenu, "Lines", "Sort Z-A", LineOps.SortDesc, "b\nC\na"),
+        T(StringMenu, "Lines", "Sort A-Z, ignore case", LineOps.SortIgnoreCase, "b\nC\na"),
+        T(StringMenu, "Lines", "Reverse", LineOps.Reverse, "1\n2\n3"),
+        T(StringMenu, "Lines", "Remove duplicates", LineOps.RemoveDuplicates, "a\nb\na"),
+        T(StringMenu, "Lines", "Remove empty lines", LineOps.RemoveEmpty, "a\n\nb"),
+        T(StringMenu, "Lines", "Trim trailing spaces", LineOps.TrimTrailing, "a   \nb  "),
+        T(StringMenu, "Lines", "Align by :=", t => LineOps.AlignBy(t, ":="), "l_id := 1;\nl_name := 'x';"),
+        T(StringMenu, "Lines", "Align by =>", t => LineOps.AlignBy(t, "=>"), "p_id => 1,\np_name => 'x'"),
 
         I(DateMenu, "Now", "Now: DATE '2026-10-13'", DateText.NowDate),
         I(DateMenu, "Now", "Now: TIMESTAMP '2026-10-13 14:30:00'", DateText.NowTimestamp),
