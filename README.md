@@ -47,3 +47,7 @@ The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll
 ## Contributing
 
 Bugs and ideas: GitHub issues (templates provided). Commit and PR rules: [CLAUDE.md](CLAUDE.md#git-workflow).
+
+## License
+
+[MIT](LICENSE) © 2026 Denis Kivilev
