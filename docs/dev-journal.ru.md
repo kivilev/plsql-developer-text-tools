@@ -1,7 +1,6 @@
-# Журнал
+# Development journal
 
-Новые записи сверху. Формат: дата — что сделали / что узнали / что решили.
-Журнал перенесён из хаба идей (ai-sport-bets/plsqldev-text-tools) при выделении в отдельный репозиторий.
+*In Russian. Newest entries first: date — what was done / learned / decided.*
 
 ## 2026-10-14 — отдельный репозиторий
 
@@ -39,19 +38,6 @@
 - Native AOT с UseSystemResourceKeys вырезает тексты системных исключений («Format_BadBase64Char») → свои сообщения.
 - Тесты: 88/88. Эмулятор хоста: все сценарии ок. Установлено в IDE 14. В живой IDE Date Tools ещё не проверен,
   как и undo после SetText.
-
-## 2026-10-14 — спрос и ожидания (Stack Overflow API, маркетплейсы, GitHub)
-
-- Просмотры вопросов SO (тег oracle-database, сумма по найденным вопросам):
-  маски/форматы дат 6.6M (топ 782k «change date format MM/DD/YYYY → YYYY-MM-DD»), escape single quote 1.3M (топ 455k),
-  INTERVAL 1.2M, IN > 1000 / ORA-01795 1.0M (топ 452k), unix epoch ↔ date ~0.9M (топ 143k), перевод строки/chr(10) 0.8M.
-  camel ↔ snake (вне Oracle) 0.4M. Выравнивание `=>`/`:=` — спроса не замерить, это «вау» для GIF, не для SEO.
-- Аудитория IDE узкая: тег plsqldeveloper 1.6k вопросов против oracle-sqldeveloper 7.6k и oracle-database 152k.
-  Пользователи PL/SQL Developer сидят в РФ/СНГ/Китае, где SO не главный канал → основной канал Habr и RU-чаты, Reddit вторичен.
-- Аналоги: StringManipulation (JetBrains) 5.07M загрузок; string-manipulation (VS Code) 88k установок — формат востребован.
-- Потолок ниши на GitHub: самый звёздный плагин для PL/SQL Developer — utPLSQL, 29★ и ~4.1k загрузок релизов за всё время;
-  остальные 1–19★. Критерий «≥100★» нишей не взять — звёзды придут от .NET-статьи (Native AOT), не от Oracle-аудитории.
-- Поправка: WakaTime-плагин для PL/SQL Developer существует (den-kozlov/PLSQLDeveloperWakatime, 1★, 2019).
 
 ## 2026-10-13 (вечер) — первая сборка
 
