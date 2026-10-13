@@ -19,4 +19,4 @@ unless you prefer otherwise.
 ## Verifying downloads
 
 Every release lists SHA-256 checksums (`SHA256SUMS.txt`) and carries a build provenance attestation:
-`gh attestation verify TextTools.dll -R kivilev/plsql-developer-text-tools`.
+`gh attestation verify PlsqlDevTextTools.dll -R kivilev/plsql-developer-text-tools`.

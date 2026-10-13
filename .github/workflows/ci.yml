@@ -49,8 +49,8 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: TextTools-win-x64
-          path: src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll
+          name: PlsqlDevTextTools-win-x64
+          path: src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll
           if-no-files-found: error
       - name: Upload coverage
         if: always()

@@ -1,7 +1,7 @@
 Text Tools for PL/SQL Developer uses third-party software that may be distributed under licenses
 different from the Text Tools license (see LICENSE).
 
-TextTools.dll is compiled with .NET Native AOT, which links parts of the .NET runtime and base class
+PlsqlDevTextTools.dll is compiled with .NET Native AOT, which links parts of the .NET runtime and base class
 libraries into the DLL. They are distributed under the MIT license below. The .NET runtime itself
 includes further third-party components; their notices are listed in
 https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT

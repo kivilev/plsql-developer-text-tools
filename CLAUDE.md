@@ -5,7 +5,7 @@ transformations of the selected editor text. Menu: Plug-Ins → **String Tools**
 over 1000, Base64/URL/HEX, line tools) and **Date Tools** (now values from the DB, epoch/TO_DATE/literal
 conversion, Java/.NET ↔ Oracle date masks, ISO duration → INTERVAL).
 
-C# / .NET 10 **Native AOT** (`PublishAot`, `NativeLib=Shared`): one `TextTools.dll`, no CLR in the IDE process,
+C# / .NET 10 **Native AOT** (`PublishAot`, `NativeLib=Shared`): one `PlsqlDevTextTools.dll`, no CLR in the IDE process,
 exports via `[UnmanagedCallersOnly(EntryPoint = ...)]`. x64 only (PL/SQL Developer 16 is x64 only).
 Development journal (in Russian): [docs/dev-journal.ru.md](docs/dev-journal.ru.md).
 
@@ -52,7 +52,7 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
 powershell -File scripts/verify.ps1                                   # all gates (as CI)
 dotnet test TextTools.slnx                                            # tests only
 dotnet publish src/TextTools.Plugin -c Release                        # native DLL (needs vswhere on PATH, see verify.ps1)
-dotnet run --project tools/HostEmulator -c Release -- src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll all
+dotnet run --project tools/HostEmulator -c Release -- src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll all
 ```
 
 ## Skills

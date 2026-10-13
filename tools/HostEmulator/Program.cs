@@ -1,6 +1,6 @@
 // Integration test of the native plugin DLL without PL/SQL Developer.
-// Loads TextTools.dll the way the IDE does, registers fake IDE callbacks and clicks menu items.
-// Usage: HostEmulator <path to TextTools.dll> <mode>; exit code 0 = all checks passed.
+// Loads PlsqlDevTextTools.dll the way the IDE does, registers fake IDE callbacks and clicks menu items.
+// Usage: HostEmulator <path to PlsqlDevTextTools.dll> <mode>; exit code 0 = all checks passed.
 // Modes: smoke | stress | nocallbacks | noutf8 | unload | all (each mode runs in its own process).
 
 using System.Diagnostics;
@@ -9,7 +9,7 @@ using TextTools.HostEmulator;
 
 if (args.Length < 2)
 {
-    Console.Error.WriteLine("usage: HostEmulator <TextTools.dll> smoke|stress|nocallbacks|noutf8|unload|all");
+    Console.Error.WriteLine("usage: HostEmulator <PlsqlDevTextTools.dll> smoke|stress|nocallbacks|noutf8|unload|all");
     return 2;
 }
 

@@ -2,6 +2,11 @@
 
 *In Russian. Newest entries first: date — what was done / learned / decided.*
 
+## 2026-10-14 — DLL переименована в PlsqlDevTextTools.dll
+
+- До первого релиза: `TextTools.dll` не говорит, к чему относится, и может совпасть с чужим плагином в PlugIns.
+  Проекты и пространства имён остались TextTools.*; меняется только AssemblyName и имена ассетов релиза.
+
 ## 2026-10-14 — отдельный репозиторий
 
 - Выделен в `kivilev/plsql-developer-text-tools` (приватный). Структура: TextTools.slnx, Directory.Build.props,

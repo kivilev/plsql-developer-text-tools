@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Integration test host: loads the native TextTools.dll like PL/SQL Developer and checks its behavior. -->
+  <!-- Integration test host: loads the native PlsqlDevTextTools.dll like PL/SQL Developer and checks its behavior. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>HostEmulator</AssemblyName>
