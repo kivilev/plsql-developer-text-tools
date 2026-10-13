@@ -24,7 +24,7 @@ description: Publishes a version of Text Tools — version bump, tag, GitHub rel
    Notes: group squash commits since the previous tag by `feat` / `fix` / `opt` (`git log v0.1.0..HEAD --oneline`),
    add the SHA-256, install steps (copy the DLL into `PlugIns`, restart, Configure > Plug-Ins), requirements
    (PL/SQL Developer x64, 12+; tested on 14).
-5. **Allround plug-ins page** (first public release only): the repo must be public with a license chosen;
+5. **Allround plug-ins page** (first public release only): the repo must be public (license: MIT, `LICENSE`);
    email the vendor (address on https://www.allroundautomations.com/products/pl-sql-developer/plug-ins/ "Enlist your
    own plug-in") with name, one-line description, download link, requirements, author. Draft the email for the user;
    sending is the user's action.
