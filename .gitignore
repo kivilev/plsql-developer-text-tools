@@ -12,3 +12,7 @@ artifacts/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Release build output
+dist/
+notes.md

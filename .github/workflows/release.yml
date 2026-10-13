@@ -1,0 +1,69 @@
+# Builds and drafts a GitHub release when a version tag is pushed.
+#   Tag vX.Y.Z (or vX.Y.Z-rc.N for a pre-release) must match <Version> in Directory.Build.props
+#   and CHANGELOG.md must have a "## [vX.Y.Z]" section. The release is created as a DRAFT: publish it by hand.
+# Assets: TextTools.dll, TextTools-<version>-win-x64.zip, SHA256SUMS.txt (+ build provenance when the repo is public).
+name: release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write       # create the release
+  id-token: write       # build provenance
+  attestations: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6.1.0
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Tag matches the project version
+        shell: pwsh
+        run: |
+          $version = (Select-Xml -Path Directory.Build.props -XPath '//Version').Node.InnerText
+          $tag = $env:GITHUB_REF_NAME
+          if ($tag -ne "v$version" -and -not $tag.StartsWith("v$version-")) { throw "tag $tag does not match Version $version" }
+          "VERSION=$version" >> $env:GITHUB_ENV
+          "PACKAGE_VERSION=$($tag.Substring(1))" >> $env:GITHUB_ENV
+          "PRERELEASE=$(if ($tag.Contains('-')) { 'true' } else { 'false' })" >> $env:GITHUB_ENV
+
+      - name: Verify (same gates as CI)
+        shell: pwsh
+        run: ./scripts/verify.ps1
+
+      - name: Package
+        shell: pwsh
+        run: ./scripts/package.ps1 -Version $env:PACKAGE_VERSION
+
+      - name: Release notes
+        shell: pwsh
+        run: ./scripts/changelog-section.ps1 -Version $env:VERSION -Tag $env:GITHUB_REF_NAME | Out-File notes.md -Encoding utf8
+
+      - name: Build provenance
+        if: ${{ !github.event.repository.private }}
+        uses: actions/attest-build-provenance@v4.2.2
+        with:
+          subject-path: |
+            dist/TextTools.dll
+            dist/*.zip
+
+      - name: Draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $flags = @('--draft', '--title', $env:GITHUB_REF_NAME, '--notes-file', 'notes.md')
+          if ($env:PRERELEASE -eq 'true') { $flags += '--prerelease' }
+          gh release create $env:GITHUB_REF_NAME (Get-ChildItem dist -File).FullName @flags
