@@ -17,7 +17,7 @@ function Step([string]$name, [scriptblock]$action) {
     if ($LASTEXITCODE -ne 0) { Write-Host "FAILED: $name" -ForegroundColor Red; exit $LASTEXITCODE }
 }
 
-$dll = 'src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll'
+$dll = 'src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll'
 
 Step 'format (whitespace, style, analyzers)' { dotnet format TextTools.slnx --verify-no-changes }
 Step 'build (warnings are errors)' { dotnet build TextTools.slnx -c Release }

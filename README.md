@@ -42,17 +42,17 @@ The full list with examples: [docs/commands.md](docs/commands.md).
 
 ## Install
 
-1. Download `TextTools.dll` from the [latest release](https://github.com/kivilev/plsql-developer-text-tools/releases/latest).
+1. Download `PlsqlDevTextTools.dll` from the [latest release](https://github.com/kivilev/plsql-developer-text-tools/releases/latest).
 2. Close PL/SQL Developer.
-3. Copy `TextTools.dll` into `<PL/SQL Developer>\PlugIns` (for example `C:\Program Files\PLSQL Developer 16\PlugIns`;
+3. Copy `PlsqlDevTextTools.dll` into `<PL/SQL Developer>\PlugIns` (for example `C:\Program Files\PLSQL Developer 16\PlugIns`;
    Windows asks for administrator rights there).
 4. Start PL/SQL Developer. If **Plug-Ins → String Tools / Date Tools** is missing, enable *Text Tools for PL/SQL Developer*
    in **Configure → Plug-Ins** and restart.
 
-Downloaded the zip instead? Unpack it and run `Unblock-File TextTools.dll` in PowerShell before copying.
+Downloaded the zip instead? Unpack it and run `Unblock-File PlsqlDevTextTools.dll` in PowerShell before copying.
 Checksums are in `SHA256SUMS.txt` next to every release.
 
-**Upgrade**: close the IDE, replace `TextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `TextTools.dll`.
+**Upgrade**: close the IDE, replace `PlsqlDevTextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `PlsqlDevTextTools.dll`.
 
 ## Compatibility
 
@@ -76,7 +76,7 @@ A report that it works (or not) on your version is welcome in [Discussions](http
 the status bar explains why. The plug-in is fuzz-tested and checked in a host emulator for crashes and memory leaks.
 
 **My antivirus complains.** The DLL is not code-signed yet. Compare its SHA-256 with `SHA256SUMS.txt`, check the build
-provenance (`gh attestation verify TextTools.dll -R kivilev/plsql-developer-text-tools`) and report a false positive to the vendor.
+provenance (`gh attestation verify PlsqlDevTextTools.dll -R kivilev/plsql-developer-text-tools`) and report a false positive to the vendor.
 
 **Does it send anything anywhere?** No network access. When connected it runs one query, `SYSTIMESTAMP` from `dual`, for the "Now" commands.
 
@@ -88,7 +88,7 @@ Requirements: Windows x64, .NET 10 SDK, Visual Studio 2022 Build Tools with the 
 powershell -File scripts/verify.ps1      # format, analyzers, tests, coverage, Native AOT publish, host emulator
 ```
 
-The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll`.
+The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll`.
 
 ## Contributing
 

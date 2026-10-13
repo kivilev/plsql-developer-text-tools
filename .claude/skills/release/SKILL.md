@@ -1,6 +1,6 @@
 ---
 name: release
-description: Publishes a version of Text Tools — release PR (version + CHANGELOG), tag, the release workflow that builds TextTools.dll, zip and checksums and drafts the GitHub release, manual checks, publishing, and the submission to the Allround Automations plug-ins page. Use when the user wants to release, tag a version, publish the DLL, or submit the plugin to Allround.
+description: Publishes a version of Text Tools — release PR (version + CHANGELOG), tag, the release workflow that builds PlsqlDevTextTools.dll, zip and checksums and drafts the GitHub release, manual checks, publishing, and the submission to the Allround Automations plug-ins page. Use when the user wants to release, tag a version, publish the DLL, or submit the plugin to Allround.
 ---
 
 # Release
@@ -18,11 +18,11 @@ MINOR new commands, MAJOR removed/renamed commands (menu captions are public API
    Rehearsal: `vX.Y.Z-rc.N` (marked as pre-release; delete the draft and the tag afterwards:
    `gh release delete vX.Y.Z-rc.N --yes --cleanup-tag`).
 4. **Workflow** `.github/workflows/release.yml` (watch: `gh run watch`): checks the tag against `<Version>`, runs
-   `scripts/verify.ps1`, `scripts/package.ps1` (dist/: `TextTools.dll`, `TextTools-X.Y.Z-win-x64.zip` with README,
+   `scripts/verify.ps1`, `scripts/package.ps1` (dist/: `PlsqlDevTextTools.dll`, `PlsqlDevTextTools-X.Y.Z-win-x64.zip` with README,
    LICENSE, THIRD-PARTY-NOTICES, `SHA256SUMS.txt`), notes from `scripts/changelog-section.ps1`, build provenance
    (public repo only), and creates a **draft** release.
 5. **Before publishing the draft**: download the assets, compare `Get-FileHash` with `SHA256SUMS.txt`,
-   `gh attestation verify TextTools.dll -R kivilev/plsql-developer-text-tools` (public repo), upload `TextTools.dll`
+   `gh attestation verify PlsqlDevTextTools.dll -R kivilev/plsql-developer-text-tools` (public repo), upload `PlsqlDevTextTools.dll`
    to VirusTotal (false positives: submit to the AV vendor / Microsoft). Then the user presses Publish.
 6. **Allround plug-ins page** (first public release only): draft an email for the user (address under "Enlist your own
    plug-in" on https://www.allroundautomations.com/products/pl-sql-developer/plug-ins/): name, one-line description,

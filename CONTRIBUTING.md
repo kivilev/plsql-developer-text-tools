@@ -19,7 +19,7 @@ git config core.hooksPath .githooks                      # commit message check,
 powershell -File scripts/verify.ps1                      # every gate CI runs
 ```
 
-The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/TextTools.dll`. To try it, copy it into
+The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll`. To try it, copy it into
 `<PL/SQL Developer>\PlugIns` with the IDE closed.
 
 ## Pull requests

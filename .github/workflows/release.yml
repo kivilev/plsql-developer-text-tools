@@ -1,7 +1,7 @@
 # Builds and drafts a GitHub release when a version tag is pushed.
 #   Tag vX.Y.Z (or vX.Y.Z-rc.N for a pre-release) must match <Version> in Directory.Build.props
 #   and CHANGELOG.md must have a "## [vX.Y.Z]" section. The release is created as a DRAFT: publish it by hand.
-# Assets: TextTools.dll, TextTools-<version>-win-x64.zip, SHA256SUMS.txt (+ build provenance when the repo is public).
+# Assets: PlsqlDevTextTools.dll, PlsqlDevTextTools-<version>-win-x64.zip, SHA256SUMS.txt (+ build provenance when the repo is public).
 name: release
 
 on:
@@ -56,7 +56,7 @@ jobs:
         uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-path: |
-            dist/TextTools.dll
+            dist/PlsqlDevTextTools.dll
             dist/*.zip
 
       - name: Draft release

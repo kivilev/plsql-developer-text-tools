@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <AssemblyName>TextTools</AssemblyName>
+    <AssemblyName>PlsqlDevTextTools</AssemblyName>
     <RootNamespace>TextTools.Plugin</RootNamespace>
 
     <!-- Native AOT shared library: a plain x64 DLL with C exports, no CLR loaded into PL/SQL Developer. -->
