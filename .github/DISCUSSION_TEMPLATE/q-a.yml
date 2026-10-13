@@ -1,0 +1,20 @@
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ask anything about using Text Tools. If it turns out to be a bug, the maintainer will convert it into an issue.
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What are you trying to do? Include the text you select and the result you want, if relevant.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Plugin and PL/SQL Developer versions
+      placeholder: "Text Tools 0.1.0, PL/SQL Developer 16.0.2 x64"
+    validations:
+      required: true

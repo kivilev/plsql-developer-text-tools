@@ -6,6 +6,16 @@ body:
     attributes:
       value: |
         Thanks for the report. The fix will be committed as `fix[#<this issue number>] ...`.
+        Questions are welcome in Discussions; security problems go to private reporting (see SECURITY.md).
+  - type: checkboxes
+    id: latest
+    attributes:
+      label: Checks
+      options:
+        - label: I use the latest release of Text Tools
+          required: true
+        - label: I searched existing issues
+          required: true
   - type: input
     id: plugin-version
     attributes:
@@ -18,8 +28,17 @@ body:
     id: ide-version
     attributes:
       label: PL/SQL Developer version
-      description: Help > About (and whether the ribbon or the classic menu is used)
-      placeholder: "16.0.2, ribbon"
+      description: Help > About; must be the 64-bit edition
+      placeholder: "16.0.2 x64"
+    validations:
+      required: true
+  - type: dropdown
+    id: menu-style
+    attributes:
+      label: Menu style
+      options:
+        - Ribbon
+        - Classic menu
     validations:
       required: true
   - type: input

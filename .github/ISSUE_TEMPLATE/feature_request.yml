@@ -2,6 +2,17 @@ name: Feature request
 description: A new conversion or tool for the PL/SQL Developer editor
 labels: [enhancement]
 body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where would it live?
+      options:
+        - String Tools
+        - Date Tools
+        - A new submenu
+        - Not sure
+    validations:
+      required: true
   - type: textarea
     id: problem
     attributes:
