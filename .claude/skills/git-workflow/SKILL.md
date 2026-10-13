@@ -36,5 +36,8 @@ Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enab
   up to date with master, linear history, no force-push, no deletion, conversations resolved, applies to admins.
   No required approvals (single maintainer; raise to 1 when a second maintainer joins).
 - Dependabot: NuGet and GitHub Actions weekly (`opt` prefix), security alerts and updates on.
-- Private repositories on a free GitHub plan cannot use branch protection/rulesets: then either the repo is public
-  or the account needs GitHub Pro.
+- The `master` ruleset is stored in `.github/rulesets/master-protection.json`. Apply it with
+  `gh api -X POST repos/kivilev/plsql-developer-text-tools/rulesets --input .github/rulesets/master-protection.json`.
+  A private repository on the free GitHub plan rejects it (HTTP 403 "Upgrade to GitHub Pro or make this repository
+  public"): apply it right after the repository becomes public (or on GitHub Pro). Until then the rules are kept by
+  discipline: never push to master, always a PR with green CI, squash merge (squash-only is enforced by repo settings).
