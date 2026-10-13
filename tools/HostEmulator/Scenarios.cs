@@ -152,8 +152,13 @@ internal static class Scenarios
     private const int WarmUpCheckpoints = 3;
     private const int ClicksPerCheckpoint = 25_000;
 
-    /// <summary>0.6 MB per 25k clicks = 25 bytes per click; a leak in every SetText of ~50 bytes or more trips it.</summary>
-    private const double LeakSlopeMbPerCheckpoint = 0.6;
+    /// <summary>
+    /// 1.5 MB per 25k clicks = ~60 bytes per click. GitHub runners show a steady ~0.6 MB per 25k of heap creep without
+    /// any leak (none locally), so the limit leaves 2.5x headroom over that. Calibrated with a leak injected into every
+    /// SetText: 100 B gives ~1.9 (caught), 50 B ~1.2 (not caught). A real leak here would be an unfreed text buffer:
+    /// hundreds of bytes to kilobytes per click.
+    /// </summary>
+    private const double LeakSlopeMbPerCheckpoint = 1.5;
 
     private static double Slope(List<double> ys)
     {
