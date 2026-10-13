@@ -2,7 +2,6 @@
 
 *In Russian. Newest entries first: date — what was done / learned / decided.*
 
-
 ## 2026-10-14 — отдельный репозиторий
 
 - Выделен в `kivilev/plsql-developer-text-tools` (приватный). Структура: TextTools.slnx, Directory.Build.props,
