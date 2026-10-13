@@ -28,6 +28,14 @@ Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enab
 3. CI: `commit-rules`, `verify`, `secrets` must pass. Squash merge (the only allowed method); the branch is deleted.
 4. Never push to `master` directly, never force-push it, never merge with failing checks.
 
+## Dependabot PRs
+
+Dependabot titles come as `opt: Bump x from 1 to 2` (it adds a colon after the prefix), which breaks the format.
+`commit-rules` is skipped for Dependabot, so fix the title when merging:
+`gh pr edit N --title "opt bump x from 1 to 2"` and `gh pr merge N --squash --subject "opt bump x from 1 to 2"`.
+A PR created before a CI fix on master: comment `@dependabot rebase`. Several Actions PRs touch `ci.yml`: merge one,
+let Dependabot rebase the rest, then the next.
+
 ## Repository settings
 
 - Applied: merge squash only (`allow_merge_commit=false`, `allow_rebase_merge=false`), squash title = PR title,
