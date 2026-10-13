@@ -31,7 +31,8 @@ Remove-Item $staging -Recurse -Force
 $sums = Get-ChildItem $dist -File | Sort-Object Name | ForEach-Object {
     '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
 }
-[IO.File]::WriteAllLines((Join-Path (Resolve-Path $dist) 'SHA256SUMS.txt'), [string[]]$sums)
+# LF line endings: `sha256sum -c` on Linux and Git Bash rejects CRLF.
+[IO.File]::WriteAllText((Join-Path (Resolve-Path $dist) 'SHA256SUMS.txt'), ($sums -join "`n") + "`n")
 
 Get-ChildItem $dist | Format-Table Name, Length
 Get-Content "$dist/SHA256SUMS.txt"
