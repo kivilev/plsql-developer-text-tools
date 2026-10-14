@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Text Tools demo</title>
+<!--
+  Mock-up of a PL/SQL Developer SQL window used to render docs/assets/demo.gif (tools/demo/render.mjs).
+  Every text the "plug-in" produces here is real output of TextTools.Core; when a command changes, update the scene.
+  Open in a browser to preview: it plays in real time; render.mjs calls window.renderAt(t) frame by frame instead.
+-->
+<style>
+  :root {
+    --w: 960px; --h: 600px;
+    --chrome: #f3f3f3; --ribbon: #fbfbfb; --line: #d6d6d6; --text: #1f1f1f; --muted: #6b6b6b;
+    --accent: #2b6cb0; --sel: #cce0f7; --flash: #fff2a8; --editor: #ffffff; --gutter: #f5f5f5;
+    --kw: #0000c8; --str: #a31515; --num: #098658; --menu: #ffffff; --hover: #dbe9f9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #e9e9e9; }
+  body { font: 12px "Segoe UI", system-ui, sans-serif; color: var(--text); }
+  #stage { position: relative; width: var(--w); height: var(--h); overflow: hidden; background: var(--chrome); }
+
+  .titlebar { height: 30px; display: flex; align-items: center; padding: 0 12px; background: #ffffff; border-bottom: 1px solid var(--line); }
+  .titlebar .t { flex: 1; text-align: center; color: var(--muted); }
+  .titlebar .win { display: flex; gap: 18px; color: var(--muted); font-size: 13px; }
+
+  .tabs { height: 26px; display: flex; gap: 2px; padding: 0 8px; align-items: flex-end; background: #ffffff; }
+  .tab { padding: 4px 12px 5px; color: var(--muted); border: 1px solid transparent; border-bottom: none; }
+  .tab.active { background: var(--ribbon); color: var(--text); border-color: var(--line); border-radius: 3px 3px 0 0; }
+
+  .ribbon { height: 78px; display: flex; gap: 0; padding: 6px 8px 0; background: var(--ribbon); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .group { display: flex; flex-direction: column; padding: 0 10px; border-right: 1px solid var(--line); }
+  .group .buttons { flex: 1; display: flex; gap: 4px; align-items: flex-start; }
+  .group .label { text-align: center; color: var(--muted); font-size: 11px; padding: 2px 0 3px; }
+  .bigbtn { width: 96px; white-space: nowrap; height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+            border: 1px solid transparent; border-radius: 3px; color: var(--text); }
+  .bigbtn.dim { color: #a0a0a0; }
+  .bigbtn.hot { background: var(--hover); border-color: #9cc3ee; }
+  .bigbtn svg { width: 24px; height: 24px; flex: none; }
+  .ghost { width: 120px; }
+
+  .doc { position: absolute; left: 0; right: 0; top: 135px; bottom: 24px; display: flex; flex-direction: column; }
+  .doctab { height: 24px; display: flex; align-items: flex-end; padding-left: 6px; background: var(--chrome); }
+  .doctab span { background: var(--editor); border: 1px solid var(--line); border-bottom: none; padding: 3px 12px; border-radius: 3px 3px 0 0; }
+  .editor { flex: 1; display: flex; background: var(--editor); border-top: 1px solid var(--line); font: 15px/24px Consolas, "Cascadia Mono", monospace; }
+  .gutter { width: 44px; padding-top: 8px; background: var(--gutter); color: #9a9a9a; text-align: right; border-right: 1px solid var(--line); }
+  .gutter div { padding-right: 8px; }
+  .code { flex: 1; padding: 8px 0 0 10px; white-space: pre; position: relative; }
+  .ln { height: 24px; position: relative; }
+  .sel { background: var(--sel); }
+  .flash { background: var(--flash); transition: none; }
+  .kw { color: var(--kw); } .str { color: var(--str); } .num { color: var(--num); }
+  .caret { display: inline-block; width: 0; height: 20px; border-left: 2px solid #000; vertical-align: -4px; margin-right: -2px; }
+
+  .status { position: absolute; left: 0; right: 0; bottom: 0; height: 24px; display: flex; align-items: center; padding: 0 10px;
+            background: var(--chrome); border-top: 1px solid var(--line); color: #333; white-space: nowrap; overflow: hidden; }
+  .status.new { background: #e4f0fc; }
+
+  .menu { position: absolute; background: var(--menu); border: 1px solid #b9b9b9; box-shadow: 2px 3px 8px rgba(0,0,0,.18); padding: 3px 0; min-width: 300px; z-index: 5; }
+  .menu .it { height: 16px; line-height: 16px; padding: 0 24px 0 28px; font-size: 12px; white-space: nowrap; }
+  .menu .it.hot { background: var(--hover); outline: 1px solid #9cc3ee; outline-offset: -1px; }
+  .menu .sep { height: 1px; background: #e0e0e0; margin: 3px 4px 3px 28px; }
+
+  .caption { position: absolute; right: 18px; bottom: 40px; max-width: 560px; padding: 10px 14px; border-radius: 6px;
+             background: rgba(24, 39, 58, .92); color: #fff; font-size: 15px; line-height: 1.35; z-index: 8; }
+  .caption small { display: block; margin-top: 4px; color: #b9d3f2; font: 12.5px Consolas, monospace; }
+  .step { position: absolute; left: 18px; bottom: 40px; padding: 6px 10px; border-radius: 6px; background: var(--accent); color: #fff; font-size: 13px; z-index: 8; }
+
+  .pointer { position: absolute; width: 18px; height: 26px; z-index: 20; pointer-events: none; }
+  .click { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; border: 2px solid var(--accent); z-index: 19; }
+
+  .endcard { position: absolute; inset: 0; z-index: 30; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+             background: #0d1117; color: #e6edf3; text-align: center; }
+  .endcard h1 { margin: 0; font: 600 34px "Segoe UI", sans-serif; }
+  .endcard p { margin: 0; color: #9fb0c3; font-size: 17px; }
+  .endcard code { font: 15px Consolas, monospace; color: #7cc4ff; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="titlebar"><div style="width:60px"></div><div class="t">PL/SQL Developer - [SQL Window - orders.sql]</div><div class="win"><span>&#x2013;</span><span>&#x25A1;</span><span>&#x2715;</span></div></div>
+  <div class="tabs"><div class="tab">File</div><div class="tab">Home</div><div class="tab">Session</div><div class="tab">Debug</div><div class="tab">Tools</div><div class="tab active">Plug-Ins</div><div class="tab">Window</div></div>
+  <div class="ribbon">
+    <div class="group"><div class="buttons"><div class="bigbtn dim ghost">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Documentation</div></div><div class="label">PL/SQL Doc</div></div>
+    <div class="group"><div class="buttons">
+      <div class="bigbtn" id="btn-string"><svg viewBox="0 0 24 24" fill="none" stroke="#2b6cb0" stroke-width="1.8"><path d="M5 6h14M12 6v13M8 19h8"/></svg>String Tools &#x25BE;</div>
+      <div class="bigbtn" id="btn-date"><svg viewBox="0 0 24 24" fill="none" stroke="#2b6cb0" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Date Tools &#x25BE;</div>
+    </div><div class="label">Text Tools</div></div>
+  </div>
+  <div class="doc">
+    <div class="doctab"><span>SQL Window - orders.sql</span></div>
+    <div class="editor"><div class="gutter" id="gutter"></div><div class="code" id="code"></div></div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="menu hidden" id="menu"></div>
+  <div class="step hidden" id="step"></div>
+  <div class="caption hidden" id="caption"></div>
+  <div class="click hidden" id="click"></div>
+  <svg class="pointer" id="pointer" viewBox="0 0 18 26"><path d="M1 1v20l5-5 4 9 3-1.4-4-8.6h7z" fill="#fff" stroke="#000" stroke-width="1.3" stroke-linejoin="round"/></svg>
+  <div class="endcard hidden" id="endcard">
+    <img src="../../docs/assets/logo-dark.svg" width="84" height="84" alt="">
+    <h1>Text Tools for PL/SQL Developer</h1>
+    <p>40 commands for strings and dates &#xB7; free &#xB7; MIT</p>
+    <code>github.com/kivilev/plsql-developer-text-tools</code>
+  </div>
+</div>
+
+<script>
+// ---- menus: the real captions from Commands.All, in order, with group separators ----
+const STRING_MENU = ['camelCase','PascalCase','snake_case','UPPER_SNAKE_CASE','kebab-case','-',
+  "Escape quotes ( ' -> '' )","Unescape quotes ( '' -> ' )","Wrap in q'...' (alt quoting)",'List -> IN (...)',"Lines -> 'a' || chr(10) || 'b'",'-',
+  'Base64 encode','Base64 decode','URL encode','URL decode','HEX encode (UTF-8)','HEX decode (UTF-8)','-',
+  'Sort A-Z','Sort Z-A','Sort A-Z, ignore case','Reverse','Remove duplicates','Remove empty lines','Trim trailing spaces','Align by :=','Align by =>'];
+const DATE_MENU = ["Now: DATE '2026-10-13'","Now: TIMESTAMP '2026-10-13 14:30:00'","Now: TIMESTAMP '2026-10-13 14:30:00.123456'",'Now: TIMESTAMP WITH TIME ZONE',
+  "Now: TO_DATE('2026-10-13 14:30:00', ...)",'Now: ISO 8601 (2026-10-13T14:30:00-03:00)','Now: Unix epoch (seconds)','-',
+  'Epoch -> TIMESTAMP (UTC)','Date -> Unix epoch (UTC if no offset)','Date -> TO_DATE(...)','Date -> DATE / TIMESTAMP literal','-',
+  'Java/.NET mask -> Oracle mask','Oracle mask -> Java mask','Oracle mask -> .NET mask'];
+
+// ---- scenes: text before/after, selection, menu path, status (all outputs from TextTools.Core) ----
+// sel: [line, colFrom, line, colTo] (0-based, colTo exclusive); caret: [line, col]
+const SCENES = [
+  { step: '1  A column of values  →  IN (...)',
+    before: ['select order_id, status', '  from orders', ' where customer_id', '1042', '1043', '2077', '3150', '4211'],
+    after:  ['select order_id, status', '  from orders', ' where customer_id', 'IN (1042, 1043, 2077, 3150, 4211)'],
+    sel: [3, 0, 7, 4], grow: 'lines', menu: 'string', item: 'List -> IN (...)', changed: [3, 0, 3, 33],
+    status: "Text Tools: List -> IN (...)  (e.g. 42, O'Neil -> IN ('42', 'O''Neil'))",
+    caption: ['Also from one line: 1 2 3, a;b, a⇥b (Excel).', '1000+ values → IN (SELECT column_value FROM TABLE(sys.odcinumberlist(...)))'] },
+  { step: '2  Identifier case',
+    before: ['select customerId, firstName, orderDate', '  from orders'],
+    after:  ['select customer_id, first_name, order_date', '  from orders'],
+    sel: [0, 7, 0, 39], grow: 'chars', menu: 'string', item: 'snake_case', changed: [0, 7, 0, 42],
+    status: 'Text Tools: snake_case  (e.g. firstName -> first_name)',
+    caption: ['camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case', '$, # and Cyrillic identifiers supported'] },
+  { step: '3  Current time from the database',
+    before: ['select *', '  from orders', ' where created_at >= ', "   and shipped_at < 13.10.2026 14:30"],
+    after:  ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < 13.10.2026 14:30"],
+    caret: [2, 21], menu: 'date', item: "Now: TIMESTAMP '2026-10-13 14:30:00'", changed: [2, 21, 2, 52],
+    status: "Text Tools: TIMESTAMP '2026-10-14 15:42:07' (from database)",
+    caption: ['SYSTIMESTAMP when connected, the PC clock otherwise', 'DATE, TIMESTAMP [WITH TIME ZONE], TO_DATE, ISO 8601, epoch'] },
+  { step: '4  Any date  →  TO_DATE(...)',
+    before: ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < 13.10.2026 14:30"],
+    after:  ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')"],
+    sel: [3, 20, 3, 36], grow: 'chars', menu: 'date', item: 'Date -> TO_DATE(...)', changed: [3, 20, 3, 75],
+    status: "Text Tools: Date -> TO_DATE(...)  (e.g. 13.10.2026 14:30 -> TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS'))",
+    caption: ['ISO, dd.mm.yyyy, epoch; Java/.NET masks ↔ Oracle masks', 'Ambiguous 01/02/2026? Nothing changes, the status bar says why.'] },
+];
+
+// ---- timeline of one scene (seconds from scene start) ----
+const T = { select: 0.5, selectEnd: 1.3, toBtn: 1.5, clickBtn: 2.1, toItem: 2.4, clickItem: 3.3, caption: 3.9, end: 6.6 };
+const END_CARD = 3.0;
+const SCENE_LEN = T.end;
+const TOTAL = SCENES.length * SCENE_LEN + END_CARD;
+window.TOTAL = TOTAL;
+
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const ease = x => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
+const lerp = (a, b, k) => a + (b - a) * k;
+
+function highlight(s) {
+  return esc(s)
+    .replace(/('[^']*')/g, '<span class="str">$1</span>')
+    .replace(/\b(select|from|where|and|in|IN|TIMESTAMP|TO_DATE|SELECT|FROM|TABLE)\b(?![^<]*<\/span>)/g, '<span class="kw">$1</span>')
+    .replace(/(^|[\s(,])(\d+)(?=[\s,)]|$)(?![^<]*<\/span>)/g, '$1<span class="num">$2</span>');
+}
+
+function renderLine(text, i, range, cls, caret) {
+  // range: [l1, c1, l2, c2] in this text; returns html with the part inside the range wrapped in <span class=cls>
+  let html;
+  if (range && i >= range[0] && i <= range[2]) {
+    const from = i === range[0] ? range[1] : 0;
+    const to = i === range[2] ? Math.min(range[3], text.length) : text.length;
+    const tail = i < range[2] ? ' ' : '';
+    html = highlight(text.slice(0, from)) + `<span class="${cls}">` + highlight(text.slice(from, to)) + tail + '</span>' + highlight(text.slice(to));
+  } else html = highlight(text);
+  if (caret && caret[0] === i) {
+    // caret goes after column caret[1]; text has no markup at that point in our scenes (end of line or plain)
+    html = highlight(text.slice(0, caret[1])) + '<span class="caret"></span>' + highlight(text.slice(caret[1]));
+  }
+  return `<div class="ln">${html || '&#8203;'}</div>`;
+}
+
+function drawEditor(lines, range, cls, caret) {
+  $('code').innerHTML = lines.map((l, i) => renderLine(l, i, range, cls, caret)).join('');
+  $('gutter').innerHTML = lines.map((_, i) => `<div>${i + 1}</div>`).join('');
+}
+
+function drawMenu(which, hotItem) {
+  const m = $('menu');
+  if (!which) { m.classList.add('hidden'); return; }
+  const items = which === 'string' ? STRING_MENU : DATE_MENU;
+  m.innerHTML = items.map(x => x === '-' ? '<div class="sep"></div>' : `<div class="it${x === hotItem ? ' hot' : ''}" data-x="${esc(x)}">${esc(x)}</div>`).join('');
+  const btn = $(which === 'string' ? 'btn-string' : 'btn-date').getBoundingClientRect();
+  const st = $('stage').getBoundingClientRect();
+  m.style.left = (btn.left - st.left) + 'px';
+  m.style.top = (btn.bottom - st.top + 2) + 'px';
+  m.classList.remove('hidden');
+}
+
+function itemPos(which, name) {
+  drawMenu(which, null);
+  const el = [...$('menu').querySelectorAll('.it')].find(e => e.dataset.x === name);
+  const r = el.getBoundingClientRect(), st = $('stage').getBoundingClientRect();
+  return [r.left - st.left + 60, r.top - st.top + 8];
+}
+function btnPos(which) {
+  const r = $(which === 'string' ? 'btn-string' : 'btn-date').getBoundingClientRect(), st = $('stage').getBoundingClientRect();
+  return [r.left - st.left + 37, r.top - st.top + 30];
+}
+function charPos(line, col) {
+  const code = $('code').getBoundingClientRect(), st = $('stage').getBoundingClientRect();
+  const cw = 8.25; // Consolas 15px advance
+  return [code.left - st.left + 10 + col * cw, code.top - st.top + 8 + line * 24 + 14];
+}
+
+function setPointer([x, y]) { const p = $('pointer'); p.style.left = x + 'px'; p.style.top = y + 'px'; }
+function showClick(pos, age) {
+  const c = $('click');
+  if (age < 0 || age > 0.35) { c.classList.add('hidden'); return; }
+  c.classList.remove('hidden');
+  const k = age / 0.35, s = 0.6 + k * 0.8;
+  c.style.left = pos[0] + 'px'; c.style.top = pos[1] + 'px';
+  c.style.transform = `scale(${s})`; c.style.opacity = String(1 - k);
+}
+
+function renderScene(sc, t, prevStatus) {
+  // selection growth
+  let range = null, cls = 'sel', caret = null, lines = sc.before;
+  const k = ease((t - T.select) / (T.selectEnd - T.select));
+  if (sc.sel && t >= T.select && t < T.clickItem) {
+    const [l1, c1, l2, c2] = sc.sel;
+    if (sc.grow === 'lines') {
+      const n = l2 - l1;
+      const cur = l1 + Math.min(n, Math.floor(k * (n + 0.999)));
+      range = [l1, c1, cur, cur === l2 ? c2 : sc.before[cur].length];
+    } else range = [l1, c1, l2, Math.round(lerp(c1, c2, k))];
+  }
+  if (sc.caret && t < T.clickItem) caret = (Math.floor(t * 2) % 2 === 0 || t > T.toBtn) ? sc.caret : null;
+  if (t >= T.clickItem) {
+    lines = sc.after;
+    const f = t - T.clickItem;
+    if (f < 1.6) { range = sc.changed; cls = 'flash'; }
+  }
+  drawEditor(lines, range, cls, caret);
+
+  // menu
+  const startPos = sc.sel ? charPos(sc.sel[2], sc.sel[3]) : charPos(sc.caret[0], sc.caret[1]);
+  const bPos = btnPos(sc.menu);
+  let menuOpen = t >= T.clickBtn && t < T.clickItem;
+  const iPos = itemPos(sc.menu, sc.item);
+  const hot = menuOpen && t >= T.toItem + 0.55 ? sc.item : null;
+  drawMenu(menuOpen ? sc.menu : null, hot);
+  $('btn-string').classList.toggle('hot', (sc.menu === 'string') && t >= T.toBtn + 0.4 && t < T.clickItem);
+  $('btn-date').classList.toggle('hot', (sc.menu === 'date') && t >= T.toBtn + 0.4 && t < T.clickItem);
+
+  // pointer path: text -> button -> item -> rests
+  let p;
+  if (t < T.toBtn) p = [startPos[0] + 6, startPos[1] + 4];
+  else if (t < T.clickBtn) p = [lerp(startPos[0] + 6, bPos[0], ease((t - T.toBtn) / (T.clickBtn - T.toBtn - 0.1))), lerp(startPos[1] + 4, bPos[1], ease((t - T.toBtn) / (T.clickBtn - T.toBtn - 0.1)))];
+  else if (t < T.toItem) p = bPos;
+  else if (t < T.clickItem) { const q = ease((t - T.toItem) / (T.clickItem - T.toItem - 0.25)); p = [lerp(bPos[0], iPos[0], q), lerp(bPos[1], iPos[1], q)]; }
+  else p = iPos;
+  setPointer(p);
+  showClick(t < T.toItem ? bPos : iPos, t < T.toItem ? t - T.clickBtn : t - T.clickItem);
+
+  // status bar, step label, caption
+  const st = $('status');
+  st.textContent = t >= T.clickItem ? sc.status : prevStatus;
+  st.classList.toggle('new', t >= T.clickItem && t < T.clickItem + 1.2);
+  $('step').textContent = sc.step; $('step').classList.remove('hidden');
+  const cap = $('caption');
+  if (t >= T.caption) { cap.innerHTML = esc(sc.caption[0]) + '<small>' + esc(sc.caption[1]) + '</small>'; cap.classList.remove('hidden'); }
+  else cap.classList.add('hidden');
+}
+
+window.renderAt = function (t) {
+  const end = $('endcard');
+  if (t >= SCENES.length * SCENE_LEN) {
+    end.classList.remove('hidden');
+    end.style.opacity = String(ease((t - SCENES.length * SCENE_LEN) / 0.4));
+    return;
+  }
+  end.classList.add('hidden');
+  const i = Math.floor(t / SCENE_LEN);
+  const prev = i > 0 ? SCENES[i - 1].status : 'Ready';
+  renderScene(SCENES[i], t - i * SCENE_LEN, prev);
+};
+
+// real-time preview when opened directly
+if (!location.hash.includes('render')) {
+  const t0 = performance.now();
+  (function tick() { window.renderAt(((performance.now() - t0) / 1000) % TOTAL); requestAnimationFrame(tick); })();
+} else window.renderAt(0);
+</script>
+</body>
+</html>
