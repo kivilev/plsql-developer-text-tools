@@ -6,7 +6,7 @@ hotkeys to them) or a dropped IDE version. Breaking changes are listed under **B
 
 A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>` and edited in the release PR.
 
-## [v0.1.0] - unreleased
+## [v0.1.0] - 2026-10-14
 
 First release.
 
