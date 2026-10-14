@@ -42,7 +42,7 @@ internal static class Scenarios
             "select first_name, клиент_имя from t", StringComparison.Ordinal), "snake_case on a selection with Cyrillic");
         Check(FakeIde.LastStatus.Contains("e.g. firstName -> first_name", StringComparison.Ordinal), "status bar shows the example");
 
-        Check(string.Equals(host.Click("Lines -> IN (...)", "where id\r\nO'Neil\r\nIvanov", "O'Neil\r\nIvanov", 7, 3),
+        Check(string.Equals(host.Click("List -> IN (...)", "where id\r\nO'Neil\r\nIvanov", "O'Neil\r\nIvanov", 7, 3),
             "where id\r\nIN ('O''Neil', 'Ivanov')", StringComparison.Ordinal), "IN list from a multi-line selection");
 
         var inserted = host.Click("Now: DATE '2026-10-13'", "where d > ;", "", 11);

@@ -14,7 +14,7 @@ description: Step-by-step recipe for adding a new menu command to Text Tools (a 
    - Regex: `[GeneratedRegex(..., RegexOptions.ExplicitCapture, Limits.RegexTimeoutMs)]`, named groups only.
 2. **Register** one line in `Commands.All` (`src/TextTools.Core/Commands.cs`), in the right `Menu` and `Group`:
    `T(StringMenu, "SQL", "Caption", SqlText.Fn, "sample input")`.
-   - Caption: ASCII only, no `[`/`]`, short, says input -> output (`"Lines -> IN (...)"`).
+   - Caption: ASCII only, no `[`/`]`, short, says input -> output (`"List -> IN (...)"`).
    - Sample (required, test `EveryTransformCommandHasASample`): an input that shows what the command does. It is rendered
      in `docs/commands.md`; when `sample -> result` is a single line of up to 80 chars it is also the status bar hint
      (`Caption  (e.g. sample -> result)`). Single-line commands must fit (test `DateAndShortStringCommandsShowAStatusBarExample`).
