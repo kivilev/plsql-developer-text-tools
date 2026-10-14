@@ -95,6 +95,13 @@ Questions and ideas: [Discussions](https://github.com/kivilev/plsql-developer-te
 Bugs and feature requests: [issues](https://github.com/kivilev/plsql-developer-text-tools/issues/new/choose).
 Code: see [CONTRIBUTING.md](CONTRIBUTING.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
+## Author
+
+**Denis Kivilev**: backend developer since 2005, Oracle Certified Professional (Advanced PL/SQL Developer, SQL Expert),
+founder of the [Backend PRO](https://backend-pro.ru) online school.
+Courses for Oracle developers (in Russian): [Oracle PL/SQL Master](https://backend-pro.ru/master-plsql),
+Oracle SQL performance tuning and more in the [catalog](https://backend-pro.ru/courses).
+
 ## License
 
 [MIT](LICENSE) © 2026 Denis Kivilev
