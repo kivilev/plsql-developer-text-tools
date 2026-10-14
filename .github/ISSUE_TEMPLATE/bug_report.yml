@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the report. The fix will be committed as `fix[#<this issue number>] ...`.
+        Thanks for the report. The fix will be committed as `fix[#<this issue number>]: ...`.
         Questions are welcome in Discussions; security problems go to private reporting (see SECURITY.md).
   - type: checkboxes
     id: latest

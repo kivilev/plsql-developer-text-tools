@@ -41,7 +41,7 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
 ## Git workflow
 
 - `master` is protected: changes only through a PR, squash merge only, CI green (`commit-rules`, `verify`, `secrets`).
-- Commit message / PR title: `feat|opt[#N] comment` or `fix[#N] comment` (GitHub issue number, required for fix),
+- Commit message / PR title: `feat: comment`, `opt: comment`, `feat|opt[#N]: comment` or `fix[#N]: comment` (GitHub issue number, required for fix),
   comment 1-200 chars. Branch: `feat/slug`, `opt/7-slug`, `fix/12-slug`. Rules: `scripts/commit-rules.sh`.
   Enable the hook once per clone: `git config core.hooksPath .githooks`.
 - Bugs come as GitHub issues (template `bug_report.yml`); a fix starts with a failing test. Skill `fix-bug`.

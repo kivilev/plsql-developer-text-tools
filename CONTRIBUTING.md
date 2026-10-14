@@ -25,8 +25,8 @@ The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextT
 ## Pull requests
 
 1. Branch from `master`: `feat/<slug>`, `opt/<slug>`, `fix/<issue>-<slug>`.
-2. Commit message and PR title: `feat <comment>`, `opt <comment>`, `fix[#<issue>] <comment>` (a fix needs an issue),
-   1–200 chars, English, imperative: `fix[#12] keep CRLF when sorting lines`. Rules: [scripts/commit-rules.sh](scripts/commit-rules.sh).
+2. Commit message and PR title: `feat: <comment>`, `opt: <comment>`, `fix[#<issue>]: <comment>` (a fix needs an issue),
+   1–200 chars, English, imperative: `fix[#12]: keep CRLF when sorting lines`. Rules: [scripts/commit-rules.sh](scripts/commit-rules.sh).
 3. `scripts/verify.ps1` green: format, analyzers as errors, tests with the coverage gate, Native AOT publish, host emulator.
 4. A bug fix starts with a test that reproduces it. A new command needs unit tests and a status bar sample
    (see `.claude/skills/add-command/SKILL.md`).
