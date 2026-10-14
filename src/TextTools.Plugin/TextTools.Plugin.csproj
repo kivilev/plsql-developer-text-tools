@@ -20,4 +20,9 @@
     <InternalsVisibleTo Include="TextTools.Plugin.Tests" />
   </ItemGroup>
 
+  <!-- Ribbon button images, made by tools/icons/make-icons.mjs. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\*.png" LogicalName="TextTools.Icons.%(Filename)%(Extension)" />
+  </ItemGroup>
+
 </Project>

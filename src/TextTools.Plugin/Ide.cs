@@ -64,6 +64,17 @@ internal static unsafe class Ide
         if (Has(143)) ((delegate* unmanaged[Cdecl]<int, int, void>)Fn(143))(x, y);
     }
     // 153
+    /// <summary>150: the image of a ribbon button (index = its CreateMenuItem index); a .bmp/.png file keeps transparency.</summary>
+    public static void CreateToolButton(int pluginId, int index, string name, string bitmapFile)
+    {
+        if (!Has(150)) return;
+        WithNative(name, n => WithNative(bitmapFile, f =>
+        {
+            ((delegate* unmanaged[Cdecl]<int, int, byte*, byte*, nint, void>)Fn(150))(pluginId, index, n, f, 0);
+            return 0;
+        }));
+    }
+
     public static bool WindowHasEditor(bool codeEditor) =>
         Has(153) && ((delegate* unmanaged[Cdecl]<int, int>)Fn(153))(codeEditor ? 1 : 0) != 0;
     // 219

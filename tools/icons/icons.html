@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ribbon icons</title>
+<!-- Source of the ribbon button icons (32x32 PNG, src/TextTools.Plugin/Icons/). Render: node tools/icons/make-icons.mjs.
+     Open in a browser to preview them on light and dark backgrounds. Colors follow docs/assets/logo.svg. -->
+<style>
+  body { font: 13px "Segoe UI", sans-serif; display: flex; gap: 24px; padding: 16px; }
+  .bg { padding: 12px; display: flex; gap: 12px; align-items: center; }
+  .light { background: #f3f3f3; } .dark { background: #2b2b2b; }
+  img { width: 32px; height: 32px; } img.x2 { width: 64px; height: 64px; image-rendering: pixelated; }
+</style>
+</head>
+<body>
+<script>
+const ICONS = {
+  'string-tools': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="7" fill="#1E293B"/>
+    <rect x="16.5" y="9" width="9" height="15" rx="2" fill="#0EA5A4" opacity="0.45"/>
+    <path d="M5.5 9.5h9M10 9.5v14" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round"/>
+    <path d="M21 9.5v11.5a2.2 2.2 0 0 0 2.6 2.1M18 13.5h6" stroke="#5EEAD4" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+    <rect x="26.6" y="7.5" width="1.9" height="17" rx="0.9" fill="#F8FAFC"/>
+  </svg>`,
+  'date-tools': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="2" y="4.5" width="28" height="25.5" rx="5" fill="#F8FAFC" stroke="#1E293B" stroke-width="2"/>
+    <path d="M2 10.5a5 5 0 0 1 5-5h18a5 5 0 0 1 5 5v1.5H2z" fill="#1E293B"/>
+    <path d="M9.5 2.5v5M22.5 2.5v5" stroke="#1E293B" stroke-width="2.6" stroke-linecap="round"/>
+    <g fill="#94A3B8"><rect x="6.5" y="15" width="4" height="3.4" rx="0.8"/><rect x="14" y="15" width="4" height="3.4" rx="0.8"/>
+      <rect x="6.5" y="21.5" width="4" height="3.4" rx="0.8"/><rect x="21.5" y="21.5" width="4" height="3.4" rx="0.8"/></g>
+    <rect x="20.5" y="14" width="6" height="5.4" rx="1.2" fill="#0EA5A4"/>
+    <rect x="13" y="20.5" width="6" height="5.4" rx="1.2" fill="#5EEAD4" stroke="#0EA5A4" stroke-width="1"/>
+  </svg>`,
+};
+const SIZE = 32;
+const out = {};
+Promise.all(Object.entries(ICONS).map(([name, svg]) => new Promise(done => {
+  const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas'); c.width = c.height = SIZE;
+    c.getContext('2d').drawImage(img, 0, 0, SIZE, SIZE);
+    out[name] = c.toDataURL('image/png');
+    done();
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}))).then(() => {
+  for (const cls of ['light', 'dark']) {
+    const d = document.createElement('div'); d.className = 'bg ' + cls;
+    for (const [n, u] of Object.entries(out)) d.insertAdjacentHTML('beforeend', `<img src="${u}" title="${n}"><img class="x2" src="${u}">`);
+    document.body.append(d);
+  }
+  const pre = document.createElement('pre'); pre.id = 'pngs'; pre.hidden = true; pre.textContent = JSON.stringify(out);
+  document.body.append(pre);
+});
+</script>
+</body>
+</html>

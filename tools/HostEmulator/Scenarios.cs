@@ -37,6 +37,10 @@ internal static class Scenarios
         Check(string.Equals(host.Identity, "Text Tools for PL/SQL Developer", StringComparison.Ordinal), "IdentifyPlugIn returns the product name");
         Check(host.AboutText.Contains("Author", StringComparison.Ordinal), "About text");
         Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools"), "two submenus");
+        Check(FakeIde.ToolButtons.Count == 2 && FakeIde.ToolButtons.All(b =>
+                host.Menu.TryGetValue("MENUITEM=" + b.Name, out var i) && i == b.Index
+                && File.Exists(b.File) && File.ReadAllBytes(b.File).AsSpan(1, 3).SequenceEqual("PNG"u8)),
+            "ribbon buttons get PNG images at their menu indices");
 
         Check(string.Equals(host.Click("snake_case", "select firstName, клиентИмя from t", "firstName, клиентИмя", 28),
             "select first_name, клиент_имя from t", StringComparison.Ordinal), "snake_case on a selection with Cyrillic");
