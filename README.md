@@ -53,7 +53,13 @@ Checksums are in `SHA256SUMS.txt` next to every release.
 
 **Upgrade**: close the IDE, replace `PlsqlDevTextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `PlsqlDevTextTools.dll`.
 
-## Compatibility
+## Keyboard shortcuts
+
+Any command can get a hotkey: **Configure → Preferences → User Interface → Key Configuration**, type `Text Tools` in the
+filter, select a command (`Plug-Ins / Text Tools / String Tools / snake_case`), press the keys (e.g. `Ctrl+Shift+U`),
+**OK**. Command names do not change between versions (a rename would be listed under **Breaking** in the changelog),
+so your shortcuts survive upgrades.
+
 
 | PL/SQL Developer | Status |
 |---|---|
@@ -94,6 +100,13 @@ The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextT
 Questions and ideas: [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
 Bugs and feature requests: [issues](https://github.com/kivilev/plsql-developer-text-tools/issues/new/choose).
 Code: see [CONTRIBUTING.md](CONTRIBUTING.md). Changes: [CHANGELOG.md](CHANGELOG.md).
+
+## Author
+
+**Denis Kivilev**: backend developer since 2005, Oracle Certified Professional (Advanced PL/SQL Developer, SQL Expert),
+founder of the [Backend PRO](https://backend-pro.ru) online school.
+Courses for Oracle developers (in Russian): [Oracle PL/SQL Master](https://backend-pro.ru/master-plsql),
+Oracle SQL performance tuning and more in the [catalog](https://backend-pro.ru/courses).
 
 ## License
 
