@@ -53,7 +53,13 @@ Checksums are in `SHA256SUMS.txt` next to every release.
 
 **Upgrade**: close the IDE, replace `PlsqlDevTextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `PlsqlDevTextTools.dll`.
 
-## Compatibility
+## Keyboard shortcuts
+
+Any command can get a hotkey: **Configure → Preferences → User Interface → Key Configuration**, type `Text Tools` in the
+filter, select a command (`Plug-Ins / Text Tools / String Tools / snake_case`), press the keys (e.g. `Ctrl+Shift+U`),
+**OK**. Command names do not change between versions (a rename would be listed under **Breaking** in the changelog),
+so your shortcuts survive upgrades.
+
 
 | PL/SQL Developer | Status |
 |---|---|
