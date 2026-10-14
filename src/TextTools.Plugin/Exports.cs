@@ -61,6 +61,15 @@ internal static unsafe partial class Exports
     {
         // Without this the interface passes ANSI text and Cyrillic in the editor gets mangled.
         Ide.Utf8 = Ide.PlugInSetting(_pluginId, "CHARMODE", "UTF8");
+
+        // Ribbon (12+): images for the String Tools / Date Tools buttons. The menu is rebuilt here because the IDE
+        // may activate the plug-in before asking for menu items; the indices are the same either way.
+        if (Ide.SysVersion < 1200) return;
+        if (Menu.Buttons.Count == 0) Menu.Build(Ide.SysVersion);
+        foreach (var (index, name) in Menu.Buttons)
+        {
+            if (RibbonIcons.FileFor(name) is { } file) Ide.CreateToolButton(_pluginId, index, name, file);
+        }
     });
 
     [UnmanagedCallersOnly(EntryPoint = "CreateMenuItem", CallConvs = [typeof(CallConvCdecl)])]

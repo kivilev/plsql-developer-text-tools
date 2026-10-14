@@ -16,11 +16,16 @@ internal static class Menu
 
     private static readonly Dictionary<int, string> Captions = [];
     private static readonly Dictionary<int, Command> ByIndex = [];
+    private static readonly Dictionary<int, string> MenuButtons = [];
+
+    /// <summary>Ribbon dropdown buttons (MENUITEM): index → menu name, for their images.</summary>
+    public static IReadOnlyDictionary<int, string> Buttons => MenuButtons;
 
     public static void Build(int sysVersion)
     {
         Captions.Clear();
         ByIndex.Clear();
+        MenuButtons.Clear();
         // One submenu per Command.Menu ("String Tools", "Date Tools"; dropdown buttons on the ribbon),
         // a flat list inside with groups separated by "-".
         var ribbon = sysVersion >= 1200;
@@ -29,7 +34,11 @@ internal static class Menu
 
         foreach (var menu in Commands.All.GroupBy(c => c.Menu, StringComparer.Ordinal))
         {
-            if (ribbon) Captions[index++] = $"MENUITEM={menu.Key}";
+            if (ribbon)
+            {
+                MenuButtons[index] = menu.Key;
+                Captions[index++] = $"MENUITEM={menu.Key}";
+            }
             var first = true;
             foreach (var group in menu.GroupBy(c => c.Group, StringComparer.Ordinal))
             {
