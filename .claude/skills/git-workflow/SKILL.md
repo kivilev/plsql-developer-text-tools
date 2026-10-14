@@ -12,7 +12,7 @@ Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enab
 
 | What | Format | Examples |
 |---|---|---|
-| Commit message / PR title | `feat\|opt[#N] comment`, `fix[#N] comment` | `feat add ISO week mask`, `feat[#3] add JSON pretty print`, `fix[#12] keep CRLF when sorting lines`, `opt[#7] split DateText` |
+| Commit message / PR title | `feat: comment`, `opt: comment`, `feat\|opt[#N]: comment`, `fix[#N]: comment` | `feat: add ISO week mask`, `feat[#3]: add JSON pretty print`, `fix[#12]: keep CRLF when sorting lines`, `opt[#7]: split DateText` |
 | Branch | `feat/slug`, `opt/[N-]slug`, `fix/N-slug` | `feat/iso-week-mask`, `fix/12-crlf-sort` |
 
 - `feat` new user-visible behavior; `fix` a bug (GitHub issue required); `opt` everything without behavior change:
@@ -30,9 +30,8 @@ Rules live in `scripts/commit-rules.sh` (used by the local hook and by CI). Enab
 
 ## Dependabot PRs
 
-Dependabot titles come as `opt: Bump x from 1 to 2` (it adds a colon after the prefix), which breaks the format.
-`commit-rules` is skipped for Dependabot, so fix the title when merging:
-`gh pr edit N --title "opt bump x from 1 to 2"` and `gh pr merge N --squash --subject "opt bump x from 1 to 2"`.
+Dependabot titles come as `opt: Bump x from 1 to 2` (prefix `opt` in `.github/dependabot.yml`), which already fits
+the format. Merge with `gh pr merge N --squash`.
 A PR created before a CI fix on master: comment `@dependabot rebase`. Several Actions PRs touch `ci.yml`: merge one,
 let Dependabot rebase the rest, then the next.
 

@@ -1,6 +1,6 @@
 ---
 name: fix-bug
-description: Takes a GitHub bug report for Text Tools from issue to merged fix — read the issue, reproduce it with a failing unit test or emulator scenario, fix, verify, open a fix[#N] PR that closes the issue. Use when the user mentions a bug, an issue number, a crash, wrong output, or pastes a bug report.
+description: Takes a GitHub bug report for Text Tools from issue to merged fix — read the issue, reproduce it with a failing unit test or emulator scenario, fix, verify, open a fix[#N]: PR that closes the issue. Use when the user mentions a bug, an issue number, a crash, wrong output, or pastes a bug report.
 ---
 
 # Fixing a bug
@@ -18,6 +18,6 @@ description: Takes a GitHub bug report for Text Tools from issue to merged fix �
 4. **Fix** the cause, not the symptom. If the same class of input can break other commands, extend
    `RobustnessTests.Nasty` with it.
 5. **Verify**: `scripts/verify.ps1` (skill `verify`).
-6. **Commit and PR**: commit `fix[#N] <what was wrong, 1-200 chars>`; PR title the same, body `Fixes #N`
+6. **Commit and PR**: commit `fix[#N]: <what was wrong, 1-200 chars>`; PR title the same, body `Fixes #N`
    (closes the issue on squash merge). `gh pr create --fill` then edit the title if needed.
 7. After merge: comment in the issue which version will contain the fix.
