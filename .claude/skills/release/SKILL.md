@@ -8,7 +8,7 @@ description: Publishes a version of Text Tools — release PR (version + CHANGEL
 Single source of the version: `<Version>` in `Directory.Build.props` (shown in About). SemVer: PATCH fixes,
 MINOR new commands, MAJOR removed/renamed commands (menu captions are public API — users bind hotkeys) or a dropped IDE version.
 
-1. **Release PR** `opt release X.Y.Z`:
+1. **Release PR** `opt release X.Y.Z`, branch `opt/release-X-Y-Z` (no dots: the branch rule allows lower case, digits, hyphens):
    - set `<Version>X.Y.Z</Version>`;
    - draft notes: `sh scripts/release-notes.sh <previous tag or -> X.Y.Z`, paste at the top of `CHANGELOG.md`
      as `## [vX.Y.Z] - YYYY-MM-DD`, rewrite into plain words for users, add `### Breaking` if any;
