@@ -42,7 +42,7 @@ public static class Commands
         T(StringMenu, "SQL", "Escape quotes ( ' -> '' )", SqlText.Escape, "it's"),
         T(StringMenu, "SQL", "Unescape quotes ( '' -> ' )", SqlText.Unescape, "'it''s'"),
         T(StringMenu, "SQL", "Wrap in q'...' (alt quoting)", SqlText.QQuote, "it's"),
-        T(StringMenu, "SQL", "Lines -> IN (...)", SqlText.ToInList, "42\nO'Neil"),
+        T(StringMenu, "SQL", "List -> IN (...)", SqlText.ToInList, "42, O'Neil"),
         T(StringMenu, "SQL", "Lines -> 'a' || chr(10) || 'b'", SqlText.ToConcatenation, "Dear\nit's ok"),
 
         T(StringMenu, "Encode", "Base64 encode", Encode.ToBase64, "Hello"),

@@ -24,7 +24,7 @@ Lines are separated by `⏎` in the examples below.
 | Escape quotes ( ' -> '' ) | `it's` | `it''s` |
 | Unescape quotes ( '' -> ' ) | `'it''s'` | `it's` |
 | Wrap in q'...' (alt quoting) | `it's` | `q'[it's]'` |
-| Lines -> IN (...) | `42 ⏎ O'Neil` | `IN ('42', 'O''Neil')` |
+| List -> IN (...) | `42, O'Neil` | `IN ('42', 'O''Neil')` |
 | Lines -> 'a' \|\| chr(10) \|\| 'b' | `Dear ⏎ it's ok` | `'Dear' \|\| chr(10) \|\| ⏎ 'it''s ok'` |
 
 ### Encode

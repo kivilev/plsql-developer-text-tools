@@ -54,6 +54,20 @@ public class SqlTextTests
     [Fact]
     public void InListKeepsNumbers() => Assert.Equal("IN (1, 2.5, -3)", SqlText.ToInList("1\n2.5\n-3,"));
 
+    // Issue #17: a single line of values is split too.
+    [Theory]
+    [InlineData("1 2 23  232\t", "IN (1, 2, 23, 232)")]
+    [InlineData("1, 2,3;", "IN (1, 2, 3)")]
+    [InlineData("a\tb\tO'Neil", "IN ('a', 'b', 'O''Neil')")]
+    [InlineData("'a', 'it''s'", "IN ('a', 'it''s')")]
+    [InlineData("'1', '2'", "IN ('1', '2')")]
+    [InlineData("New York, Boston", "IN ('New York', 'Boston')")]
+    public void InListSplitsASingleLine(string input, string expected) => Assert.Equal(expected, SqlText.ToInList(input));
+
+    [Fact]
+    public void InListKeepsOneValuePerLine() =>
+        Assert.Equal("IN ('New York', 'Boston')", SqlText.ToInList("New York,\r\nBoston"));
+
     [Fact]
     public void InListOverLimitUsesCollection()
     {

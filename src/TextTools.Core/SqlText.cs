@@ -42,23 +42,40 @@ public static class SqlText
     public static string Quote(string value) => "'" + Escape(value) + "'";
 
     /// <summary>
-    /// One value per line (e.g. a column pasted from Excel) → IN (...).
+    /// Values → IN (...): one per line (a column pasted from Excel), or a single line split by tab, comma or semicolon
+    /// (by spaces when there are none). Already quoted 'values' are not quoted twice.
     /// Numbers stay unquoted. More than 1000 values → IN (SELECT column_value FROM TABLE(sys.odci*list(...))).
     /// </summary>
     public static string ToInList(string text)
     {
-        var values = Lines.Split(text).Items
-            .Select(v => v.Trim().TrimEnd(','))
-            .Where(v => v.Length > 0)
-            .ToList();
+        var values = ListValues(text);
         if (values.Count == 0) return text;
 
-        var numeric = values.All(v => decimal.TryParse(v, NumberStyles.Number, CultureInfo.InvariantCulture, out _));
-        var items = values.Select(v => numeric ? v : Quote(v)).ToList();
+        var numeric = values.All(v => !v.Quoted && decimal.TryParse(v.Text, NumberStyles.Number, CultureInfo.InvariantCulture, out _));
+        var items = values.Select(v => numeric ? v.Text : Quote(v.Text)).ToList();
         var list = WrapList(items);
         if (values.Count <= InListLimit) return $"IN ({list})";
         var collection = numeric ? "odcinumberlist" : "odcivarchar2list";
         return $"IN (SELECT column_value FROM TABLE(sys.{collection}({list})))";
+    }
+
+    private static readonly char[] ListSeparators = ['\t', ',', ';'];
+    private static readonly char[] Blanks = [' ', '\t'];
+
+    private static List<(string Text, bool Quoted)> ListValues(string text)
+    {
+        var lines = Lines.Split(text).Items.Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
+        IEnumerable<string> raw = lines.Count switch
+        {
+            0 => [],
+            > 1 => lines.Select(l => l.TrimEnd(',', ';')),
+            _ when lines[0].IndexOfAny(ListSeparators) >= 0 => lines[0].Split(ListSeparators),
+            _ => lines[0].Split(Blanks, StringSplitOptions.RemoveEmptyEntries),
+        };
+        return raw.Select(v => v.Trim())
+            .Where(v => v.Length > 0)
+            .Select(v => v.Length >= 2 && v[0] == '\'' && v[^1] == '\'' ? (Unescape(v), true) : (v, false))
+            .ToList();
     }
 
     /// <summary>Multiline text → 'line1' || chr(10) || 'line2' — for building dynamic SQL or messages.</summary>

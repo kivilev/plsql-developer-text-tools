@@ -36,7 +36,7 @@ The full list with examples: [docs/commands.md](docs/commands.md).
 | String Tools | Date Tools |
 |---|---|
 | **Case**: `first_name` → camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic supported) | **Now**: insert the current `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601 or Unix epoch — from `SYSTIMESTAMP` when connected |
-| **SQL**: escape / unescape quotes, `q'[...]'`, lines → `IN (...)` beyond 1000 values (no ORA-01795), lines → `'a' \|\| chr(10) \|\| 'b'` | **Convert**: epoch (s/ms/µs/ns) → `TIMESTAMP`, date → epoch, `13.10.2026 14:30` → `TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')` or a `DATE`/`TIMESTAMP` literal |
+| **SQL**: escape / unescape quotes, `q'[...]'`, a list (lines or `1 2 3`, `a, b`) → `IN (...)` beyond 1000 values (no ORA-01795), lines → `'a' \|\| chr(10) \|\| 'b'` | **Convert**: epoch (s/ms/µs/ns) → `TIMESTAMP`, date → epoch, `13.10.2026 14:30` → `TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')` or a `DATE`/`TIMESTAMP` literal |
 | **Encode**: Base64, URL, HEX (UTF-8, as `UTL_RAW.CAST_TO_RAW`) | **Masks**: `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` ↔ `YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM` (Java and .NET), `PT1H30M` → `INTERVAL '1:30' HOUR TO MINUTE` |
 | **Lines**: sort, reverse, remove duplicates / empty lines / trailing spaces, align by `:=` and `=>` | |
 
