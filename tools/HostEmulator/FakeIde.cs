@@ -15,9 +15,11 @@ internal static unsafe class FakeIde
     public static int X { get; set; }
     public static int Y { get; set; }
     public static bool AcceptUtf8 { get; set; } = true;
+    public static List<(int Index, string Name, string File)> ToolButtons { get; } = [];
 
     public static void Register(delegate* unmanaged[Cdecl]<int, nint, void> register)
     {
+        ToolButtons.Clear();
         register(1, (nint)(delegate* unmanaged[Cdecl]<int>)&SysVersion);
         register(26, (nint)(delegate* unmanaged[Cdecl]<int>)&ReadOnly);
         register(30, (nint)(delegate* unmanaged[Cdecl]<byte*>)&GetText);
@@ -27,6 +29,7 @@ internal static unsafe class FakeIde
         register(141, (nint)(delegate* unmanaged[Cdecl]<int>)&CursorX);
         register(142, (nint)(delegate* unmanaged[Cdecl]<int>)&CursorY);
         register(143, (nint)(delegate* unmanaged[Cdecl]<int, int, void>)&SetCursor);
+        register(150, (nint)(delegate* unmanaged[Cdecl]<int, int, byte*, byte*, nint, void>)&ToolButton);
         register(153, (nint)(delegate* unmanaged[Cdecl]<int, int>)&HasEditor);
         register(219, (nint)(delegate* unmanaged[Cdecl]<int, byte*, byte*, int>)&Setting);
     }
@@ -80,6 +83,9 @@ internal static unsafe class FakeIde
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int HasEditor(int codeEditor) => 1;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void ToolButton(int pluginId, int index, byte* name, byte* file, nint bitmap) => ToolButtons.Add((index, Read(name), Read(file)));
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int Setting(int pluginId, byte* name, byte* value) => AcceptUtf8 ? 1 : 0;
