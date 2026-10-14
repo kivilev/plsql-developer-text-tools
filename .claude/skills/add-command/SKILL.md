@@ -29,4 +29,4 @@ description: Step-by-step recipe for adding a new menu command to Text Tools (a 
    add a check to `tools/HostEmulator/Scenarios.cs` (`Smoke`).
 5. **Docs**: regenerate the command reference — `$env:UPDATE_DOCS=1; dotnet test tests/TextTools.Core.Tests; Remove-Item Env:UPDATE_DOCS`
    — and commit `docs/commands.md` (test `CommandsReferenceIsUpToDate` fails otherwise). README feature table if a group changes.
-6. **Commit / PR**: branch `feat/<slug>` (or `feat/<issue>-<slug>`), title `feat[#N] add <command>` (skill `git-workflow`).
+6. **Commit / PR**: branch `feat/<slug>` (or `feat/<issue>-<slug>`), title `feat: add <command>` or `feat[#N]: add <command>` (skill `git-workflow`).

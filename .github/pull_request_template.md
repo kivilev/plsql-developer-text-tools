@@ -1,5 +1,5 @@
 <!--
-PR title = the squash commit message on master:  feat|opt[#N] comment  or  fix[#N] comment  (issue number required for fix)
+PR title = the squash commit message on master:  feat: comment, opt: comment, feat|opt[#N]: comment  or  fix[#N]: comment  (issue number required for fix)
 Branch: feat/slug, opt/7-slug, fix/12-slug. Rules: scripts/commit-rules.sh. CI fails on a wrong title or branch.
 -->
 

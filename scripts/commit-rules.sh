@@ -1,10 +1,10 @@
 #!/bin/sh
 # Single source of the commit/PR/branch naming rules; used by .githooks/commit-msg and by CI.
 #
-#   commit message / PR title:  <type>[#issue] <comment, 1-200 chars>
+#   commit message / PR title:  <type>[#issue]: <comment, 1-200 chars>
 #     type: feat | fix | opt     (opt = refactoring, tooling, CI, docs: no behavior change)
 #     [#issue] is the GitHub issue number; required for fix, optional for feat/opt.
-#     e.g. "fix[#12] keep CRLF when sorting lines", "feat add ISO week mask", "opt[#7] split DateText"
+#     e.g. "fix[#12]: keep CRLF when sorting lines", "feat: add ISO week mask", "opt[#7]: split DateText"
 #   branch: <type>/[issue-]slug  e.g. fix/12-crlf-sort, feat/iso-week-mask
 #
 # Usage: commit-rules.sh title "<first line>"   |   commit-rules.sh branch "<name>"
@@ -26,8 +26,8 @@ case "$kind" in
       "Merge "*|"Revert "*|"fixup! "*|"squash! "*|"amend! "*) exit 0 ;;
     esac
     value=$(printf '%s' "$value" | sed -E 's/ \(#[0-9]+\)$//')
-    prefix=$(printf '%s' "$value" | grep -oE '^(fix\[#[0-9]+\]|(feat|opt)(\[#[0-9]+\])?) ')
-    [ -n "$prefix" ] || fail "bad prefix" 'feat|opt[#N] comment, fix[#N] comment (issue number required for fix)'
+    prefix=$(printf '%s' "$value" | grep -oE '^(fix\[#[0-9]+\]|(feat|opt)(\[#[0-9]+\])?): ')
+    [ -n "$prefix" ] || fail "bad prefix" 'feat: comment, opt: comment, feat|opt[#N]: comment, fix[#N]: comment (issue number required for fix)'
     comment=${value#"$prefix"}
     len=$(printf '%s' "$comment" | LC_ALL=C.UTF-8 wc -m | tr -d ' ')
     [ "$len" -ge 1 ] || fail "empty comment" 'a comment after the prefix'
