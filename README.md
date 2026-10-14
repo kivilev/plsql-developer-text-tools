@@ -24,8 +24,7 @@
   <img alt=".NET 10 Native AOT" src="https://img.shields.io/badge/.NET%2010-Native%20AOT-512BD4?logo=dotnet">
 </p>
 
-<!-- Demo GIF (to be recorded in the real IDE): docs/assets/demo.gif — lines -> IN (...) over 1000 values,
-     date -> TO_DATE, Java mask -> Oracle mask. -->
+<p align="center"><img src="docs/assets/demo.gif" alt="Demo: values to IN (...), identifier case, current time from the database, date to TO_DATE" width="880"></p>
 
 ## Features
 

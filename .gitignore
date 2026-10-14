@@ -16,3 +16,6 @@ artifacts/
 # Release build output
 dist/
 notes.md
+
+# Demo stills (node tools/demo/render.mjs --frames ...)
+tools/demo/out/
