@@ -8,6 +8,7 @@ update `SCENES` / the menus in `demo.html` and render again.
 node tools/demo/render.mjs --frames 2.6,4.5,28    # PNG stills in tools/demo/out/ for review
 $env:FFMPEG = 'C:\path\to\ffmpeg.exe'             # if ffmpeg is not on PATH
 node tools/demo/render.mjs                        # docs/assets/demo.gif, 12 fps
+node tools/demo/render.mjs --social               # docs/assets/social-preview.png (Settings > Social preview)
 ```
 
 Needs Node 22+, Chrome or Edge, ffmpeg. Open `demo.html` in a browser to watch it in real time.

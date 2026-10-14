@@ -1,6 +1,7 @@
 // Renders tools/demo/demo.html frame by frame in headless Chrome/Edge (DevTools protocol, no npm packages)
 // and encodes docs/assets/demo.gif with ffmpeg.
 // Usage: node tools/demo/render.mjs [--fps 12] [--frames t1,t2,...]   (--frames: only PNG stills, for review)
+//        node tools/demo/render.mjs --social                       (social.html -> docs/assets/social-preview.png)
 // Needs: Node 22+, Chrome or Edge, ffmpeg on PATH (or FFMPEG=path).
 import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, existsSync, statSync } from 'node:fs';
@@ -12,7 +13,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../..');
 const args = Object.fromEntries(process.argv.slice(2).map((a, i, all) => a.startsWith('--') ? [a.slice(2), all[i + 1]] : null).filter(Boolean));
 const fps = Number(args.fps ?? 12);
-const W = 960, H = 600;
+const social = process.argv.includes('--social');
+const [W, H] = social ? [1280, 640] : [960, 600];
 
 const browsers = [
   process.env.CHROME,
@@ -57,10 +59,16 @@ const evaluate = async expr => (await cdp('Runtime.evaluate', { expression: expr
 
 try {
   await cdp('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
-  await cdp('Page.navigate', { url: pathToFileURL(join(here, 'demo.html')).href + '#render' });
-  for (let i = 0; i < 50 && !(await evaluate('typeof window.renderAt === "function" && document.fonts.status === "loaded"')); i++)
+  await cdp('Page.navigate', { url: pathToFileURL(join(here, social ? 'social.html' : 'demo.html')).href + '#render' });
+  for (let i = 0; i < 50 && !(await evaluate(`(${social} || typeof window.renderAt === "function") && document.fonts.status === "loaded" && [...document.images].every(i => i.complete)`)); i++)
     await new Promise(r => setTimeout(r, 100));
-  const total = await evaluate('window.TOTAL');
+  if (social) {
+    const { data } = await cdp('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: W, height: H, scale: 1 } });
+    const png = join(root, 'docs/assets/social-preview.png');
+    writeFileSync(png, Buffer.from(data, 'base64'));
+    console.log(`${png}: ${(statSync(png).size / 1024).toFixed(0)} KB`);
+  }
+  const total = social ? 0 : await evaluate('window.TOTAL');
 
   const shot = async (t, file) => {
     await evaluate(`window.renderAt(${t})`);
@@ -68,7 +76,7 @@ try {
     writeFileSync(file, Buffer.from(data, 'base64'));
   };
 
-  if (args.frames) {
+  if (social) { /* done above */ } else if (args.frames) {
     const out = join(root, 'tools/demo/out');
     mkdirSync(out, { recursive: true });
     for (const t of args.frames.split(',')) await shot(Number(t), join(out, `still-${t}.png`));
