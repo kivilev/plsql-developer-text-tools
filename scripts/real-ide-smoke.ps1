@@ -96,7 +96,7 @@ $result.oci = (Get-Command oci.dll -ErrorAction SilentlyContinue).Source
 $env:TEXTTOOLS_SELFTEST = $selfTest
 $ide = Start-Process $exe.FullName -PassThru
 $result.dialogs = @()
-$known = @('TPLSQLDevForm', 'TApplication')
+$known = @('TPLSQLDevForm', 'TApplication', 'TSplashScreen')
 $seen = @{}
 $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
 while ((Get-Date) -lt $deadline -and -not (Test-Path $selfTest)) {
