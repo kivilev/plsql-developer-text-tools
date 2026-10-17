@@ -6,15 +6,28 @@ hotkeys to them) or a dropped IDE version. Breaking changes are listed under **B
 
 A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>` and edited in the release PR.
 
-## [Unreleased]
+## [v0.2.0] - 2026-10-17
 
 ### Features
 
-- **SQL Tools → Copy SQL with constants resolved**: copies the SQL statement under the cursor (or the selection) from
-  PL/SQL code with constants replaced by their values (`'NEW' /*c_new*/`), variables and parameters as bind variables,
-  `INTO` and `RETURNING ... INTO` removed — ready for a SQL Window or Explain Plan. Constants of other packages come
-  from the database when connected; a constant without a known value becomes a bind named like it (`:c_x`).
-  The editor is not changed.
+- **SQL Tools → Copy SQL with constants resolved**: put the cursor in a query inside a package, procedure or block (or
+  select it) and get a statement that runs on its own in a SQL Window or Explain Plan. PL/SQL constants become their
+  values (`status = c_new` → `status = 'NEW' /*c_new*/`), variables and parameters become bind variables (`:p_id`),
+  `INTO` / `BULK COLLECT INTO` and `RETURNING ... INTO` are removed. The editor is not changed; the result goes to the
+  clipboard.
+  - Constants are found like PL/SQL does: enclosing blocks, the package body, its specification, `pkg.c_x` and
+    `owner.pkg.c_x`; package variables with a plain initial value count too. When the IDE is connected, other packages'
+    specifications are read from the database through the IDE's own connection (no other tools needed).
+  - A constant whose value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_x`).
+  - Columns, tables, aliases, sequences and function calls are left as they are.
+- **Context menu**: Copy SQL and the everyday commands (IN list, quoting, case, dates) are also in the editor's
+  right-click menu.
+- Icons on the ribbon buttons.
+
+### Internal
+
+- Tested inside real PL/SQL Developer 12, 13, 14, 15, 16 and 17 on every interop change: CI installs each version and
+  runs the plug-in self test in it (also available by hand: `TextTools selftest` in a Command Window).
 
 ## [v0.1.0] - 2026-10-14
 
