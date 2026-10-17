@@ -41,6 +41,10 @@ connected, other packages' specifications are read from the database (`ALL_SOURC
 value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_x`). The editor is not changed; the
 result goes to the clipboard.
 
+**SQL Tools → Explain Plan with constants / Extended Explain Plan.** The same statement, explained: in the IDE's own
+Plan Window (bind F5 to it in Key Configuration), or in an HTML window with a **Plan** tab and a **Findings** tab that
+explains the plan in plain words (early version: a few test checks).
+
 | String Tools | Date Tools |
 |---|---|
 | **Case**: `first_name` → camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic supported) | **Now**: insert the current `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601 or Unix epoch — from `SYSTIMESTAMP` when connected |

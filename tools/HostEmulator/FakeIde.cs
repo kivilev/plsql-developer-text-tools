@@ -55,6 +55,39 @@ internal static unsafe class FakeIde
         register(69, (nint)(delegate* unmanaged[Cdecl]<int, int, byte*, byte*, void>)&PopupItem);
         register(20, (nint)(delegate* unmanaged[Cdecl]<int, byte*, int, void>)&CreateWindow);
         register(180, (nint)(delegate* unmanaged[Cdecl]<int, byte*, void>)&CommandFeedback);
+        register(14, (nint)(delegate* unmanaged[Cdecl]<int>)&WindowType);
+        register(48, (nint)(delegate* unmanaged[Cdecl]<byte*>)&SqlError);
+        register(107, (nint)(delegate* unmanaged[Cdecl]<byte*, byte*, byte*, byte*, int>)&ShowHtml);
+        register(108, (nint)(delegate* unmanaged[Cdecl]<byte*, byte*, int, int>)&RefreshHtml);
+    }
+
+    /// <summary>The current window type (IDE_GetWindowType) and the HTML windows shown: (url, title, id).</summary>
+    public static int CurrentWindowType { get; set; } = 1;
+    public static List<(string Url, string Title, string Id)> HtmlWindows { get; } = [];
+    private static nint _errorBuffer;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int WindowType() => CurrentWindowType;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static byte* SqlError() => Keep(ref _errorBuffer, Connected ? "" : "ORA-03114: not connected to ORACLE");
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int ShowHtml(byte* url, byte* hash, byte* title, byte* id)
+    {
+        HtmlWindows.Add((Read(url), Read(title), Read(id)));
+        CurrentWindowType = 7;
+        return 1;
+    }
+
+    // Reloads the window with this ID if one was shown; the HTML window becomes current.
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int RefreshHtml(byte* url, byte* id, int bringToFront)
+    {
+        var key = Read(id);
+        if (!HtmlWindows.Exists(w => string.Equals(w.Id, key, StringComparison.Ordinal))) return 0;
+        CurrentWindowType = 7;
+        return 1;
     }
 
     /// <summary>Windows the plugin created (type, text) and the lines it wrote to the Command Window.</summary>
@@ -66,6 +99,7 @@ internal static unsafe class FakeIde
     private static void CreateWindow(int type, byte* text, int execute)
     {
         CreatedWindows.Add((type, Read(text)));
+        CurrentWindowType = type;
         (Text, Selected, X, Y) = (Read(text), "", 1, 1);
     }
 
