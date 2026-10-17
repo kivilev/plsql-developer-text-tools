@@ -93,9 +93,13 @@ while ((Get-Date) -lt $deadline) {
     if ($ide.HasExited) { break }
     $windows = @([Win]::Of($ide.Id))
     if (-not $result.firstWindows -and $windows.Count -gt 0) { $result.firstWindows = $windows }
-    if ([Win]::Close($ide.Id, 'TClientWizardForm') -gt 0) {
-        if ($result.closedDialogs -notcontains 'Oracle Client Wizard') { Screenshot "$Out\client-wizard.png" }
-        $result.closedDialogs += 'Oracle Client Wizard'
+    # First start: the Oracle Client Wizard, then the logon dialog (closing it = Cancel = "Not logged on").
+    foreach ($dialog in @(@{ Class = 'TClientWizardForm'; Name = 'client-wizard' }, @{ Class = 'TLogOnForm'; Name = 'logon' })) {
+        if ([Win]::Of($ide.Id) -match "^$($dialog.Class) ") {
+            if ($result.closedDialogs -notcontains $dialog.Name) { Screenshot "$Out\$($dialog.Name).png" }
+            [void][Win]::Close($ide.Id, $dialog.Class)
+            $result.closedDialogs += $dialog.Name
+        }
     }
     if ($ide.Modules | Where-Object { $_.ModuleName -eq 'PlsqlDevTextTools.dll' }) { Start-Sleep -Seconds 5; break }
 }
