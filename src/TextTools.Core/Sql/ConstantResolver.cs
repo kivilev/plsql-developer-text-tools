@@ -259,7 +259,7 @@ public static class ConstantResolver
             {
                 var k = next++;
                 if (!src.IsName(k) || src.IsSymbol(k - 1, ".") || src.IsSymbol(k - 1, ":") || src.IsSymbol(k - 1, "%")
-                    || src.IsSymbol(k + 1, "=>") || (statement && (src.IsKeyword(k - 1, "AS") || IsRemoved(src.Tokens[k].Start) || IsColumn(src, k))))
+                    || src.IsSymbol(k + 1, "=>") || IsTypedLiteral(src, k) || (statement && (src.IsKeyword(k - 1, "AS") || IsRemoved(src.Tokens[k].Start) || IsColumn(src, k))))
                 {
                     continue;
                 }
@@ -296,6 +296,10 @@ public static class ConstantResolver
             }
             return true;
         }
+
+        /// <summary>DATE '...', TIMESTAMP '...', INTERVAL '...': the word is part of a literal, never a name.</summary>
+        private static bool IsTypedLiteral(PlsqlSource src, int k) =>
+            k + 1 < src.Tokens.Count && src.Tokens[k + 1].Kind == TokenKind.StringLiteral;
 
         private enum RefKind { Unknown, Constant, Variable, UnknownConstant }
 
@@ -384,7 +388,9 @@ public static class ConstantResolver
         private string BindName(PlsqlSource src, List<int> parts, string written)
         {
             var name = src.Text.Substring(src.Tokens[parts[^1]].Start, src.Tokens[parts[^1]].Length).Trim('"');
-            if (_bindNames.TryGetValue(name, out var taken) && !string.Equals(taken, written, StringComparison.OrdinalIgnoreCase))
+            // A variable of the same name may be bound later in the statement: it keeps the plain name.
+            var variable = InScope(src, src.Name(parts[^1]), src.Tokens[parts[0]].Start) is { IsConstant: false, HasValue: false };
+            if (variable || (_bindNames.TryGetValue(name, out var taken) && !string.Equals(taken, written, StringComparison.OrdinalIgnoreCase)))
             {
                 name = Joined(src, parts);
             }
@@ -422,7 +428,10 @@ public static class ConstantResolver
                         inFrom.Add(depth);
                         TableAt(k + 1, to);
                         break;
-                    case "JOIN":
+                    case "JOIN" or "APPLY":
+                        TableAt(k + 1, to);
+                        break;
+                    case "DELETE" when !s.IsKeyword(k + 1, "FROM"): // DELETE t a WHERE ...
                         TableAt(k + 1, to);
                         break;
                     case "PIVOT" or "UNPIVOT":
@@ -481,6 +490,15 @@ public static class ConstantResolver
                 if (s.IsSymbol(j + 1, "@") && s.IsName(j + 2)) j += 2;
                 while (s.IsSymbol(j + 1, ".") && s.IsName(j + 2)) j += 2; // @link.domain
                 _tableNames.Add((nameStart, s.Tokens[j].End));
+                // A table function - XMLTABLE(...), JSON_TABLE(...), pkg.rows(...) - is followed by its alias.
+                if (s.IsSymbol(j + 1, "("))
+                {
+                    for (var depth = 0; ++j < to;)
+                    {
+                        if (s.IsSymbol(j, "(")) depth++;
+                        else if (s.IsSymbol(j, ")") && --depth == 0) break;
+                    }
+                }
             }
             else
             {
