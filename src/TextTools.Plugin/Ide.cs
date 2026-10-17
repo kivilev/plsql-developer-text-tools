@@ -56,6 +56,42 @@ internal static unsafe class Ide
         if (rc != 0 || ((delegate* unmanaged[Cdecl]<int>)Fn(42))() != 0) return null;
         return FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0));
     }
+    // 69: IDE_CreatePopupItem(ID, Index, Name, ObjectType) - a context menu item; a click comes to OnMenuClick(Index).
+    // ObjectType PROGRAMWINDOW / SQLWINDOW / TESTWINDOW / COMMANDWINDOW = the editor of that window type.
+    public static void CreatePopupItem(int pluginId, int index, string name, string objectType)
+    {
+        if (!Has(69)) return;
+        WithNative(name, n => WithNative(objectType, t =>
+        {
+            ((delegate* unmanaged[Cdecl]<int, int, byte*, byte*, void>)Fn(69))(pluginId, index, n, t);
+            return 0;
+        }));
+    }
+    // 110: IDE_GetWindowObject(var ObjectType, ObjectOwner, ObjectName, SubObject: PAnsiChar): Bool - the object
+    // edited in the current window (a Program Window); null for SQL windows and files.
+    public static (string Type, string Owner, string Name)? GetWindowObject()
+    {
+        if (!Has(110)) return null;
+        byte* type = null, owner = null, name = null, sub = null;
+        if (((delegate* unmanaged[Cdecl]<byte**, byte**, byte**, byte**, int>)Fn(110))(&type, &owner, &name, &sub) == 0) return null;
+        var o = FromNative(owner);
+        var n = FromNative(name);
+        return o.Length > 0 && n.Length > 0 ? (FromNative(type), o, n) : null;
+    }
+    // 40, 42, 43, 44: the first column of every row (up to maxRows), or null when the query failed.
+    public static List<string>? QueryColumn(string sql, int maxRows)
+    {
+        if (!Has(40) || !Has(42) || !Has(43) || !Has(44)) return null;
+        var rc = WithNative(sql, p => ((delegate* unmanaged[Cdecl]<byte*, int>)Fn(40))(p));
+        if (rc != 0) return null;
+        var rows = new List<string>();
+        while (rows.Count < maxRows && ((delegate* unmanaged[Cdecl]<int>)Fn(42))() == 0)
+        {
+            rows.Add(FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0)));
+            ((delegate* unmanaged[Cdecl]<int>)Fn(43))();
+        }
+        return rows;
+    }
     // 141, 142, 143
     public static int GetCursorX() => Has(141) ? ((delegate* unmanaged[Cdecl]<int>)Fn(141))() : 0;
     public static int GetCursorY() => Has(142) ? ((delegate* unmanaged[Cdecl]<int>)Fn(142))() : 0;

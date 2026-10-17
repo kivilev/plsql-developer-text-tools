@@ -6,6 +6,16 @@ hotkeys to them) or a dropped IDE version. Breaking changes are listed under **B
 
 A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>` and edited in the release PR.
 
+## [Unreleased]
+
+### Features
+
+- **SQL Tools → Copy SQL with constants resolved**: copies the SQL statement under the cursor (or the selection) from
+  PL/SQL code with constants replaced by their values (`'NEW' /*c_new*/`), variables and parameters as bind variables,
+  `INTO` and `RETURNING ... INTO` removed — ready for a SQL Window or Explain Plan. Constants of other packages come
+  from the database when connected; a constant without a known value becomes a bind named like it (`:c_x`).
+  The editor is not changed.
+
 ## [v0.1.0] - 2026-10-14
 
 First release.

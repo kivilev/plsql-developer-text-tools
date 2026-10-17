@@ -3,7 +3,9 @@
 Native x64 plugin for Allround Automations PL/SQL Developer in the spirit of StringManipulation (IntelliJ):
 transformations of the selected editor text. Menu: Plug-Ins → **String Tools** (case, SQL quoting, IN lists
 over 1000, Base64/URL/HEX, line tools) and **Date Tools** (now values from the DB, epoch/TO_DATE/literal
-conversion, Java/.NET ↔ Oracle date masks, ISO duration → INTERVAL).
+conversion, Java/.NET ↔ Oracle date masks, ISO duration → INTERVAL) and **SQL Tools** (copy a SQL statement from
+PL/SQL with constants resolved, to the clipboard: `src/TextTools.Core/Sql/` — lexer, block/declaration scopes, resolver;
+other packages from the database through the IDE's own connection only — no external tools, see `docs/plans/`).
 
 C# / .NET 10 **Native AOT** (`PublishAot`, `NativeLib=Shared`): one `PlsqlDevTextTools.dll`, no CLR in the IDE process,
 exports via `[UnmanagedCallersOnly(EntryPoint = ...)]`. x64 only (PL/SQL Developer 16 is x64 only).
@@ -13,7 +15,7 @@ Development journal (in Russian): [docs/dev-journal.ru.md](docs/dev-journal.ru.m
 
 ```
 src/TextTools.Core/        pure string -> string transformations; all logic and all tests target this
-src/TextTools.Plugin/      interop: Exports (C exports), Ide (callbacks), Menu, Editor (apply to the editor), NativeStrings
+src/TextTools.Plugin/      interop: Exports (C exports), Ide (callbacks), Menu, Editor (apply to the editor), Clipboard, NativeStrings
 tests/TextTools.Core.Tests/    xUnit: transforms, dates, robustness fuzzing of every command (coverage gate 95% lines)
 tests/TextTools.Plugin.Tests/  xUnit: menu layout
 tools/HostEmulator/        loads the native DLL like the IDE, fake callbacks; modes smoke|nocallbacks|noutf8|unload|stress|all

@@ -57,4 +57,8 @@ internal static class Menu
     public static string Caption(int index) => Captions.GetValueOrDefault(index, "");
 
     public static Command? Find(int index) => ByIndex.GetValueOrDefault(index);
+
+    /// <summary>The menu index of the command with this name, or null.</summary>
+    public static int? IndexOf(string name) =>
+        ByIndex.Where(p => string.Equals(p.Value.Name, name, StringComparison.Ordinal)).Select(p => (int?)p.Key).FirstOrDefault();
 }
