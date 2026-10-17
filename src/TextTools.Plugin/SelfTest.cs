@@ -20,6 +20,7 @@ internal static unsafe partial class SelfTest
     public const string EnvironmentVariable = "TEXTTOOLS_SELFTEST";
     private const int TimerMs = 2000;
     private const int MaxTicks = 300; // 10 minutes: then report that the IDE never became ready
+    private const int NoMainFormTicks = 3; // no TPLSQLDevForm at all (the host emulator): idle after 6 s
 
     private static nuint _timer;
     private static int _ticks;
@@ -57,9 +58,21 @@ internal static unsafe partial class SelfTest
     /// <summary>Command Window: "TextTools selftest [path]".</summary>
     public static void FromCommandWindow(int feedback, string parameters)
     {
+        var clipboard = Clipboard.GetText(Ide.AppHandle);
         var checks = Run();
+        if (clipboard is not null) Clipboard.SetText(Ide.AppHandle, clipboard);
         var path = parameters.Trim();
-        if (path.Length > 0) Write(path, checks);
+        if (path.Length > 0)
+        {
+            try
+            {
+                Write(path, checks);
+            }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+            {
+                Ide.CommandFeedback(feedback, $"Text Tools self test: cannot write {path}: {e.Message}");
+            }
+        }
         var failed = checks.Where(c => !c.Ok).ToList();
         Ide.CommandFeedback(feedback, $"Text Tools self test: {checks.Count - failed.Count} passed, {failed.Count} failed");
         foreach (var c in failed) Ide.CommandFeedback(feedback, $"  FAIL {c.Name}: {c.Detail}");
@@ -156,19 +169,26 @@ internal static unsafe partial class SelfTest
     {
         nint main = 0;
         EnumWindows(&FindMain, (nint)(&main));
-        return main == 0 || (IsWindowVisible(main) && IsWindowEnabled(main));
+        return main == 0 ? _ticks >= NoMainFormTicks : IsWindowVisible(main) && IsWindowEnabled(main);
     }
 
     [UnmanagedCallersOnly]
     private static int FindMain(nint hwnd, nint state)
     {
-        GetWindowThreadProcessId(hwnd, out var pid);
-        if (pid != (uint)Environment.ProcessId) return 1;
-        var name = stackalloc char[64];
-        var n = GetClassNameW(hwnd, name, 64);
-        if (!Same(new string(name, 0, n), "TPLSQLDevForm")) return 1;
-        *(nint*)state = hwnd;
-        return 0;
+        try
+        {
+            GetWindowThreadProcessId(hwnd, out var pid);
+            if (pid != (uint)Environment.ProcessId) return 1;
+            var name = stackalloc char[64];
+            var n = GetClassNameW(hwnd, name, 64);
+            if (n <= 0 || !Same(new string(name, 0, n), "TPLSQLDevForm")) return 1;
+            *(nint*)state = hwnd;
+            return 0;
+        }
+        catch
+        {
+            return 0; // stop enumerating; never let an exception reach user32
+        }
     }
 
     private static void Write(string path, List<Check> checks)

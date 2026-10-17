@@ -21,6 +21,8 @@ jobs:
     timeout-minutes: 30
     env:
       PLSQLDEV_MSI: plsqldev1703x64.msi
+      # The trial link names an exact build: when Allround publishes a new one this 404s (the cache keeps working
+      # until it is evicted) - then update both values from https://www.allroundautomations.com/try-it-free/.
       PLSQLDEV_URL: https://www.allroundautomations.com/files/trial/plsqldev1703x64.msi
     steps:
       - uses: actions/checkout@v7.0.1
@@ -48,7 +50,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/instantclient-basiclite-windows.zip
-          key: oracle-instantclient-basiclite-windows-x64
+          # The URL is Oracle's rolling "latest" link: the cache freezes one version on purpose (stable runs);
+          # bump the key suffix to take a newer client.
+          key: oracle-instantclient-basiclite-windows-x64-v1
       - name: Download Oracle Instant Client
         if: steps.oci.outputs.cache-hit != 'true'
         shell: pwsh

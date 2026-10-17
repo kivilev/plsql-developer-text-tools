@@ -108,7 +108,7 @@ while ((Get-Date) -lt $deadline -and -not (Test-Path $selfTest)) {
         if ($known -contains $class) { continue }
         if (-not $seen.ContainsKey($class)) {
             $seen[$class] = 0
-            Screenshot "$Out\dialog-$class.png"
+            Screenshot "$Out\dialog-$($class -replace '[^A-Za-z0-9_]', '_').png"
             $result.dialogs += $w
         }
         $seen[$class]++
@@ -124,7 +124,8 @@ while ((Get-Date) -lt $deadline -and -not (Test-Path $selfTest)) {
 $ide.Refresh()
 $result.alive = -not $ide.HasExited
 if ($result.alive) {
-    $result.pluginLoaded = [bool]($ide.Modules | Where-Object { $_.ModuleName -eq 'PlsqlDevTextTools.dll' })
+    try { $result.pluginLoaded = [bool]($ide.Modules | Where-Object { $_.ModuleName -eq 'PlsqlDevTextTools.dll' }) }
+    catch { $result.pluginLoaded = $false; $result.modulesError = $_.Exception.Message }
     $result.windows = @([Win]::Of($ide.Id))
 } else {
     $result.exitCode = $ide.ExitCode

@@ -12,7 +12,13 @@ internal static unsafe partial class Clipboard
     /// <summary>The Unicode text on the clipboard, or null when it is busy or holds no text (self test).</summary>
     public static string? GetText(nint owner)
     {
-        if (!OpenClipboard(owner)) return null;
+        var opened = OpenClipboard(owner);
+        for (var i = 1; i < Attempts && !opened; i++)
+        {
+            Thread.Sleep(20);
+            opened = OpenClipboard(owner);
+        }
+        if (!opened) return null;
         try
         {
             var handle = GetClipboardData(CfUnicodeText);
