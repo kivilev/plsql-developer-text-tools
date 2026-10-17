@@ -1,29 +1,29 @@
-# Smoke test of the plug-in in a real PL/SQL Developer on a throwaway Windows VM (spike, run by hand).
-# The trial installer is downloaded from Allround Automations into the Actions cache - never committed:
-# the license forbids redistributing it. Results (result.json, screenshot, install log) are uploaded as an artifact.
+# The plug-in self test inside a real PL/SQL Developer, one throwaway Windows VM per IDE version (12-17, the x64
+# editions; the plug-in is x64 only). Runs by hand and on pull requests that touch the IDE interop.
+# Installers are downloaded from Allround Automations into the Actions cache - never committed: the license forbids
+# redistributing them. Each version runs as its built-in trial. Results (result.json, selftest.json, screenshots,
+# install log) are uploaded per version.
 name: real-ide
 
 on:
   workflow_dispatch:
-  push:
-    branches: [opt/real-ide-ci]
+  pull_request:
+    paths:
+      - src/TextTools.Plugin/**
+      - scripts/real-ide-smoke.ps1
+      - .github/workflows/real-ide.yml
 
 permissions:
   contents: read
 
 concurrency:
-  group: real-ide-${{ github.ref }}
+  group: real-ide-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  smoke:
+  build:
     runs-on: windows-latest
-    timeout-minutes: 30
-    env:
-      PLSQLDEV_MSI: plsqldev1703x64.msi
-      # The trial link names an exact build: when Allround publishes a new one this 404s (the cache keeps working
-      # until it is evicted) - then update both values from https://www.allroundautomations.com/try-it-free/.
-      PLSQLDEV_URL: https://www.allroundautomations.com/files/trial/plsqldev1703x64.msi
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-dotnet@v6.0.0
@@ -34,16 +34,46 @@ jobs:
         run: |
           $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
           dotnet publish src/TextTools.Plugin -c Release
-      - name: Cache the trial installer
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: plugin-dll
+          path: src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll
+          if-no-files-found: error
+
+  ide:
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # The trial page offers the current build only; older builds come from the registered-download page
+          # (each runs as a trial without a license key). Exact builds: a new release 404s the old link until the
+          # cache is evicted - then update from https://www.allroundautomations.com/try-it-free/ and /registered-plsqldev/.
+          - { version: '17', msi: plsqldev1703x64.msi, url: 'https://www.allroundautomations.com/files/trial/plsqldev1703x64.msi' }
+          - { version: '16', msi: plsqldev1608x64.msi, url: 'https://www.allroundautomations.com/files/registered/plsqldev1608x64.msi' }
+          - { version: '15', msi: plsqldev1504x64.msi, url: 'https://www.allroundautomations.com/files/registered/plsqldev1504x64.msi' }
+          - { version: '14', msi: plsqldev1406x64.msi, url: 'https://www.allroundautomations.com/files/registered/plsqldev1406x64.msi' }
+          - { version: '13', msi: plsqldev1306x64.msi, url: 'https://www.allroundautomations.com/files/plsqldev1306x64.msi' }
+          - { version: '12', msi: plsqldev1207x64.msi, url: 'https://www.allroundautomations.com/files/plsqldev1207x64.msi' }
+    name: PL/SQL Developer ${{ matrix.version }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/download-artifact@v4
+        with:
+          name: plugin-dll
+          path: plugin
+      - name: Cache the installer
         id: msi
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/${{ env.PLSQLDEV_MSI }}
-          key: plsqldev-${{ env.PLSQLDEV_MSI }}
-      - name: Download the trial installer
+          path: ${{ runner.temp }}/${{ matrix.msi }}
+          key: plsqldev-${{ matrix.msi }}
+      - name: Download the installer
         if: steps.msi.outputs.cache-hit != 'true'
         shell: pwsh
-        run: curl.exe -fsSL --retry 3 -o "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" $env:PLSQLDEV_URL
+        run: curl.exe -fsSL --retry 3 -o "$env:RUNNER_TEMP\${{ matrix.msi }}" "${{ matrix.url }}"
       # Without an Oracle client the IDE opens a modal "Oracle Client Wizard" on the first start.
       - name: Cache Oracle Instant Client
         id: oci
@@ -66,11 +96,11 @@ jobs:
           $ic | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
       - name: Install, start, run the plug-in self test
         shell: pwsh
-        run: ./scripts/real-ide-smoke.ps1 -Msi "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" -Dll src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll -Out real-ide
+        run: ./scripts/real-ide-smoke.ps1 -Msi "$env:RUNNER_TEMP\${{ matrix.msi }}" -Dll plugin/PlsqlDevTextTools.dll -Out real-ide
       - name: Upload results
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: real-ide
+          name: real-ide-${{ matrix.version }}
           path: real-ide/
           if-no-files-found: warn
