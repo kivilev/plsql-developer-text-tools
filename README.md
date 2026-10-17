@@ -72,9 +72,8 @@ so your shortcuts survive upgrades.
 
 | PL/SQL Developer | Status |
 |---|---|
-| 14 x64 | tested |
-| 12, 13, 15, 16 x64 | expected to work (same plug-in interface), not tested yet |
-| 32-bit editions | not supported |
+| 12, 13, 14, 15, 16, 17 x64 | tested on every interop change: CI installs each version and runs the plug-in self test inside it (`real-ide` workflow) |
+| 32-bit editions (11 and older) | not supported |
 
 A report that it works (or not) on your version is welcome in [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
 
