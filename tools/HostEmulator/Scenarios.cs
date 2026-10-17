@@ -48,7 +48,7 @@ internal static class Scenarios
         Check(copyPopups.Select(p => p.ObjectType).Order(StringComparer.Ordinal).SequenceEqual(["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"], StringComparer.Ordinal)
               && copyPopups.All(p => string.Equals(p.Name, "Copy SQL with constants resolved", StringComparison.Ordinal)),
             "Copy SQL is a top-level item of the editor context menu in Program, SQL and Test windows");
-        Check(FakeIde.PopupItems.Count == 9 * 3
+        Check(FakeIde.PopupItems.Count == 11 * 3
               && FakeIde.PopupItems.All(p => host.Menu.TryGetValue("SUBITEM=" + p.Name, out var i) && i == p.Index)
               && FakeIde.PopupItems.Any(p => string.Equals(p.Name, "List -> IN (...)", StringComparison.Ordinal)),
             "a short flat list of everyday commands in the context menu, each at its menu index");
@@ -166,8 +166,13 @@ internal static class Scenarios
         var json = File.Exists(result) ? File.ReadAllText(result) : "";
         File.Delete(result);
         Console.WriteLine($"  {json.Split('\n').FirstOrDefault()}");
-        Check(json.Contains("\"failed\":0,", StringComparison.Ordinal) && FakeIde.CreatedWindows.Count == 1 && FakeIde.CreatedWindows[0].Type == 1,
+        Check(json.Contains("\"failed\":0,", StringComparison.Ordinal) && FakeIde.CreatedWindows.Count > 0 && FakeIde.CreatedWindows[0].Type == 1,
             "TEXTTOOLS_SELFTEST: after AfterStart the timer runs every command in a new SQL Window, all passed, JSON written");
+        var html = FakeIde.HtmlWindows.FirstOrDefault();
+        Check(html.Url is not null && string.Equals(html.Id, "TextTools.ExtendedPlan", StringComparison.Ordinal) && File.Exists(html.Url)
+              && File.ReadAllText(html.Url).Contains("Not connected to a database", StringComparison.Ordinal)
+              && FakeIde.HtmlWindows.Count == 1,
+            "Extended Explain Plan: one HTML window (refreshed, not reopened) explaining there is no connection");
         foreach (var line in json.Split('\n').Where(l => l.Contains("\"ok\":false", StringComparison.Ordinal)).Take(10))
         {
             Console.WriteLine($"    {line}");

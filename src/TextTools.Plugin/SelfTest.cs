@@ -103,6 +103,7 @@ internal static unsafe partial class SelfTest
                 TransformCommand t => Transform(t),
                 InsertCommand i => Insert(i),
                 CopyCommand c => Copy(c),
+                PlanCommand p => Plan(p),
                 _ => new Check(cmd.Name, false, "unknown command type"),
             }));
         }
@@ -149,6 +150,28 @@ internal static unsafe partial class SelfTest
         if (ok) return new Check(cmd.Name, true, Short(copied));
         var editor = unchanged ? "" : "; the editor text changed";
         return new Check(cmd.Name, false, $"expected {Short(expected)}, got {Short(copied)}{editor}");
+    }
+
+    /// <summary>
+    /// Extended: the HTML window opens (the current window becomes an HTML one, type 7), connected or not.
+    /// IDE window: needs a connection (the self test usually runs not logged on) - then it only checks the refusal.
+    /// Afterwards a new SQL Window, so the next commands have an editor again.
+    /// </summary>
+    private static Check Plan(PlanCommand cmd)
+    {
+        Ide.SetText("select * from dual where dummy = 'X'");
+        Ide.SetCursor(1, 1);
+        var connected = Ide.Connected;
+        Editor.Apply(cmd);
+        var type = Ide.GetWindowType();
+        var check = cmd.View switch
+        {
+            PlanView.Extended => new Check(cmd.Name, type == 7, $"window type {type.ToString(CultureInfo.InvariantCulture)} (7 = HTML)"),
+            _ when connected => new Check(cmd.Name, type == 5, $"window type {type.ToString(CultureInfo.InvariantCulture)} (5 = Plan)"),
+            _ => new Check(cmd.Name, type != 5, "not logged on: no Plan Window, a status message instead"),
+        };
+        Ide.CreateWindow(1, "");
+        return check;
     }
 
     private static Check Safe(string name, Func<Check> check)

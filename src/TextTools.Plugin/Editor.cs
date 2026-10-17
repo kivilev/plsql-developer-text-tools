@@ -15,7 +15,7 @@ internal static class Editor
             Status("no editor in the current window");
             return;
         }
-        if (cmd is not CopyCommand && Ide.GetReadOnly)
+        if (cmd is not (CopyCommand or PlanCommand) && Ide.GetReadOnly)
         {
             Status("editor is read-only");
             return;
@@ -39,6 +39,9 @@ internal static class Editor
                     break;
                 case CopyCommand c:
                     Copy(c);
+                    break;
+                case PlanCommand p:
+                    Plan(p);
                     break;
             }
         }
@@ -103,15 +106,43 @@ internal static class Editor
         Status($"{value} (from {source})");
     }
 
-    /// <summary>Puts the result for the selection (or the statement under the cursor) on the clipboard; the editor is not changed.</summary>
-    private static void Copy(CopyCommand cmd)
+    /// <summary>The selection (or the statement under the cursor) with constants resolved, as Copy SQL does it.</summary>
+    private static (CopyResult Result, DatabaseSpecs? Database) Resolve(Func<SqlRequest, ISpecSource?, CopyResult> build)
     {
         var text = Ide.GetText();
         var selected = Ide.GetSelectedText();
         int x = Ide.GetCursorX(), y = Ide.GetCursorY();
         var start = selected.Length > 0 ? SelectionLocator.Locate(text, selected, x, y) : 0;
         var database = DatabaseSpecs.IfConnected();
-        var result = cmd.Build(new SqlRequest(text, start, selected.Length, SelectionLocator.ToOffset(text, x, y)), database);
+        return (build(new SqlRequest(text, start, selected.Length, SelectionLocator.ToOffset(text, x, y)), database), database);
+    }
+
+    /// <summary>
+    /// Explain plan of the resolved statement: in the IDE's own Plan Window (executed at once), or in the plug-in's
+    /// HTML window with the Plan and Findings tabs. The IDE Plan Window needs a connection; the HTML one explains why
+    /// there is no plan instead.
+    /// </summary>
+    private static void Plan(PlanCommand cmd)
+    {
+        var (result, _) = Resolve(ConstantResolver.CopySql);
+        if (cmd.View == PlanView.IdeWindow)
+        {
+            if (!Ide.Connected)
+            {
+                Status("Explain Plan needs a database connection");
+                return;
+            }
+            Ide.CreateWindow(5, result.Text, execute: !Ide.WindowIsRunning); // Plan Window
+            Status($"Explain Plan: {result.Summary}");
+            return;
+        }
+        Status(PlanWindow.Show(result.Text) ? $"Extended Explain Plan: {result.Summary}" : "Extended Explain Plan: the IDE could not open the window");
+    }
+
+    /// <summary>Puts the result for the selection (or the statement under the cursor) on the clipboard; the editor is not changed.</summary>
+    private static void Copy(CopyCommand cmd)
+    {
+        var (result, database) = Resolve(cmd.Build);
         if (!Clipboard.SetText(Ide.AppHandle, result.Text))
         {
             Status("the clipboard is busy, try again");

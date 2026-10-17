@@ -38,6 +38,22 @@ public sealed record CopyCommand(string Menu, string Group, string Name, Func<Sq
     public string SampleResult => Build(new SqlRequest(Sample, 0, 0, SampleCursor), null).Text;
 }
 
+/// <summary>Where an explain plan command shows the plan.</summary>
+public enum PlanView
+{
+    /// <summary>The IDE's own Explain Plan window, executed at once.</summary>
+    IdeWindow,
+
+    /// <summary>The plug-in's HTML window with the Plan and Findings tabs.</summary>
+    Extended,
+}
+
+/// <summary>
+/// Explain plan of the statement under the cursor (or the selection) with constants resolved exactly like
+/// <see cref="CopyCommand"/>; the editor is not changed.
+/// </summary>
+public sealed record PlanCommand(string Menu, string Group, string Name, PlanView View) : Command(Menu, Group, Name);
+
 /// <summary>Everything that shows up in the plugin menu, in menu order. Add a line here to add a menu item.</summary>
 public static class Commands
 {
@@ -52,6 +68,8 @@ public static class Commands
     public static readonly IReadOnlyList<string> ContextMenu =
     [
         "Copy SQL with constants resolved",
+        "Explain Plan with constants",
+        "Extended Explain Plan",
         "List -> IN (...)",
         "Escape quotes ( ' -> '' )",
         "Unescape quotes ( '' -> ' )",
@@ -117,6 +135,9 @@ public static class Commands
 
         new CopyCommand(SqlMenu, "Copy", "Copy SQL with constants resolved", ConstantResolver.CopySql,
             CopySample, CopySample.IndexOf("select", StringComparison.Ordinal)),
+
+        new PlanCommand(SqlMenu, "Plan", "Explain Plan with constants", PlanView.IdeWindow),
+        new PlanCommand(SqlMenu, "Plan", "Extended Explain Plan", PlanView.Extended),
     ];
 
     private static TransformCommand T(string menu, string group, string name, Func<string, string> f, string? sample = null) =>

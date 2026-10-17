@@ -56,6 +56,18 @@ internal static unsafe class Ide
         if (rc != 0 || ((delegate* unmanaged[Cdecl]<int>)Fn(42))() != 0) return null;
         return FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0));
     }
+    // 14: IDE_GetWindowType - the current window: 1 SQL, 2 Test, 3 Program, 4 Command, 5 Plan, 6 Report, 7 HTML.
+    public static int GetWindowType() => Has(14) ? ((delegate* unmanaged[Cdecl]<int>)Fn(14))() : 0;
+    // 48: SQL_ErrorMessage - the last error of SQL_Execute (e.g. "ORA-00942: table or view does not exist").
+    public static string SqlErrorMessage() => Has(48) ? FromNative(((delegate* unmanaged[Cdecl]<byte*>)Fn(48))()) : "";
+    // 107: IDE_ShowHTML(Url, Hash, Title, ID) - an HTML file in a child window; ID lets IDE_RefreshHTML find it again.
+    public static bool ShowHtml(string url, string hash, string title, string id) =>
+        Has(107) && WithNative(url, u => WithNative(hash, h => WithNative(title, t => WithNative(id, i =>
+            ((delegate* unmanaged[Cdecl]<byte*, byte*, byte*, byte*, int>)Fn(107))(u, h, t, i) != 0))));
+    // 108: IDE_RefreshHTML(Url, ID, BringToFront) - reloads the window with this ID; false when there is none.
+    public static bool RefreshHtml(string url, string id, bool bringToFront) =>
+        Has(108) && WithNative(url, u => WithNative(id, i =>
+            ((delegate* unmanaged[Cdecl]<byte*, byte*, int, int>)Fn(108))(u, i, bringToFront ? 1 : 0) != 0));
     // 20: IDE_CreateWindow(WindowType, Text, Execute) - 1 = SQL Window, 5 = Plan Window; the new window becomes current.
     public static void CreateWindow(int windowType, string text, bool execute = false)
     {

@@ -6,6 +6,15 @@ hotkeys to them) or a dropped IDE version. Breaking changes are listed under **B
 
 A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>` and edited in the release PR.
 
+## [Unreleased]
+
+### Features
+
+- **SQL Tools → Explain Plan with constants**: the IDE's own Explain Plan of the statement under the cursor, with
+  constants resolved like Copy SQL (bind F5 to it in Key Configuration to replace the built-in one).
+- **SQL Tools → Extended Explain Plan**: an HTML window with two tabs - **Plan** (`DBMS_XPLAN`) and **Findings**
+  (first test notes: full table scans, Cartesian joins). Running it again refreshes the same window.
+
 ## [v0.2.0] - 2026-10-17
 
 ### Features
