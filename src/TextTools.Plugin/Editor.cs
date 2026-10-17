@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using TextTools.Core;
+using TextTools.Core.Sql;
 
 namespace TextTools.Plugin;
 
@@ -14,7 +15,7 @@ internal static class Editor
             Status("no editor in the current window");
             return;
         }
-        if (Ide.GetReadOnly)
+        if (cmd is not CopyCommand && Ide.GetReadOnly)
         {
             Status("editor is read-only");
             return;
@@ -35,6 +36,9 @@ internal static class Editor
                     break;
                 case InsertCommand i:
                     Insert(i);
+                    break;
+                case CopyCommand c:
+                    Copy(c);
                     break;
             }
         }
@@ -97,6 +101,35 @@ internal static class Editor
         Ide.SetText(r.Value.Text);
         Ide.SetCursor(r.Value.CursorX, r.Value.CursorY);
         Status($"{value} (from {source})");
+    }
+
+    /// <summary>Puts the result for the selection (or the statement under the cursor) on the clipboard; the editor is not changed.</summary>
+    private static void Copy(CopyCommand cmd)
+    {
+        var text = Ide.GetText();
+        var selected = Ide.GetSelectedText();
+        int x = Ide.GetCursorX(), y = Ide.GetCursorY();
+        var start = selected.Length > 0 ? SelectionLocator.Locate(text, selected, x, y) : 0;
+        var database = DatabaseSpecs.IfConnected();
+        var result = cmd.Build(new SqlRequest(text, start, selected.Length, SelectionLocator.ToOffset(text, x, y)), database);
+        if (!Clipboard.SetText(Ide.AppHandle, result.Text))
+        {
+            Status("the clipboard is busy, try again");
+            return;
+        }
+        Status($"SQL copied: {result.Summary}{DatabaseNote(database, result)}");
+    }
+
+    /// <summary>"(not connected ...)" when constants became binds offline; the time of dictionary queries when connected.</summary>
+    private static string DatabaseNote(DatabaseSpecs? database, CopyResult result)
+    {
+        if (database is null)
+        {
+            return result.Summary.Contains("constants as binds", StringComparison.Ordinal) ? " (not connected to a database)" : "";
+        }
+        return database.DatabaseTime > TimeSpan.Zero
+            ? string.Create(CultureInfo.InvariantCulture, $" (database {database.DatabaseTime.TotalMilliseconds:F0} ms)")
+            : "";
     }
 
     /// <summary>

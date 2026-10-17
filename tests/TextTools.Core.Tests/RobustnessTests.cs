@@ -63,6 +63,41 @@ public class RobustnessTests
     }
 
     [Fact]
+    public void CopyCommandsNeverThrowAnythingButFormatException()
+    {
+        var rnd = new Random(3);
+        string[] plsql =
+        [
+            "declare c constant number := 1; begin select c into l from t; end;", "package body p is procedure x is begin",
+            "create package p as c constant varchar2(1) := 'x'", "begin update t set a = p.c returning a into l; end;",
+            "end end end; end if; end loop; end case;", "select (((( from", "select )))) from", "q'[", "function f(", "procedure",
+        ];
+        foreach (var cmd in Commands.All.OfType<CopyCommand>())
+        {
+            foreach (var text in Nasty.Concat(plsql).Concat(RandomInputs(300)).Concat(plsql.Select(p => string.Concat(Enumerable.Repeat(p, 50)))))
+            {
+                for (var i = 0; i < 5; i++)
+                {
+                    var start = rnd.Next(-2, text.Length + 2);
+                    var request = new Sql.SqlRequest(text, start, i % 2 == 0 ? 0 : rnd.Next(-1, 20), rnd.Next(-2, text.Length + 2));
+                    try
+                    {
+                        Assert.NotNull(cmd.Build(request, null).Text);
+                    }
+                    catch (FormatException)
+                    {
+                        // expected: no statement at the cursor, selection outside the text
+                    }
+                    catch (Exception e)
+                    {
+                        Assert.Fail($"{cmd.Name} on {Describe(text)} at {start}: {e.GetType().Name}: {e.Message}");
+                    }
+                }
+            }
+        }
+    }
+
+    [Fact]
     public void LocatorNeverThrows()
     {
         var rnd = new Random(1);

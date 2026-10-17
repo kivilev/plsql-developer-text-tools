@@ -1,3 +1,5 @@
+using TextTools.Core.Sql;
+
 namespace TextTools.Core;
 
 /// <summary>A menu entry: <see cref="Menu"/> is the submenu under Plug-Ins, <see cref="Group"/> is a block between separators.</summary>
@@ -25,11 +27,44 @@ public sealed record TransformCommand(string Menu, string Group, string Name, Fu
 public sealed record InsertCommand(string Menu, string Group, string Name, Func<DateTimeOffset, string> Format)
     : Command(Menu, Group, Name);
 
+/// <summary>
+/// Builds text for the clipboard from the editor text and the selection or cursor; the editor is not changed.
+/// The second argument is the database (package specifications), null when not connected.
+/// <see cref="Sample"/> is an editor text with the cursor at <see cref="SampleCursor"/> (docs/commands.md).
+/// </summary>
+public sealed record CopyCommand(string Menu, string Group, string Name, Func<SqlRequest, ISpecSource?, CopyResult> Build, string Sample, int SampleCursor)
+    : Command(Menu, Group, Name)
+{
+    public string SampleResult => Build(new SqlRequest(Sample, 0, 0, SampleCursor), null).Text;
+}
+
 /// <summary>Everything that shows up in the plugin menu, in menu order. Add a line here to add a menu item.</summary>
 public static class Commands
 {
     public const string StringMenu = "String Tools";
     public const string DateMenu = "Date Tools";
+    public const string SqlMenu = "SQL Tools";
+
+    /// <summary>
+    /// Commands also shown in the editor's context menu, in this order. The IDE draws plug-in context items as a flat
+    /// list (no submenus), so only the everyday ones go there; everything else is in the Plug-Ins menu.
+    /// </summary>
+    public static readonly IReadOnlyList<string> ContextMenu =
+    [
+        "Copy SQL with constants resolved",
+        "List -> IN (...)",
+        "Escape quotes ( ' -> '' )",
+        "Unescape quotes ( '' -> ' )",
+        "Wrap in q'...' (alt quoting)",
+        "snake_case",
+        "camelCase",
+        "Now: DATE '2026-10-13'",
+        "Date -> TO_DATE(...)",
+    ];
+
+    private const string CopySample =
+        "declare\n  c_new constant varchar2(3) := 'NEW';\n  l_cnt number;\nbegin\n" +
+        "  select count(*) into l_cnt from orders where status = c_new;\nend;";
 
     public static readonly IReadOnlyList<Command> All =
     [
@@ -79,6 +114,9 @@ public static class Commands
         T(DateMenu, "Masks", "Oracle mask -> Java mask", DateMasks.ToJava, "YYYY-MM-DD HH24:MI:SS"),
         T(DateMenu, "Masks", "Oracle mask -> .NET mask", DateMasks.ToDotNet, "DD.MM.YYYY HH24:MI:SS.FF3"),
         T(DateMenu, "Masks", "ISO duration -> INTERVAL", Interval.FromIsoDuration, "PT1H30M"),
+
+        new CopyCommand(SqlMenu, "Copy", "Copy SQL with constants resolved", ConstantResolver.CopySql,
+            CopySample, CopySample.IndexOf("select", StringComparison.Ordinal)),
     ];
 
     private static TransformCommand T(string menu, string group, string name, Func<string, string> f, string? sample = null) =>

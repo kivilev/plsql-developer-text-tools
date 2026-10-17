@@ -17,10 +17,30 @@ internal static unsafe class FakeIde
     public static bool AcceptUtf8 { get; set; } = true;
     public static List<(int Index, string Name, string File)> ToolButtons { get; } = [];
 
+    /// <summary>A fake database: connected or not, every query returns <see cref="Rows"/> (one column) and is recorded.</summary>
+    public static bool Connected { get; set; }
+    public static IReadOnlyList<string> Rows { get; set; } = [];
+    public static List<string> Queries { get; } = [];
+
+    /// <summary>Context menu items the plugin created: (index, caption, window type).</summary>
+    public static List<(int Index, string Name, string ObjectType)> PopupItems { get; } = [];
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void PopupItem(int pluginId, int index, byte* name, byte* objectType) =>
+        PopupItems.Add((index, Read(name), Read(objectType)));
+    private static int _row;
+    private static nint _fieldBuffer;
+
     public static void Register(delegate* unmanaged[Cdecl]<int, nint, void> register)
     {
         ToolButtons.Clear();
         register(1, (nint)(delegate* unmanaged[Cdecl]<int>)&SysVersion);
+        register(11, (nint)(delegate* unmanaged[Cdecl]<int>)&IsConnected);
+        register(40, (nint)(delegate* unmanaged[Cdecl]<byte*, int>)&SqlExecute);
+        register(42, (nint)(delegate* unmanaged[Cdecl]<int>)&SqlEof);
+        register(43, (nint)(delegate* unmanaged[Cdecl]<int>)&SqlNext);
+        register(44, (nint)(delegate* unmanaged[Cdecl]<int, byte*>)&SqlField);
+        register(84, (nint)(delegate* unmanaged[Cdecl]<int>)&WindowIsRunning);
         register(26, (nint)(delegate* unmanaged[Cdecl]<int>)&ReadOnly);
         register(30, (nint)(delegate* unmanaged[Cdecl]<byte*>)&GetText);
         register(31, (nint)(delegate* unmanaged[Cdecl]<byte*>)&GetSelected);
@@ -32,6 +52,7 @@ internal static unsafe class FakeIde
         register(150, (nint)(delegate* unmanaged[Cdecl]<int, int, byte*, byte*, nint, void>)&ToolButton);
         register(153, (nint)(delegate* unmanaged[Cdecl]<int, int>)&HasEditor);
         register(219, (nint)(delegate* unmanaged[Cdecl]<int, byte*, byte*, int>)&Setting);
+        register(69, (nint)(delegate* unmanaged[Cdecl]<int, int, byte*, byte*, void>)&PopupItem);
     }
 
     private static byte* Keep(ref nint slot, string value)
@@ -45,6 +66,33 @@ internal static unsafe class FakeIde
     }
 
     private static string Read(byte* p) => Marshal.PtrToStringUTF8((nint)p) ?? "";
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int IsConnected() => Connected ? 1 : 0;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int WindowIsRunning() => 0;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SqlExecute(byte* sql)
+    {
+        Queries.Add(Read(sql));
+        _row = 0;
+        return Connected ? 0 : 3114; // ORA-03114: not connected
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SqlEof() => _row >= Rows.Count ? 1 : 0;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SqlNext()
+    {
+        _row++;
+        return 0;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static byte* SqlField(int field) => Keep(ref _fieldBuffer, _row < Rows.Count ? Rows[_row] : "");
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int SysVersion() => 1600;

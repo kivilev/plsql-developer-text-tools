@@ -28,9 +28,18 @@
 
 ## Features
 
-Two submenus under **Plug-Ins**. Every command works on the selection (or the whole text when nothing is selected),
+Three submenus under **Plug-Ins**. Every command works on the selection (or the whole text when nothing is selected),
 shows an example in the status bar and never changes the text when the input is invalid.
 The full list with examples: [docs/commands.md](docs/commands.md).
+
+**SQL Tools → Copy SQL with constants resolved.** Put the cursor in a query inside a package, procedure or block
+(or select it) and get a statement that runs on its own in a SQL Window or Explain Plan: PL/SQL constants become their
+values (`status = c_new` → `status = 'NEW' /*c_new*/`), variables and parameters become bind variables (`:p_id`),
+`INTO` / `BULK COLLECT INTO` and `RETURNING ... INTO` are removed. Constants are found like PL/SQL does: enclosing
+blocks, the package body, its specification, `pkg.c_x` from package specifications in the same editor; when the IDE is
+connected, other packages' specifications are read from the database (`ALL_SOURCE`, synonyms followed). A constant whose
+value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_x`). The editor is not changed; the
+result goes to the clipboard.
 
 | String Tools | Date Tools |
 |---|---|

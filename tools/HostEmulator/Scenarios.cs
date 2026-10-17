@@ -36,11 +36,21 @@ internal static class Scenarios
     {
         Check(string.Equals(host.Identity, "Text Tools for PL/SQL Developer", StringComparison.Ordinal), "IdentifyPlugIn returns the product name");
         Check(host.AboutText.Contains("Author", StringComparison.Ordinal), "About text");
-        Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools"), "two submenus");
-        Check(FakeIde.ToolButtons.Count == 2 && FakeIde.ToolButtons.All(b =>
+        Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools")
+              && host.Menu.ContainsKey("MENUITEM=SQL Tools"), "three submenus");
+        Check(FakeIde.ToolButtons.Count == 3 && FakeIde.ToolButtons.All(b =>
                 host.Menu.TryGetValue("MENUITEM=" + b.Name, out var i) && i == b.Index
                 && File.Exists(b.File) && File.ReadAllBytes(b.File).AsSpan(1, 3).SequenceEqual("PNG"u8)),
             "ribbon buttons get PNG images at their menu indices");
+        var copyIndex = host.Menu["SUBITEM=Copy SQL with constants resolved"];
+        var copyPopups = FakeIde.PopupItems.Where(p => p.Index == copyIndex).ToList();
+        Check(copyPopups.Select(p => p.ObjectType).Order(StringComparer.Ordinal).SequenceEqual(["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"], StringComparer.Ordinal)
+              && copyPopups.All(p => string.Equals(p.Name, "Copy SQL with constants resolved", StringComparison.Ordinal)),
+            "Copy SQL is a top-level item of the editor context menu in Program, SQL and Test windows");
+        Check(FakeIde.PopupItems.Count == 9 * 3
+              && FakeIde.PopupItems.All(p => host.Menu.TryGetValue("SUBITEM=" + p.Name, out var i) && i == p.Index)
+              && FakeIde.PopupItems.Any(p => string.Equals(p.Name, "List -> IN (...)", StringComparison.Ordinal)),
+            "a short flat list of everyday commands in the context menu, each at its menu index");
 
         Check(string.Equals(host.Click("snake_case", "select firstName, клиентИмя from t", "firstName, клиентИмя", 28),
             "select first_name, клиент_имя from t", StringComparison.Ordinal), "snake_case on a selection with Cyrillic");
@@ -63,7 +73,71 @@ internal static class Scenarios
               && FakeIde.LastStatus.Contains("not valid Base64", StringComparison.Ordinal), "bad Base64: readable status, no dialog");
 
         Check(string.Equals(host.Click("snake_case", "x x", "x", 50, 50), "x x", StringComparison.Ordinal), "cursor outside the text: nothing corrupted");
+
+        const string package = "declare\r\n  c_new constant varchar2(3) := 'НОВ';\r\nbegin\r\n  delete from orders where status = c_new;\r\nend;";
+        Check(string.Equals(host.Click("Copy SQL with constants resolved", package, "", 10, 4), package, StringComparison.Ordinal)
+              && string.Equals(ClipboardText(), "delete from orders where status = 'НОВ' /*c_new*/", StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("1 constant", StringComparison.Ordinal),
+            "Copy SQL: statement under the cursor on the clipboard (Cyrillic), editor unchanged");
+        var clipboard = ClipboardText();
+        Check(string.Equals(host.Click("Copy SQL with constants resolved", "begin null; end;", "", 3, 1), "begin null; end;", StringComparison.Ordinal)
+              && string.Equals(ClipboardText(), clipboard, StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("put the cursor in a SQL statement", StringComparison.Ordinal),
+            "Copy SQL without a statement: readable status, clipboard kept");
+
+        const string query = "select * from orders o where o.type_id = pkg_const.c_retail and o.state = pkg_const.c_unknown";
+        host.Click("Copy SQL with constants resolved", query, "", 5, 1);
+        Check(string.Equals(ClipboardText(), "select * from orders o where o.type_id = :c_retail and o.state = :c_unknown", StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("not connected", StringComparison.Ordinal) && FakeIde.Queries.Count == 0,
+            "Copy SQL offline: package constants become binds, no queries");
+        (FakeIde.Connected, FakeIde.Rows) = (true, ["package pkg_const is\n", "  c_retail constant number := 10;\n", "end;\n"]);
+        host.Click("Copy SQL with constants resolved", query, "", 5, 1);
+        (FakeIde.Connected, FakeIde.Rows) = (false, []);
+        Check(string.Equals(ClipboardText(), "select * from orders o where o.type_id = 10 /*pkg_const.c_retail*/ and o.state = pkg_const.c_unknown", StringComparison.Ordinal)
+              && FakeIde.Queries.Count == 1 && FakeIde.Queries[0].Contains("'PKG_CONST'", StringComparison.Ordinal)
+              && !FakeIde.Queries[0].Contains("all_objects", StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("database", StringComparison.Ordinal),
+            "Copy SQL connected: one indexed dictionary query, the value from the package specification, time in the status");
+        (FakeIde.Connected, FakeIde.Rows) = (true, ["package pkg_const is\n", "  c_retail constant number := 10;\n", "end;\n"]);
+        host.Click("Copy SQL with constants resolved", query, "", 5, 1);
+        (FakeIde.Connected, FakeIde.Rows) = (false, []);
+        Check(FakeIde.Queries.Count == 1, "Copy SQL again within 5 seconds: the specification comes from the cache");
     }
+
+    private static string ClipboardText()
+    {
+        if (!OpenClipboard(0)) return "<clipboard busy>";
+        try
+        {
+            var handle = GetClipboardData(13 /* CF_UNICODETEXT */);
+            var p = handle == 0 ? 0 : GlobalLock(handle);
+            if (p == 0) return "";
+            try { return Marshal.PtrToStringUni(p) ?? ""; }
+            finally { GlobalUnlock(handle); }
+        }
+        finally
+        {
+            CloseClipboard();
+        }
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool OpenClipboard(nint owner);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CloseClipboard();
+
+    [DllImport("user32.dll")]
+    private static extern nint GetClipboardData(uint format);
+
+    [DllImport("kernel32.dll")]
+    private static extern nint GlobalLock(nint memory);
+
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GlobalUnlock(nint memory);
 
     private static void NoCallbacks(PluginHost host)
     {

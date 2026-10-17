@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using TextTools.Core;
 
 namespace TextTools.Plugin;
 
@@ -48,6 +49,7 @@ internal static unsafe partial class Exports
                 $"{Menu.ProductName} {typeof(Exports).Assembly.GetName().Version?.ToString(3)}\r\n" +
                 "String Tools: case, quoting, IN lists, encodings, lines.\r\n" +
                 "Date Tools: now values, date and epoch conversion, date masks, intervals.\r\n" +
+                "SQL Tools: copy a SQL statement from PL/SQL with its constants resolved.\r\n" +
                 "Author: Denis Kivilev");
         }
         catch
@@ -62,10 +64,23 @@ internal static unsafe partial class Exports
         // Without this the interface passes ANSI text and Cyrillic in the editor gets mangled.
         Ide.Utf8 = Ide.PlugInSetting(_pluginId, "CHARMODE", "UTF8");
 
-        // Ribbon (12+): images for the String Tools / Date Tools buttons. The menu is rebuilt here because the IDE
-        // may activate the plug-in before asking for menu items; the indices are the same either way.
+        // The menu is (re)built here because the IDE may activate the plug-in before asking for menu items;
+        // the indices are the same either way.
+        Menu.Build(Ide.SysVersion);
+
+        // Everyday commands also go into the editor's context menu (same index: the click comes to OnMenuClick).
+        // The IDE shows plug-in context items as a flat list - no submenus - so it is a short list (Commands.ContextMenu).
+        foreach (var name in Commands.ContextMenu)
+        {
+            if (Menu.IndexOf(name) is not { } index) continue;
+            foreach (var window in (string[])["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"])
+            {
+                Ide.CreatePopupItem(_pluginId, index, name, window);
+            }
+        }
+
+        // Ribbon (12+): images for the String Tools / Date Tools / SQL Tools buttons.
         if (Ide.SysVersion < 1200) return;
-        if (Menu.Buttons.Count == 0) Menu.Build(Ide.SysVersion);
         foreach (var (index, name) in Menu.Buttons)
         {
             if (RibbonIcons.FileFor(name) is { } file) Ide.CreateToolButton(_pluginId, index, name, file);

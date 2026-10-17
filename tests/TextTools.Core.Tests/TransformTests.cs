@@ -170,4 +170,9 @@ public class MenuLimitsTests
     [Fact]
     public void CaptionsHaveNoSquareBrackets() =>
         Assert.All(Commands.All, c => Assert.DoesNotContain('[', c.Name));
+
+    // A renamed command must not silently drop out of the editor's context menu.
+    [Fact]
+    public void ContextMenuNamesAreExistingCommands() =>
+        Assert.All(Commands.ContextMenu, name => Assert.Single(Commands.All, c => string.Equals(c.Name, name, StringComparison.Ordinal)));
 }
