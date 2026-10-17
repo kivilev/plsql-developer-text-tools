@@ -60,7 +60,7 @@ jobs:
           $ic = (Get-ChildItem C:\oracle -Directory -Filter 'instantclient_*' | Select-Object -First 1).FullName
           "Instant Client: $ic"
           $ic | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
-      - name: Install, start, check the plug-in is loaded
+      - name: Install, start, run the plug-in self test
         shell: pwsh
         run: ./scripts/real-ide-smoke.ps1 -Msi "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" -Dll src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll -Out real-ide
       - name: Upload results

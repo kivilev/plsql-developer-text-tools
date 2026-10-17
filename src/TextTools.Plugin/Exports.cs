@@ -107,6 +107,25 @@ internal static unsafe partial class Exports
         if (Menu.Find(index) is { } cmd) Editor.Apply(cmd);
     });
 
+    /// <summary>All plug-ins are loaded and the IDE has started: arm the self test when TEXTTOOLS_SELFTEST is set.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "AfterStart", CallConvs = [typeof(CallConvCdecl)])]
+    public static void AfterStart() => Guard(SelfTest.StartIfRequested);
+
+    /// <summary>Command Window: "TextTools selftest [result.json]".</summary>
+    [UnmanagedCallersOnly(EntryPoint = "CommandLine", CallConvs = [typeof(CallConvCdecl)])]
+    public static void CommandLine(int feedback, byte* command, byte* parameters) => Guard(() =>
+    {
+        var cmd = Marshal.PtrToStringUTF8((nint)command) ?? "";
+        if (string.Equals(cmd.Trim(), "selftest", StringComparison.OrdinalIgnoreCase))
+        {
+            SelfTest.FromCommandWindow(feedback, Marshal.PtrToStringUTF8((nint)parameters) ?? "");
+        }
+        else
+        {
+            Ide.CommandFeedback(feedback, "Text Tools: unknown command; available: selftest [result.json]");
+        }
+    });
+
     private static void Guard(Action action)
     {
         try

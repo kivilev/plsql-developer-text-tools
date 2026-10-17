@@ -7,7 +7,7 @@ namespace TextTools.HostEmulator;
 /// <summary>One scenario per mode; each prints its checks and returns false if any failed.</summary>
 internal static class Scenarios
 {
-    public static readonly string[] Modes = ["smoke", "nocallbacks", "noutf8", "unload", "stress"];
+    public static readonly string[] Modes = ["smoke", "nocallbacks", "noutf8", "unload", "stress", "selftest"];
 
     private static int _failures;
 
@@ -21,6 +21,7 @@ internal static class Scenarios
             case "noutf8": NoUtf8(host); break;
             case "unload": Unload(host, dll); break;
             case "stress": Stress(host); break;
+            case "selftest": SelfTest(host); break;
             default: throw new ArgumentException($"unknown mode {mode}", nameof(mode));
         }
         return _failures == 0;
@@ -138,6 +139,72 @@ internal static class Scenarios
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GlobalUnlock(nint memory);
+
+    /// <summary>
+    /// The self test the CI runs in the real IDE (TEXTTOOLS_SELFTEST + AfterStart, a timer on the message loop), here
+    /// against the fake callbacks; then the Command Window form "TextTools selftest".
+    /// </summary>
+    private static void SelfTest(PluginHost host)
+    {
+        var result = Path.Combine(Path.GetTempPath(), $"texttools-selftest-{Environment.ProcessId}.json");
+        File.Delete(result);
+        Environment.SetEnvironmentVariable("TEXTTOOLS_SELFTEST", result);
+        unsafe
+        {
+            ((delegate* unmanaged[Cdecl]<void>)NativeLibrary.GetExport(host.Library, "AfterStart"))();
+        }
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+        while (!File.Exists(result) && DateTime.UtcNow < deadline)
+        {
+            while (PeekMessageW(out var msg, 0, 0, 0, 1 /* PM_REMOVE */))
+            {
+                DispatchMessageW(in msg);
+            }
+            Thread.Sleep(50);
+        }
+        Environment.SetEnvironmentVariable("TEXTTOOLS_SELFTEST", null);
+        var json = File.Exists(result) ? File.ReadAllText(result) : "";
+        File.Delete(result);
+        Console.WriteLine($"  {json.Split('\n').FirstOrDefault()}");
+        Check(json.Contains("\"failed\":0,", StringComparison.Ordinal) && FakeIde.CreatedWindows.Count == 1 && FakeIde.CreatedWindows[0].Type == 1,
+            "TEXTTOOLS_SELFTEST: after AfterStart the timer runs every command in a new SQL Window, all passed, JSON written");
+        foreach (var line in json.Split('\n').Where(l => l.Contains("\"ok\":false", StringComparison.Ordinal)).Take(10))
+        {
+            Console.WriteLine($"    {line}");
+        }
+
+        unsafe
+        {
+            var commandLine = (delegate* unmanaged[Cdecl]<int, byte*, byte*, void>)NativeLibrary.GetExport(host.Library, "CommandLine");
+            fixed (byte* selftest = "selftest\0"u8, empty = "\0"u8, other = "frobnicate\0"u8)
+            {
+                commandLine(42, selftest, empty);
+                commandLine(42, other, empty);
+            }
+        }
+        Check(FakeIde.Feedback.Count >= 2 && FakeIde.Feedback[0].EndsWith(" 0 failed", StringComparison.Ordinal)
+              && FakeIde.Feedback[^1].Contains("unknown command", StringComparison.Ordinal),
+            "Command Window: 'TextTools selftest' reports the summary, an unknown command explains itself");
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Msg
+    {
+        public nint Hwnd;
+        public uint Message;
+        public nint WParam;
+        public nint LParam;
+        public uint Time;
+        public int X;
+        public int Y;
+    }
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool PeekMessageW(out Msg msg, nint hwnd, uint min, uint max, uint remove);
+
+    [DllImport("user32.dll")]
+    private static extern nint DispatchMessageW(in Msg msg);
 
     private static void NoCallbacks(PluginHost host)
     {

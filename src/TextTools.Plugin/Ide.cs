@@ -56,6 +56,26 @@ internal static unsafe class Ide
         if (rc != 0 || ((delegate* unmanaged[Cdecl]<int>)Fn(42))() != 0) return null;
         return FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0));
     }
+    // 20: IDE_CreateWindow(WindowType, Text, Execute) - 1 = SQL Window, 5 = Plan Window; the new window becomes current.
+    public static void CreateWindow(int windowType, string text, bool execute = false)
+    {
+        if (!Has(20)) return;
+        WithNative(text, t =>
+        {
+            ((delegate* unmanaged[Cdecl]<int, byte*, int, void>)Fn(20))(windowType, t, execute ? 1 : 0);
+            return 0;
+        });
+    }
+    // 180: IDE_CommandFeedback(FeedbackHandle, S) - a line of output in the Command Window that ran CommandLine.
+    public static void CommandFeedback(int feedback, string text)
+    {
+        if (!Has(180)) return;
+        WithNative(text, t =>
+        {
+            ((delegate* unmanaged[Cdecl]<int, byte*, void>)Fn(180))(feedback, t);
+            return 0;
+        });
+    }
     // 69: IDE_CreatePopupItem(ID, Index, Name, ObjectType) - a context menu item; a click comes to OnMenuClick(Index).
     // ObjectType PROGRAMWINDOW / SQLWINDOW / TESTWINDOW / COMMANDWINDOW = the editor of that window type.
     public static void CreatePopupItem(int pluginId, int index, string name, string objectType)
