@@ -53,7 +53,24 @@ internal static unsafe class FakeIde
         register(153, (nint)(delegate* unmanaged[Cdecl]<int, int>)&HasEditor);
         register(219, (nint)(delegate* unmanaged[Cdecl]<int, byte*, byte*, int>)&Setting);
         register(69, (nint)(delegate* unmanaged[Cdecl]<int, int, byte*, byte*, void>)&PopupItem);
+        register(20, (nint)(delegate* unmanaged[Cdecl]<int, byte*, int, void>)&CreateWindow);
+        register(180, (nint)(delegate* unmanaged[Cdecl]<int, byte*, void>)&CommandFeedback);
     }
+
+    /// <summary>Windows the plugin created (type, text) and the lines it wrote to the Command Window.</summary>
+    public static List<(int Type, string Text)> CreatedWindows { get; } = [];
+    public static List<string> Feedback { get; } = [];
+
+    // A new window becomes the current one: its text, no selection, the cursor at the start.
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void CreateWindow(int type, byte* text, int execute)
+    {
+        CreatedWindows.Add((type, Read(text)));
+        (Text, Selected, X, Y) = (Read(text), "", 1, 1);
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void CommandFeedback(int handle, byte* text) => Feedback.Add(Read(text));
 
     private static byte* Keep(ref nint slot, string value)
     {

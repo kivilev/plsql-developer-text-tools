@@ -18,8 +18,10 @@ src/TextTools.Core/        pure string -> string transformations; all logic and 
 src/TextTools.Plugin/      interop: Exports (C exports), Ide (callbacks), Menu, Editor (apply to the editor), Clipboard, NativeStrings
 tests/TextTools.Core.Tests/    xUnit: transforms, dates, robustness fuzzing of every command (coverage gate 95% lines)
 tests/TextTools.Plugin.Tests/  xUnit: menu layout
-tools/HostEmulator/        loads the native DLL like the IDE, fake callbacks; modes smoke|nocallbacks|noutf8|unload|stress|all
+tools/HostEmulator/        loads the native DLL like the IDE, fake callbacks; modes smoke|nocallbacks|noutf8|unload|stress|selftest|all
 scripts/verify.ps1         every quality gate, same as CI
+scripts/real-ide-smoke.ps1 CI only (workflow real-ide): installs a real PL/SQL Developer 12-17 trial on a throwaway VM,
+                           runs the plug-in self test (src/TextTools.Plugin/SelfTest.cs, TEXTTOOLS_SELFTEST) in it
 scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
 .claude/skills/            project skills (below)
 ```

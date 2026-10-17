@@ -14,6 +14,7 @@ namespace TextTools.Plugin;
 internal static unsafe partial class Exports
 {
     private static int _pluginId;
+    private static bool _popupsCreated;
 
     [UnmanagedCallersOnly(EntryPoint = "IdentifyPlugIn", CallConvs = [typeof(CallConvCdecl)])]
     public static byte* IdentifyPlugIn(int id)
@@ -70,7 +71,10 @@ internal static unsafe partial class Exports
 
         // Everyday commands also go into the editor's context menu (same index: the click comes to OnMenuClick).
         // The IDE shows plug-in context items as a flat list - no submenus - so it is a short list (Commands.ContextMenu).
-        foreach (var name in Commands.ContextMenu)
+        // Once per process: OnActivate runs again when the plug-in is re-enabled, and the items must not double.
+        var popups = _popupsCreated ? [] : Commands.ContextMenu;
+        _popupsCreated = true;
+        foreach (var name in popups)
         {
             if (Menu.IndexOf(name) is not { } index) continue;
             foreach (var window in (string[])["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"])
@@ -105,6 +109,25 @@ internal static unsafe partial class Exports
     public static void OnMenuClick(int index) => Guard(() =>
     {
         if (Menu.Find(index) is { } cmd) Editor.Apply(cmd);
+    });
+
+    /// <summary>All plug-ins are loaded and the IDE has started: arm the self test when TEXTTOOLS_SELFTEST is set.</summary>
+    [UnmanagedCallersOnly(EntryPoint = "AfterStart", CallConvs = [typeof(CallConvCdecl)])]
+    public static void AfterStart() => Guard(SelfTest.StartIfRequested);
+
+    /// <summary>Command Window: "TextTools selftest [result.json]".</summary>
+    [UnmanagedCallersOnly(EntryPoint = "CommandLine", CallConvs = [typeof(CallConvCdecl)])]
+    public static void CommandLine(int feedback, byte* command, byte* parameters) => Guard(() =>
+    {
+        var cmd = Marshal.PtrToStringUTF8((nint)command) ?? "";
+        if (string.Equals(cmd.Trim(), "selftest", StringComparison.OrdinalIgnoreCase))
+        {
+            SelfTest.FromCommandWindow(feedback, Marshal.PtrToStringUTF8((nint)parameters) ?? "");
+        }
+        else
+        {
+            Ide.CommandFeedback(feedback, "Text Tools: unknown command; available: selftest [result.json]");
+        }
     });
 
     private static void Guard(Action action)
