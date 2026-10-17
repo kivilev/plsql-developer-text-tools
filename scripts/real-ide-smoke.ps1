@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory)] [string] $Msi,
     [Parameter(Mandatory)] [string] $Dll,
     [string] $Out = 'real-ide',
-    [int] $StartSeconds = 45
+    [int] $StartSeconds = 90
 )
 
 $ErrorActionPreference = 'Stop'
@@ -29,6 +29,18 @@ public static class Win {
     [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] static extern bool PostMessage(IntPtr h, uint msg, IntPtr w, IntPtr l);
+    /// Asks the visible top-level windows of the process with this class name to close (WM_CLOSE); returns how many.
+    public static int Close(int pid, string className) {
+        var n = 0;
+        EnumWindows((h, p) => {
+            uint id; GetWindowThreadProcessId(h, out id);
+            var c = new StringBuilder(256); GetClassName(h, c, 256);
+            if (id == pid && IsWindowVisible(h) && c.ToString() == className) { PostMessage(h, 0x0010, IntPtr.Zero, IntPtr.Zero); n++; }
+            return true;
+        }, IntPtr.Zero);
+        return n;
+    }
     public static List<string> Of(int pid) {
         var list = new List<string>();
         EnumWindows((h, p) => {
@@ -69,9 +81,24 @@ $result.ideVersion = $exe.VersionInfo.ProductVersion
 # 2. The plug-in.
 Copy-Item $Dll (Join-Path $exe.DirectoryName 'PlugIns') -Force
 
-# 3. Start and give it time to load plug-ins and show whatever it shows on the first start.
+# 3. Start and wait for the plug-in to load. First-start dialogs that block it (the Oracle Client Wizard when no
+#    client is found) are closed and recorded.
+$result.oci = (Get-Command oci.dll -ErrorAction SilentlyContinue).Source
 $ide = Start-Process $exe.FullName -PassThru
-Start-Sleep -Seconds $StartSeconds
+$result.closedDialogs = @()
+$deadline = (Get-Date).AddSeconds($StartSeconds)
+while ((Get-Date) -lt $deadline) {
+    Start-Sleep -Seconds 3
+    $ide.Refresh()
+    if ($ide.HasExited) { break }
+    $windows = @([Win]::Of($ide.Id))
+    if (-not $result.firstWindows -and $windows.Count -gt 0) { $result.firstWindows = $windows }
+    if ([Win]::Close($ide.Id, 'TClientWizardForm') -gt 0) {
+        if ($result.closedDialogs -notcontains 'Oracle Client Wizard') { Screenshot "$Out\client-wizard.png" }
+        $result.closedDialogs += 'Oracle Client Wizard'
+    }
+    if ($ide.Modules | Where-Object { $_.ModuleName -eq 'PlsqlDevTextTools.dll' }) { Start-Sleep -Seconds 5; break }
+}
 $ide.Refresh()
 $result.alive = -not $ide.HasExited
 if ($result.alive) {

@@ -42,6 +42,24 @@ jobs:
         if: steps.msi.outputs.cache-hit != 'true'
         shell: pwsh
         run: curl.exe -fsSL --retry 3 -o "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" $env:PLSQLDEV_URL
+      # Without an Oracle client the IDE opens a modal "Oracle Client Wizard" on the first start.
+      - name: Cache Oracle Instant Client
+        id: oci
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/instantclient-basiclite-windows.zip
+          key: oracle-instantclient-basiclite-windows-x64
+      - name: Download Oracle Instant Client
+        if: steps.oci.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: curl.exe -fsSL --retry 3 -o "$env:RUNNER_TEMP\instantclient-basiclite-windows.zip" https://download.oracle.com/otn_software/nt/instantclient/instantclient-basiclite-windows.zip
+      - name: Install Oracle Instant Client
+        shell: pwsh
+        run: |
+          Expand-Archive "$env:RUNNER_TEMP\instantclient-basiclite-windows.zip" C:\oracle -Force
+          $ic = (Get-ChildItem C:\oracle -Directory -Filter 'instantclient_*' | Select-Object -First 1).FullName
+          "Instant Client: $ic"
+          $ic | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
       - name: Install, start, check the plug-in is loaded
         shell: pwsh
         run: ./scripts/real-ide-smoke.ps1 -Msi "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" -Dll src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll -Out real-ide
