@@ -1,0 +1,54 @@
+# Smoke test of the plug-in in a real PL/SQL Developer on a throwaway Windows VM (spike, run by hand).
+# The trial installer is downloaded from Allround Automations into the Actions cache - never committed:
+# the license forbids redistributing it. Results (result.json, screenshot, install log) are uploaded as an artifact.
+name: real-ide
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [opt/real-ide-ci]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: real-ide-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PLSQLDEV_MSI: plsqldev1703x64.msi
+      PLSQLDEV_URL: https://www.allroundautomations.com/files/trial/plsqldev1703x64.msi
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-dotnet@v6.0.0
+        with:
+          global-json-file: global.json
+      - name: Build the plug-in (Native AOT)
+        shell: pwsh
+        run: |
+          $env:PATH = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer;$env:PATH"
+          dotnet publish src/TextTools.Plugin -c Release
+      - name: Cache the trial installer
+        id: msi
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/${{ env.PLSQLDEV_MSI }}
+          key: plsqldev-${{ env.PLSQLDEV_MSI }}
+      - name: Download the trial installer
+        if: steps.msi.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: curl.exe -fsSL --retry 3 -o "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" $env:PLSQLDEV_URL
+      - name: Install, start, check the plug-in is loaded
+        shell: pwsh
+        run: ./scripts/real-ide-smoke.ps1 -Msi "$env:RUNNER_TEMP\$env:PLSQLDEV_MSI" -Dll src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll -Out real-ide
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: real-ide
+          path: real-ide/
+          if-no-files-found: warn
