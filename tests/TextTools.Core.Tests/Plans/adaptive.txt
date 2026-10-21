@@ -1,0 +1,156 @@
+## sql
+select /*+ full(c) nonsense(x) */ c.client_id, (select count(*) from account a where a.client_id = c.client_id) cnt from client c where to_char(c.client_id) = :p and c.client_id in (select w.client_id from wallet w where w.status_id = 1) and upper(c.blocked_reason) = 'X'
+## rows
+"0",,"3407","SELECT STATEMENT",,,,,,,"1","39","3407",,,,
+"1","0","1","SORT","AGGREGATE",,,,,"SEL$2","1","5",,,,,
+"2","1","1","TABLE ACCESS","FULL","KIVI","ACCOUNT","TABLE","""A""@""SEL$2""","SEL$2","1","5","1887",,"""A"".""CLIENT_ID""=:B1",,
+"3","0","2","HASH JOIN",,,,,,"SEL$8771BF6C","1","39","1520","""C"".""CLIENT_ID""=""W"".""CLIENT_ID""",,,
+"4","3","1","NESTED LOOPS",,,,,,"SEL$8771BF6C","1","39","1520",,,,
+"5","4","1","NESTED LOOPS",,,,,,,"1","39","1520",,,,
+"6","5","1","STATISTICS COLLECTOR",,,,,,,,,,,,,
+"7","6","1","TABLE ACCESS","FULL","KIVI","CLIENT","TABLE","""C""@""SEL$1""","SEL$8771BF6C","1","32","1518",,"TO_CHAR(""C"".""CLIENT_ID"")=:P AND UPPER(""C"".""BLOCKED_REASON"")='X'",,
+"8","5","2","INDEX","UNIQUE SCAN","KIVI","WALLET_CLIENT_UNQ","INDEX (UNIQUE)","""W""@""SEL$3""","SEL$8771BF6C","1",,"1","""C"".""CLIENT_ID""=""W"".""CLIENT_ID""",,,
+"9","4","2","TABLE ACCESS","BY INDEX ROWID","KIVI","WALLET","TABLE","""W""@""SEL$3""","SEL$8771BF6C","1","7","2",,"""W"".""STATUS_ID""=1",,
+"10","3","2","TABLE ACCESS","FULL","KIVI","WALLET","TABLE","""W""@""SEL$3""","SEL$8771BF6C","1","7","2",,"""W"".""STATUS_ID""=1",,
+## map
+"1","1","0","0"
+"2","2","1","0"
+"3","2","0","1"
+"4","3","0","0"
+"5","4","3","0"
+"6","4","4","1"
+"7","5","4","0"
+"8","6","4","0"
+"9","7","3","0"
+"10","7","0","1"
+## tables
+"KIVI","CLIENT","1000000","5536","2026-10-17","N","NO","NO"
+"KIVI","WALLET","1000000","5788","2026-10-17","N","NO","NO"
+"KIVI","ACCOUNT","1000000","6922","2026-10-17","N","NO","NO"
+## indexes
+"KIVI","ACCOUNT_WALLET_CURRENCY_UNQ","KIVI","ACCOUNT","VALID","VISIBLE","UNIQUE","NORMAL","WALLET_ID,CURRENCY_ID"
+"KIVI","ACCOUNT_PK","KIVI","ACCOUNT","VALID","VISIBLE","UNIQUE","NORMAL","ACCOUNT_ID"
+"KIVI","CLIENT_PK","KIVI","CLIENT","VALID","VISIBLE","UNIQUE","NORMAL","CLIENT_ID"
+"KIVI","WALLET_PK","KIVI","WALLET","VALID","VISIBLE","UNIQUE","NORMAL","WALLET_ID"
+"KIVI","WALLET_CLIENT_UNQ","KIVI","WALLET","VALID","VISIBLE","UNIQUE","NORMAL","CLIENT_ID"
+## columns
+"KIVI","ACCOUNT","ACCOUNT_ID","NUMBER"
+"KIVI","ACCOUNT","CLIENT_ID","NUMBER"
+"KIVI","ACCOUNT","WALLET_ID","NUMBER"
+"KIVI","ACCOUNT","CURRENCY_ID","NUMBER"
+"KIVI","ACCOUNT","BALANCE","NUMBER"
+"KIVI","ACCOUNT","CREATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","ACCOUNT","UPDATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","CLIENT","CLIENT_ID","NUMBER"
+"KIVI","CLIENT","IS_ACTIVE","NUMBER"
+"KIVI","CLIENT","IS_BLOCKED","NUMBER"
+"KIVI","CLIENT","BLOCKED_REASON","VARCHAR2"
+"KIVI","CLIENT","CREATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","CLIENT","UPDATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","WALLET","WALLET_ID","NUMBER"
+"KIVI","WALLET","CLIENT_ID","NUMBER"
+"KIVI","WALLET","STATUS_ID","NUMBER"
+"KIVI","WALLET","STATUS_CHANGE_REASON","VARCHAR2"
+"KIVI","WALLET","CREATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","WALLET","UPDATE_DTIME_TECH","TIMESTAMP(6)"
+## partkeys
+## text
+
+Plan hash value: 2746368495
+
+-----------------------------------------------------------------------------------------------------
+|   Id  | Operation                     | Name              | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------------------------------
+|     0 | SELECT STATEMENT              |                   |     1 |    39 |  3407   (1)| 00:00:01 |
+|     1 |  SORT AGGREGATE               |                   |     1 |     5 |            |          |
+|  *  2 |   TABLE ACCESS FULL           | ACCOUNT           |     1 |     5 |  1887   (1)| 00:00:01 |
+|- *  3 |  HASH JOIN                    |                   |     1 |    39 |  1520   (2)| 00:00:01 |
+|     4 |   NESTED LOOPS                |                   |     1 |    39 |  1520   (2)| 00:00:01 |
+|     5 |    NESTED LOOPS               |                   |     1 |    39 |  1520   (2)| 00:00:01 |
+|-    6 |     STATISTICS COLLECTOR      |                   |       |       |            |          |
+|  *  7 |      TABLE ACCESS FULL        | CLIENT            |     1 |    32 |  1518   (2)| 00:00:01 |
+|  *  8 |     INDEX UNIQUE SCAN         | WALLET_CLIENT_UNQ |     1 |       |     1   (0)| 00:00:01 |
+|  *  9 |    TABLE ACCESS BY INDEX ROWID| WALLET            |     1 |     7 |     2   (0)| 00:00:01 |
+|- * 10 |   TABLE ACCESS FULL           | WALLET            |     1 |     7 |     2   (0)| 00:00:01 |
+-----------------------------------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$2
+   2 - SEL$2        / "A"@"SEL$2"
+   3 - SEL$8771BF6C
+   4 - SEL$8771BF6C
+   7 - SEL$8771BF6C / "C"@"SEL$1"
+   8 - SEL$8771BF6C / "W"@"SEL$3"
+   9 - SEL$8771BF6C / "W"@"SEL$3"
+  10 - SEL$8771BF6C / "W"@"SEL$3"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      FULL(@"SEL$2" "A"@"SEL$2")
+      NLJ_BATCHING(@"SEL$8771BF6C" "W"@"SEL$3")
+      USE_NL(@"SEL$8771BF6C" "W"@"SEL$3")
+      LEADING(@"SEL$8771BF6C" "C"@"SEL$1" "W"@"SEL$3")
+      INDEX(@"SEL$8771BF6C" "W"@"SEL$3" ("WALLET"."CLIENT_ID"))
+      FULL(@"SEL$8771BF6C" "C"@"SEL$1")
+      OUTLINE(@"SEL$3")
+      OUTLINE(@"SEL$1")
+      UNNEST(@"SEL$3")
+      OUTLINE_LEAF(@"SEL$8771BF6C")
+      OUTLINE_LEAF(@"SEL$2")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   2 - filter("A"."CLIENT_ID"=:B1)
+   3 - access("C"."CLIENT_ID"="W"."CLIENT_ID")
+   7 - filter(TO_CHAR("C"."CLIENT_ID")=:P AND UPPER("C"."BLOCKED_REASON")='X')
+   8 - access("C"."CLIENT_ID"="W"."CLIENT_ID")
+   9 - filter("W"."STATUS_ID"=1)
+  10 - filter("W"."STATUS_ID"=1)
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - (#keys=0) COUNT(*)[22]
+   2 - (rowset=256)
+   3 - (#keys=1) "C"."CLIENT_ID"[NUMBER,22]
+   4 - (#keys=0) "C"."CLIENT_ID"[NUMBER,22]
+   5 - (#keys=0) "C"."CLIENT_ID"[NUMBER,22], "W".ROWID[ROWID,10]
+   6 - "C"."CLIENT_ID"[NUMBER,22]
+   7 - "C"."CLIENT_ID"[NUMBER,22]
+   8 - "W".ROWID[ROWID,10]
+  10 - "W"."CLIENT_ID"[NUMBER,22]
+
+Hint Report (identified by operation id / Query Block Name / Object Alias):
+Total hints for statement: 2 (E - Syntax error (1))
+---------------------------------------------------------------------------
+
+   0 -  SEL$1
+         E -  nonsense
+
+   7 -  SEL$8771BF6C / "C"@"SEL$1"
+           -  full(c)
+
+Note
+-----
+   - this is an adaptive plan (rows marked '-' are inactive)
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER)
+    SEL$8771BF6C (SUBQUERY UNNEST SEL$1 ; SEL$3) [FINAL]
+  SEL$2 (PARSER) [FINAL]
+  SEL$3 (PARSER)
+

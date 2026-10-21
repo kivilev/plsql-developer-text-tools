@@ -23,6 +23,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Real plans captured from Oracle 23ai (PLAN_TABLE rows, display map, dictionary rows, DBMS_XPLAN text). -->
+    <None Include="Plans/*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TextTools.Core\TextTools.Core.csproj" />
   </ItemGroup>
 

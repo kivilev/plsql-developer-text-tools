@@ -98,4 +98,4 @@ Lines are separated by `⏎` in the examples below.
 | Command | Example input | Result |
 |---|---|---|
 | Explain Plan with constants | (statement under the cursor) | `the IDE Plan Window with this statement, constants resolved` |
-| Extended Explain Plan | (statement under the cursor) | `an HTML window: Plan tab (DBMS_XPLAN) and Findings tab` |
+| Extended Explain Plan | (statement under the cursor) | `an HTML window: Plan (reading order, step panels), Findings (static rules), Text (DBMS_XPLAN + Copy), Reference` |

@@ -1,0 +1,100 @@
+## sql
+select * from client c where c.client_id in (select column_value from table(cast(:ids as sys.odcinumberlist)))
+## rows
+"0",,"540","SELECT STATEMENT",,,,,,,"255","8670","540",,,,
+"1","0","1","NESTED LOOPS",,,,,,"SEL$09D7319C","255","8670","540",,,,
+"2","1","1","NESTED LOOPS",,,,,,,"255","8670","540",,,,
+"3","2","1","SORT","UNIQUE",,,,,,"8168","16336","29",,,,
+"4","3","1","COLLECTION ITERATOR","PICKLER FETCH",,,,"""KOKBF$0""@""SEL$3""","SEL$09D7319C","8168","16336","29",,,,
+"5","2","2","INDEX","UNIQUE SCAN","KIVI","CLIENT_PK","INDEX (UNIQUE)","""C""@""SEL$1""","SEL$09D7319C","1",,"1","""C"".""CLIENT_ID""=VALUE(KOKBF$)",,,
+"6","1","2","TABLE ACCESS","BY INDEX ROWID","KIVI","CLIENT","TABLE","""C""@""SEL$1""","SEL$09D7319C","1","32","2",,,,
+## map
+## tables
+"KIVI","CLIENT","1000000","5536","2026-10-17","N","NO","NO"
+## indexes
+"KIVI","CLIENT_PK","KIVI","CLIENT","VALID","VISIBLE","UNIQUE","NORMAL","CLIENT_ID"
+## columns
+"KIVI","CLIENT","CLIENT_ID","NUMBER"
+"KIVI","CLIENT","IS_ACTIVE","NUMBER"
+"KIVI","CLIENT","IS_BLOCKED","NUMBER"
+"KIVI","CLIENT","BLOCKED_REASON","VARCHAR2"
+"KIVI","CLIENT","CREATE_DTIME_TECH","TIMESTAMP(6)"
+"KIVI","CLIENT","UPDATE_DTIME_TECH","TIMESTAMP(6)"
+## partkeys
+## text
+
+Plan hash value: 478074127
+
+--------------------------------------------------------------------------------------------------
+| Id  | Operation                            | Name      | Rows  | Bytes | Cost (%CPU)| Time     |
+--------------------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT                     |           |   255 |  8670 |   540   (1)| 00:00:01 |
+|   1 |  NESTED LOOPS                        |           |   255 |  8670 |   540   (1)| 00:00:01 |
+|   2 |   NESTED LOOPS                       |           |   255 |  8670 |   540   (1)| 00:00:01 |
+|   3 |    SORT UNIQUE                       |           |  8168 | 16336 |    29   (0)| 00:00:01 |
+|   4 |     COLLECTION ITERATOR PICKLER FETCH|           |  8168 | 16336 |    29   (0)| 00:00:01 |
+|*  5 |    INDEX UNIQUE SCAN                 | CLIENT_PK |     1 |       |     1   (0)| 00:00:01 |
+|   6 |   TABLE ACCESS BY INDEX ROWID        | CLIENT    |     1 |    32 |     2   (0)| 00:00:01 |
+--------------------------------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$09D7319C
+   4 - SEL$09D7319C / "KOKBF$0"@"SEL$3"
+   5 - SEL$09D7319C / "C"@"SEL$1"
+   6 - SEL$09D7319C / "C"@"SEL$1"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      SEMI_TO_INNER(@"SEL$09D7319C" "KOKBF$0"@"SEL$3")
+      NLJ_BATCHING(@"SEL$09D7319C" "C"@"SEL$1")
+      USE_NL(@"SEL$09D7319C" "C"@"SEL$1")
+      LEADING(@"SEL$09D7319C" "KOKBF$0"@"SEL$3" "C"@"SEL$1")
+      INDEX(@"SEL$09D7319C" "C"@"SEL$1" ("CLIENT"."CLIENT_ID"))
+      FULL(@"SEL$09D7319C" "KOKBF$0"@"SEL$3")
+      OUTLINE(@"SEL$3")
+      OUTLINE(@"SEL$2")
+      MERGE(@"SEL$3" >"SEL$2")
+      OUTLINE(@"SEL$335DD26A")
+      OUTLINE(@"SEL$1")
+      UNNEST(@"SEL$335DD26A")
+      OUTLINE_LEAF(@"SEL$09D7319C")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   5 - access("C"."CLIENT_ID"=VALUE(KOKBF$))
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - (#keys=0) "C"."CLIENT_ID"[NUMBER,22], "C"."IS_ACTIVE"[NUMBER,22],
+       "C"."IS_BLOCKED"[NUMBER,22], "C"."BLOCKED_REASON"[VARCHAR2,4000],
+       "C"."CREATE_DTIME_TECH"[TIMESTAMP,11], "C"."UPDATE_DTIME_TECH"[TIMESTAMP,11]
+   2 - (#keys=0) "C".ROWID[ROWID,10], "C"."CLIENT_ID"[NUMBER,22]
+   3 - (#keys=1) VALUE(KOKBF$)[22]
+   4 - VALUE(A0)[22]
+   5 - "C".ROWID[ROWID,10], "C"."CLIENT_ID"[NUMBER,22]
+   6 - "C"."IS_ACTIVE"[NUMBER,22], "C"."IS_BLOCKED"[NUMBER,22],
+       "C"."BLOCKED_REASON"[VARCHAR2,4000], "C"."CREATE_DTIME_TECH"[TIMESTAMP,11],
+       "C"."UPDATE_DTIME_TECH"[TIMESTAMP,11]
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER)
+    SEL$09D7319C (SUBQUERY UNNEST SEL$1 ; SEL$335DD26A) [FINAL]
+  SEL$2 (PARSER)
+    SEL$335DD26A (VIEW MERGE SEL$2 ; SEL$3)
+  SEL$3 (PARSER)
+

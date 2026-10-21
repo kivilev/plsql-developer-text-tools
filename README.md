@@ -42,8 +42,10 @@ value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_
 result goes to the clipboard.
 
 **SQL Tools → Explain Plan with constants / Extended Explain Plan.** The same statement, explained: in the IDE's own
-Plan Window (bind F5 to it in Key Configuration), or in an HTML window with a **Plan** tab and a **Findings** tab that
-explains the plan in plain words (early version: a few test checks).
+Plan Window (bind F5 to it in Key Configuration), or in an HTML window that explains the plan without AI: steps in reading
+order with "runs for each row of step N", each step in plain words with its predicates, table statistics and indexes,
+**Findings** from 19 static rules (conversions on indexed columns, full scans inside nested loops, broken partition
+pruning, unused hints, missing statistics, ...) each with "why it may be fine", and the raw `DBMS_XPLAN` text to copy.
 
 | String Tools | Date Tools |
 |---|---|

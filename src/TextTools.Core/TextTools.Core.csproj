@@ -6,4 +6,9 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Extended Explain Plan reference and rule texts: data, not code. -->
+    <EmbeddedResource Include="Plan/reference.json" LogicalName="TextTools.Core.Plan.reference.json" />
+  </ItemGroup>
+
 </Project>
