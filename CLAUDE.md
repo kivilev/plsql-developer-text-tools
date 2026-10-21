@@ -41,7 +41,9 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
   the DB query for "now" is skipped while the window executes. Details: skill `plsqldev-plugin-api`.
 - New command = function in Core + `Sample` + tests + one line in `Commands.All`; it appears in the menu by itself.
   Skill `add-command`.
-- Menu captions: ASCII only (the IDE may read them before UTF-8 mode) and no `[...]` (the IDE cuts it out).
+- Menu captions: the English ones (`Commands.All` names, the identity of a command) are ASCII only and have no `[...]`
+  (the IDE cuts it out). Displayed captions are translated (`menu` section of `Plan/reference.<code>.json`, UTF-8,
+  no `[`, `]`, `&`, unique per submenu) and used only once the IDE reads UTF-8 (`CHARMODE`); otherwise English.
 - Analyzers (.NET latest-recommended, Meziantou, SonarAnalyzer) run as errors. Fix the code; suppress only in
   `.editorconfig` for a path with a written reason.
 - Before a PR: `scripts/verify.ps1` green. Interop changes also need a check in the real IDE (skill `install-to-ide`).

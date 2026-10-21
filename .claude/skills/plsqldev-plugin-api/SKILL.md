@@ -68,8 +68,12 @@ visual column with tabs?
 - v12+ (`SYS_Version >= 1200`): `GROUP=Text Tools`, then per submenu `MENUITEM=String Tools`, items `SUBITEM=...`,
   separator `SUBITEM=-`. In the classic menu GROUP renders as a separator and MENUITEM as a submenu of Plug-Ins.
 - Before v12: paths `Tools / Text Tools / String Tools / item`.
-- ASCII only (captions can be read before `CHARMODE=UTF8`), no `[...]` (parsed as options like `[tabindex=3]` and cut out).
+- English captions (command names): ASCII only, no `[...]` (parsed as options like `[tabindex=3]` and cut out).
   Tests `CaptionsAreAscii`, `CaptionsHaveNoSquareBrackets` enforce it.
+- Displayed captions follow the IDE language (`IDE_TranslationLanguage`, 131; `reference.<code>.json` → `menu`). They are UTF-8,
+  so `CHARMODE=UTF8` is requested in `CreateMenuItem(1)` before the menu is built, and translations are used only
+  when it was accepted (`Ide.Utf8`); otherwise the ASCII English captions. The click comes by index, so a translation
+  never changes what a command does.
 
 ## Crash safety (non-negotiable)
 

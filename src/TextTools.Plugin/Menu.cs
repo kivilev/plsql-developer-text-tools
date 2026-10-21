@@ -1,4 +1,5 @@
 using TextTools.Core;
+using TextTools.Core.Plan;
 
 namespace TextTools.Plugin;
 
@@ -17,15 +18,23 @@ internal static class Menu
     private static readonly Dictionary<int, string> Captions = [];
     private static readonly Dictionary<int, Command> ByIndex = [];
     private static readonly Dictionary<int, string> MenuButtons = [];
+    private static readonly Dictionary<int, string> Displayed = [];
 
     /// <summary>Ribbon dropdown buttons (MENUITEM): index → menu name, for their images.</summary>
     public static IReadOnlyDictionary<int, string> Buttons => MenuButtons;
 
-    public static void Build(int sysVersion)
+    /// <summary>
+    /// Builds the menu in the language of the IDE's translation. The captions travel as UTF-8, so they are translated
+    /// only once the IDE reads UTF-8 (CHARMODE); until then, and for English, they are the ASCII English ones.
+    /// The English caption stays the command's identity (lookups, icons, tests); only the displayed text changes.
+    /// </summary>
+    public static void Build(int sysVersion, PlanReference? reference = null)
     {
+        reference ??= Ide.Utf8 ? PlanReference.For(Ide.TranslationLanguage, Ide.TranslationFile) : PlanReference.Default;
         Captions.Clear();
         ByIndex.Clear();
         MenuButtons.Clear();
+        Displayed.Clear();
         // One submenu per Command.Menu ("String Tools", "Date Tools"; dropdown buttons on the ribbon),
         // a flat list inside with groups separated by "-".
         var ribbon = sysVersion >= 1200;
@@ -37,17 +46,21 @@ internal static class Menu
             if (ribbon)
             {
                 MenuButtons[index] = menu.Key;
-                Captions[index++] = $"MENUITEM={menu.Key}";
+                Displayed[index] = reference.Menu(menu.Key);
+                Captions[index++] = $"MENUITEM={reference.Menu(menu.Key)}";
             }
+            var menuName = reference.Menu(menu.Key);
             var first = true;
             foreach (var group in menu.GroupBy(c => c.Group, StringComparer.Ordinal))
             {
-                if (!first) Captions[index++] = ribbon ? "SUBITEM=-" : $"Tools / {Title} / {menu.Key} / -";
+                if (!first) Captions[index++] = ribbon ? "SUBITEM=-" : $"Tools / {Title} / {menuName} / -";
                 first = false;
                 foreach (var cmd in group)
                 {
                     if (index > 99) return;
-                    Captions[index] = ribbon ? $"SUBITEM={cmd.Name}" : $"Tools / {Title} / {menu.Key} / {cmd.Name}";
+                    var name = reference.Menu(cmd.Name);
+                    Displayed[index] = name;
+                    Captions[index] = ribbon ? $"SUBITEM={name}" : $"Tools / {Title} / {menuName} / {name}";
                     ByIndex[index++] = cmd;
                 }
             }
@@ -55,6 +68,9 @@ internal static class Menu
     }
 
     public static string Caption(int index) => Captions.GetValueOrDefault(index, "");
+
+    /// <summary>The text of an item or ribbon dropdown as the user sees it (for the context menu and the ribbon buttons).</summary>
+    public static string DisplayName(int index) => Displayed.GetValueOrDefault(index, "");
 
     public static Command? Find(int index) => ByIndex.GetValueOrDefault(index);
 

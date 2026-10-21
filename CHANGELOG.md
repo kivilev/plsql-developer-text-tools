@@ -32,6 +32,10 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
     Brazilian, Chinese, French, German, Hungarian, Japanese, Russian, Spanish; English otherwise. The texts are
     `Plan/reference.<code>.json` laid over `reference.json`; a missing key shows the English text.
   - The statement is shown above the plan table, not below it.
+- **Menu in the language of the IDE**: submenu and item captions (Plug-Ins menu, ribbon, editor context menu) follow
+  the IDE's translation, like the plan report; English when the IDE has no translation. If a Key Configuration hotkey
+  of a Text Tools item stops working after switching the IDE language, bind it again.
+- **SQL Tools**: no separator between Copy SQL with constants resolved and the two Explain Plan commands.
 
 ## [v0.2.0] - 2026-10-17
 

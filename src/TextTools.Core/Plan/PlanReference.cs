@@ -23,6 +23,7 @@ public sealed class PlanReference
     private readonly Dictionary<string, RuleText> _rules;
     private readonly Dictionary<string, double> _thresholds;
     private readonly Dictionary<string, string> _ui;
+    private readonly Dictionary<string, string> _menu;
     private static readonly ConcurrentDictionary<string, PlanReference> ByLanguage = new(StringComparer.Ordinal);
 
     private PlanReference(
@@ -34,8 +35,10 @@ public sealed class PlanReference
         Dictionary<string, double> thresholds,
         List<long> picklerRows,
         Dictionary<string, string> banners,
-        Dictionary<string, string> ui)
+        Dictionary<string, string> ui,
+        Dictionary<string, string> menu)
     {
+        _menu = menu;
         CourseUrl = courseUrl;
         _operations = operations;
         Columns = columns;
@@ -74,6 +77,9 @@ public sealed class PlanReference
 
     public string Ui(string key, params (string Name, string Value)[] values) =>
         Fill(Ui(key), values.ToDictionary(v => v.Name, v => v.Value, StringComparer.Ordinal));
+
+    /// <summary>The caption of a menu item or submenu in this language; the English caption (the key) when there is no translation.</summary>
+    public string Menu(string english) => _menu.TryGetValue(english, out var v) && v.Length > 0 ? v : english;
 
     /// <summary>
     /// The reference in the language of the IDE's translation (the name <c>IDE_TranslationLanguage</c> or the file name
@@ -179,7 +185,8 @@ public sealed class PlanReference
         }
         var banners = Object(root, "banners").ToDictionary(p => p.Name, p => p.Value.GetString() ?? "", StringComparer.Ordinal);
         var ui = Object(root, "ui").ToDictionary(p => p.Name, p => p.Value.GetString() ?? "", StringComparer.Ordinal);
-        return new PlanReference(Str(root, "courseUrl"), operations, columns, notes, rules, thresholds, pickler, banners, ui);
+        var menu = Object(root, "menu").ToDictionary(p => p.Name, p => p.Value.GetString() ?? "", StringComparer.Ordinal);
+        return new PlanReference(Str(root, "courseUrl"), operations, columns, notes, rules, thresholds, pickler, banners, ui, menu);
     }
 
     /// <summary>
@@ -220,7 +227,7 @@ public sealed class PlanReference
         }
         return new PlanReference(
             CourseUrl, operations, Texts(Columns, "columns"), notes, rules,
-            _thresholds, [.. PicklerDefaultRows], Texts(Banners, "banners"), Texts(_ui, "ui"))
+            _thresholds, [.. PicklerDefaultRows], Texts(Banners, "banners"), Texts(_ui, "ui"), Texts(_menu, "menu"))
         {
             Language = language,
         };

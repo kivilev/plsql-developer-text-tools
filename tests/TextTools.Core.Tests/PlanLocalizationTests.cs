@@ -36,7 +36,7 @@ public partial class PlanLocalizationTests
 
     private static IEnumerable<(string Path, string Text)> Texts(JsonElement root, bool translation)
     {
-        foreach (var section in new[] { "columns", "banners", "ui" })
+        foreach (var section in new[] { "columns", "banners", "ui", "menu" })
         {
             foreach (var p in root.GetProperty(section).EnumerateObject()) yield return ($"{section}.{p.Name}", p.Value.GetString()!);
         }
