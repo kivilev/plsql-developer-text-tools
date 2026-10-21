@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <!-- Extended Explain Plan reference and rule texts: data, not code. -->
-    <EmbeddedResource Include="Plan/reference.json" LogicalName="TextTools.Core.Plan.reference.json" />
+    <!-- reference.json (English) and reference.<code>.json (one per IDE translation); resource names TextTools.Core.Plan.reference[.<code>].json. -->
+    <!-- WithCulture=false: ".de" in the file name is a language code of ours, not a satellite-assembly culture. -->
+    <EmbeddedResource Include="Plan/reference*.json" WithCulture="false" />
   </ItemGroup>
 
 </Project>

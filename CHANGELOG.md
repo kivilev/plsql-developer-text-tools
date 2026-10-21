@@ -28,6 +28,10 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
   - **Reference** tab and tooltips: what each operation and column means; banners for bind variables, adaptive and
     fixed plans. Rules and texts are data (`Plan/reference.json` in the DLL). Read-only: EXPLAIN PLAN, DBMS_XPLAN and
     `ALL_*` views through the IDE's own connection.
+  - **Language**: the report speaks the language of the IDE's translation (Preferences → User Interface → Language):
+    Brazilian, Chinese, French, German, Hungarian, Japanese, Russian, Spanish; English otherwise. The texts are
+    `Plan/reference.<code>.json` laid over `reference.json`; a missing key shows the English text.
+  - The statement is shown above the plan table, not below it.
 
 ## [v0.2.0] - 2026-10-17
 

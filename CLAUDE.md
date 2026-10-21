@@ -28,6 +28,12 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
 
 ## Rules
 
+- **Every user-visible text of a report/window is localized into all languages of the IDE's translations** (Brazilian,
+  Chinese, French, German, Hungarian, Japanese, Russian, Spanish; English is the source), chosen by
+  `IDE_TranslationLanguage` (Preferences → Language). New text = a key in `Plan/reference.json` (`ui` and the other
+  sections) + the same key in every `reference.<code>.json` (placeholders `{name}` unchanged, Oracle terms and
+  identifiers not translated); `PlanLocalizationTests` fails when a language lacks a key or a placeholder differs.
+  Never put English text in code: use `PlanReference.Ui(key, ...)`. Same for any new window.
 - **The plugin must never crash the IDE or corrupt the user's text.** Every export is wrapped in try/catch with
   static fallback strings; the module pins itself (`GetModuleHandleEx PIN`) because a Native AOT runtime cannot be
   unloaded; Core throws only `FormatException` (status bar), overflow is converted; every regex has

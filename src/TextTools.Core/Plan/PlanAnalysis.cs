@@ -40,7 +40,7 @@ public sealed partial class PlanAnalysis
         _reference = reference;
         Dictionary = data.Dictionary;
         Text = PlanText.Parse(data.Text);
-        Tree = PlanTree.Build(data.Rows, data.DisplayMap, Text.Inactive);
+        Tree = PlanTree.Build(data.Rows, data.DisplayMap, Text.Inactive, reference);
         foreach (var step in Tree.Steps)
         {
             if (step.Row.ShortAlias.Length > 0 && TableOf(step) is { } t) _aliases.TryAdd(step.Row.ShortAlias, t);
@@ -91,10 +91,15 @@ public sealed partial class PlanAnalysis
     {
         var r = step.Row;
         var what = _reference.Operation(r)?.What is { Length: > 0 } w ? w : r.FullOperation.ToLowerInvariant();
-        var text = $"Step {step.Order}: {what}{(r.Name.Length > 0 ? " " + r.Name : "")}";
-        if (r.AccessPredicates.Length > 0) text += $", finding rows by {r.AccessPredicates}";
-        if (r.FilterPredicates.Length > 0) text += $"; then discards rows by {r.FilterPredicates}";
-        if (r.Rows is { } rows) text += $"; expects ~{PlanFormat.Count(rows)} row{(rows == 1 ? "" : "s")}{(step.RepeatedFor is null ? "" : " per execution")}";
+        var n = step.Order.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var text = _reference.Ui("desc.step", ("n", n), ("what", what)) + (r.Name.Length > 0 ? " " + r.Name : "");
+        if (r.AccessPredicates.Length > 0) text += _reference.Ui("desc.access", ("predicate", r.AccessPredicates));
+        if (r.FilterPredicates.Length > 0) text += _reference.Ui("desc.filter", ("predicate", r.FilterPredicates));
+        if (r.Rows is { } rows)
+        {
+            text += _reference.Ui(rows == 1 ? "desc.expects.one" : "desc.expects.many", ("n", PlanFormat.Count(rows)));
+            if (step.RepeatedFor is not null) text += _reference.Ui("desc.perExecution");
+        }
         return text + ".";
     }
 
@@ -232,7 +237,7 @@ public sealed partial class PlanAnalysis
         var hits = Dictionary.IndexesOf(table.Owner, table.Name)
             .Where(i => i.Columns.Count > 0 && columns.Contains(i.Columns[0], StringComparer.Ordinal) && !i.Unusable && !i.Invisible)
             .Select(i => $"{i.Columns[0]} ({i.Name})").ToList();
-        return hits.Count == 0 ? "" : $" Indexes lead with filter columns: {string.Join(", ", hits)}.";
+        return hits.Count == 0 ? "" : _reference.Ui("indexLead", ("list", string.Join(", ", hits)));
     }
 
     private void IndexFilter(PlanStep step)
@@ -355,9 +360,9 @@ public sealed partial class PlanAnalysis
         {
             var meaning = h.Code switch
             {
-                'E' => "a syntax error",
-                'N' => "unresolved",
-                _ => "not used",
+                'E' => _reference.Ui("hint.E"),
+                'N' => _reference.Ui("hint.N"),
+                _ => _reference.Ui("hint.U"),
             };
             Add("NOTE-01", h.Step is { } id ? Tree.Step(id) : null,
                 new(StringComparer.Ordinal) { ["meaning"] = meaning, ["hint"] = h.Hint, ["reason"] = h.Reason.Length > 0 ? $" ({h.Reason})" : "" },

@@ -52,10 +52,11 @@ public static class PlanReport
         function init(first){var ds=document.getElementsByTagName('div');for(var i=0;i<ds.length;i++){if(ds[i].className=='detail')ds[i].style.display='none';}
         show('plan');if(first!=null)step(first);}
         function copyText(){var t=document.getElementById('xplan');var s=t.innerText||t.textContent;
-        if(window.clipboardData&&window.clipboardData.setData){window.clipboardData.setData('Text',s);return msg('Copied');}
+        var ok=t.getAttribute('data-ok'),hint=t.getAttribute('data-select');
+        if(window.clipboardData&&window.clipboardData.setData){window.clipboardData.setData('Text',s);return msg(ok);}
         try{var r=document.createRange();r.selectNodeContents(t);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);
-        if(document.execCommand('copy')){sel.removeAllRanges();return msg('Copied');}}catch(e){}
-        if(navigator.clipboard){navigator.clipboard.writeText(s);return msg('Copied');}return msg('Select the text and press Ctrl+C');}
+        if(document.execCommand('copy')){sel.removeAllRanges();return msg(ok);}}catch(e){}
+        if(navigator.clipboard){navigator.clipboard.writeText(s);return msg(ok);}return msg(hint);}
         function msg(s){document.getElementById('copied').innerHTML=s;return false;}
 
         """;
@@ -78,16 +79,17 @@ public static class PlanReport
 
         Summary(sb, analysis, error, reference);
         sb.Append("<div class=\"tabs\">");
-        Tab(sb, "plan", "Plan");
-        Tab(sb, "findings", $"Findings ({findings.Count.ToString(CultureInfo.InvariantCulture)})");
-        Tab(sb, "text", "Text");
-        Tab(sb, "reference", "Reference");
+        Tab(sb, "plan", reference.Ui("tab.plan"));
+        Tab(sb, "findings", $"{reference.Ui("tab.findings")} ({findings.Count.ToString(CultureInfo.InvariantCulture)})");
+        Tab(sb, "text", reference.Ui("tab.text"));
+        Tab(sb, "reference", reference.Ui("tab.reference"));
         sb.Append("</div>\n");
 
         sb.Append("<div class=\"tab\" id=\"plan\">\n");
         if (error is not null) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"error\">{E(error)}</p>\n");
+        sb.Append("<p class=\"muted\">").Append(E(reference.Ui("stmt.label"))).Append("</p><pre>").Append(E(sql)).Append("</pre>\n");
         if (analysis is not null && analysis.Tree.Steps.Count > 0) PlanTab(sb, analysis, reference);
-        sb.Append("<p class=\"muted\">Statement:</p><pre>").Append(E(sql)).Append("</pre>\n</div>\n");
+        sb.Append("</div>\n");
 
         sb.Append("<div class=\"tab\" id=\"findings\">\n");
         FindingsTab(sb, findings, reference);
@@ -96,19 +98,19 @@ public static class PlanReport
         sb.Append("<div class=\"tab\" id=\"text\">\n");
         if (text.Count > 0)
         {
-            sb.Append("<p><a href=\"#\" class=\"course\" onclick=\"return copyText()\">Copy</a> <span id=\"copied\" class=\"muted\"></span></p>\n");
-            sb.Append("<pre id=\"xplan\">").Append(E(string.Join("\n", text))).Append("</pre>\n");
+            sb.Append(CultureInfo.InvariantCulture, $"<p><a href=\"#\" class=\"course\" onclick=\"return copyText()\">{E(reference.Ui("text.copy"))}</a> <span id=\"copied\" class=\"muted\"></span></p>\n");
+            sb.Append(CultureInfo.InvariantCulture, $"<pre id=\"xplan\" data-ok=\"{E(reference.Ui("text.copied"))}\" data-select=\"{E(reference.Ui("text.select"))}\">").Append(E(string.Join("\n", text))).Append("</pre>\n");
         }
         else
         {
-            sb.Append("<p class=\"muted\">No plan text.</p>\n");
+            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">{E(reference.Ui("text.none"))}</p>\n");
         }
         sb.Append("</div>\n");
 
         sb.Append("<div class=\"tab\" id=\"reference\">\n");
         ReferenceTab(sb, analysis, reference);
         sb.Append("</div>\n");
-        sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">Text Tools for PL/SQL Developer, {at:yyyy-MM-dd HH:mm:ss}. Explain plan is an estimate of the optimizer, not a measurement.</p>\n</body></html>\n");
+        sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">{E(reference.Ui("footer", ("time", at.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture))))}</p>\n</body></html>\n");
         return sb.ToString();
     }
 
@@ -124,11 +126,11 @@ public static class PlanReport
         }
         string Count(Level l) => analysis.Findings.Count(f => f.Level == l).ToString(CultureInfo.InvariantCulture);
         sb.Append("<p>");
-        if (analysis.Text.PlanHash.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"Plan hash <b>{E(analysis.Text.PlanHash)}</b> &middot; ");
-        sb.Append(CultureInfo.InvariantCulture, $"Cost <b>{E(PlanFormat.Count(root.Row.Cost))}</b> &middot; Rows <b>{E(PlanFormat.Count(root.Row.Rows))}</b> &middot; ");
-        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"P\">&#9679; {Count(Level.Problem)} problems</span> ");
-        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"C\">&#9679; {Count(Level.Check)} to check</span> ");
-        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"I\">&#9679; {Count(Level.Info)} notes</span></p>\n");
+        if (analysis.Text.PlanHash.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"{E(reference.Ui("sum.planHash"))} <b>{E(analysis.Text.PlanHash)}</b> &middot; ");
+        sb.Append(CultureInfo.InvariantCulture, $"{E(reference.Ui("sum.cost"))} <b>{E(PlanFormat.Count(root.Row.Cost))}</b> &middot; {E(reference.Ui("sum.rows"))} <b>{E(PlanFormat.Count(root.Row.Rows))}</b> &middot; ");
+        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"P\">&#9679; {E(reference.Ui("sum.problems", ("n", Count(Level.Problem))))}</span> ");
+        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"C\">&#9679; {E(reference.Ui("sum.check", ("n", Count(Level.Check))))}</span> ");
+        sb.Append(CultureInfo.InvariantCulture, $"<span class=\"I\">&#9679; {E(reference.Ui("sum.notes", ("n", Count(Level.Info))))}</span></p>\n");
         foreach (var banner in analysis.Banners)
         {
             if (reference.Banners.TryGetValue(banner, out var t)) sb.Append(CultureInfo.InvariantCulture, $"<div class=\"banner\">{E(t)}</div>\n");
@@ -145,7 +147,7 @@ public static class PlanReport
         foreach (var h in new[] { "Step", "Id", "Operation", "Name", "Rows", "Cost", "" })
         {
             var tip = reference.Columns.TryGetValue(h, out var c) ? $" title=\"{E(c)}\"" : "";
-            sb.Append(CultureInfo.InvariantCulture, $"<th{tip}>{E(h)}</th>");
+            sb.Append(CultureInfo.InvariantCulture, $"<th{tip}>{E(h.Length > 0 ? reference.Ui("h." + h) : h)}</th>");
         }
         sb.Append("</tr>\n");
         foreach (var s in steps)
@@ -176,52 +178,57 @@ public static class PlanReport
     {
         var r = s.Row;
         sb.Append(CultureInfo.InvariantCulture, $"<div class=\"detail\" id=\"d-{r.Id.ToString(CultureInfo.InvariantCulture)}\">");
-        sb.Append(CultureInfo.InvariantCulture, $"<p><b>Step {s.Order.ToString(CultureInfo.InvariantCulture)}</b> (Id {r.Id.ToString(CultureInfo.InvariantCulture)}): {E(r.FullOperation)} {E(r.Name)}</p>");
+        sb.Append(CultureInfo.InvariantCulture, $"<p><b>{E(reference.Ui("detail.step", ("n", s.Order.ToString(CultureInfo.InvariantCulture)), ("id", r.Id.ToString(CultureInfo.InvariantCulture))))}</b> {E(r.FullOperation)} {E(r.Name)}</p>");
         sb.Append(CultureInfo.InvariantCulture, $"<p>{E(a.Describe(s))}</p>");
         foreach (var note in s.Annotations) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">{E(note)}</p>");
         if (r.AccessPredicates.Length > 0)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono acc\" title=\"{E(reference.Columns.GetValueOrDefault("access", ""))}\">access: {E(r.AccessPredicates)}</p>");
+            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono acc\" title=\"{E(reference.Columns.GetValueOrDefault("access", ""))}\">{E(reference.Ui("detail.access"))}: {E(r.AccessPredicates)}</p>");
         }
         if (r.FilterPredicates.Length > 0)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono flt\" title=\"{E(reference.Columns.GetValueOrDefault("filter", ""))}\">filter: {E(r.FilterPredicates)}</p>");
+            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono flt\" title=\"{E(reference.Columns.GetValueOrDefault("filter", ""))}\">{E(reference.Ui("detail.filter"))}: {E(r.FilterPredicates)}</p>");
         }
-        if (r.PartitionStart.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono\">partitions: {E(r.PartitionStart)} .. {E(r.PartitionStop)}</p>");
+        if (r.PartitionStart.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"mono\">{E(reference.Ui("detail.partitions"))}: {E(r.PartitionStart)} .. {E(r.PartitionStop)}</p>");
         if (reference.Operation(r) is { } op)
         {
-            if (op.Normal.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>Normal when:</b> {E(op.Normal)}</p>");
-            if (op.Suspicious.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>Suspicious when:</b> {E(op.Suspicious)}</p>");
-            if (op.Check.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>Check:</b> {E(op.Check)}</p>");
+            if (op.Normal.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>{E(reference.Ui("detail.normal"))}</b> {E(op.Normal)}</p>");
+            if (op.Suspicious.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>{E(reference.Ui("detail.suspicious"))}</b> {E(op.Suspicious)}</p>");
+            if (op.Check.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<p class=\"note\"><b>{E(reference.Ui("detail.check"))}</b> {E(op.Check)}</p>");
         }
-        DictionaryFacts(sb, a, s);
+        DictionaryFacts(sb, a, s, reference);
         foreach (var f in findings) FindingHtml(sb, f, reference, link: false);
         sb.Append("</div>\n");
     }
 
     /// <summary>Table size and statistics, indexes with their columns (the used index bold, predicate columns underlined).</summary>
-    private static void DictionaryFacts(StringBuilder sb, PlanAnalysis a, PlanStep s)
+    private static void DictionaryFacts(StringBuilder sb, PlanAnalysis a, PlanStep s, PlanReference reference)
     {
         if (a.TableOf(s) is not { } table || a.Dictionary.Table(table.Owner, table.Name) is not { } t) return;
-        var stale = t.Stale ? " <span class=\"C\">(stale)</span>" : "";
-        var stats = t.LastAnalyzed.Length == 0 ? "<span class=\"P\">no statistics</span>" : $"analyzed {E(t.LastAnalyzed)}{stale}";
-        sb.Append(CultureInfo.InvariantCulture, $"<p><b>{E(t.Owner)}.{E(t.Name)}</b>: {E(PlanFormat.Count(t.NumRows))} rows, {E(PlanFormat.Count(t.Blocks))} blocks, {stats}");
-        if (t.Temporary) sb.Append(", temporary");
-        if (t.Partitioned) sb.Append(CultureInfo.InvariantCulture, $", partitioned by {E(string.Join(", ", a.Dictionary.PartitionKey(t.Owner, t.Name)))}");
+        var stale = t.Stale ? $" <span class=\"C\">{E(reference.Ui("facts.stale"))}</span>" : "";
+        var stats = t.LastAnalyzed.Length == 0
+            ? $"<span class=\"P\">{E(reference.Ui("facts.noStats"))}</span>"
+            : E(reference.Ui("facts.analyzed", ("date", t.LastAnalyzed))) + stale;
+        const string Mark = "\u0001";
+        var line = E(reference.Ui("facts.table", ("name", Mark), ("rows", PlanFormat.Count(t.NumRows)), ("blocks", PlanFormat.Count(t.Blocks)), ("stats", Mark + "S")));
+        line = line.Replace(Mark + "S", stats, StringComparison.Ordinal).Replace(Mark, $"<b>{E(t.Owner)}.{E(t.Name)}</b>", StringComparison.Ordinal);
+        sb.Append("<p>").Append(line);
+        if (t.Temporary) sb.Append(", ").Append(E(reference.Ui("facts.temporary")));
+        if (t.Partitioned) sb.Append(", ").Append(E(reference.Ui("facts.partitioned", ("key", string.Join(", ", a.Dictionary.PartitionKey(t.Owner, t.Name))))));
         sb.Append("</p>");
         var used = Predicates.Columns(s.Row.AccessPredicates + " " + s.Row.FilterPredicates).Select(c => c.Column).ToHashSet(StringComparer.Ordinal);
         var indexes = a.Dictionary.IndexesOf(t.Owner, t.Name).OrderBy(i => i.Name, StringComparer.Ordinal).ToList();
         if (indexes.Count == 0)
         {
-            sb.Append("<p class=\"muted\">No indexes.</p>");
+            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">{E(reference.Ui("facts.noIndexes"))}</p>");
             return;
         }
-        sb.Append("<p>Indexes:<br>");
+        sb.Append(CultureInfo.InvariantCulture, $"<p>{E(reference.Ui("facts.indexes"))}<br>");
         foreach (var i in indexes)
         {
             var name = s.Row.IsIndex && i.Name.Equals(s.Row.Name, StringComparison.Ordinal) ? $"<b>{E(i.Name)}</b>" : E(i.Name);
             var columns = string.Join(", ", i.Columns.Select(c => used.Contains(c) ? $"<u>{E(c)}</u>" : E(c)));
-            var state = (i.Unusable ? " UNUSABLE" : "") + (i.Invisible ? " INVISIBLE" : "") + (string.Equals(i.Uniqueness, "UNIQUE", StringComparison.Ordinal) ? " unique" : "");
+            var state = (i.Unusable ? " UNUSABLE" : "") + (i.Invisible ? " INVISIBLE" : "") + (string.Equals(i.Uniqueness, "UNIQUE", StringComparison.Ordinal) ? " " + reference.Ui("facts.unique") : "");
             sb.Append(CultureInfo.InvariantCulture, $"{name} ({columns}){E(state)}<br>");
         }
         sb.Append("</p>");
@@ -231,7 +238,7 @@ public static class PlanReport
     {
         if (findings.Count == 0)
         {
-            sb.Append("<p class=\"muted\">No findings.</p>\n");
+            sb.Append(CultureInfo.InvariantCulture, $"<p class=\"muted\">{E(reference.Ui("find.none"))}</p>\n");
             return;
         }
         foreach (var f in findings) FindingHtml(sb, f, reference, link: true);
@@ -239,24 +246,24 @@ public static class PlanReport
 
     private static void FindingHtml(StringBuilder sb, Finding f, PlanReference reference, bool link)
     {
-        sb.Append(CultureInfo.InvariantCulture, $"<div class=\"finding\"><span class=\"{Code(f.Level)}\">{E(Name(f.Level))}</span> <b>{E(f.Title)}</b> <span class=\"muted\">{E(f.RuleId)}</span>");
+        sb.Append(CultureInfo.InvariantCulture, $"<div class=\"finding\"><span class=\"{Code(f.Level)}\">{E(reference.Ui("find." + Code(f.Level)))}</span> <b>{E(f.Title)}</b> <span class=\"muted\">{E(f.RuleId)}</span>");
         if (link && f.StepId is { } id)
         {
             var sid = id.ToString(CultureInfo.InvariantCulture);
-            sb.Append(CultureInfo.InvariantCulture, $" &middot; <a href=\"#plan\" onclick=\"return step({sid})\">Id {sid}</a>");
+            sb.Append(CultureInfo.InvariantCulture, $" &middot; <a href=\"#plan\" onclick=\"return step({sid})\">{E(reference.Ui("find.id", ("id", sid)))}</a>");
         }
         sb.Append(CultureInfo.InvariantCulture, $"<br>{E(f.Detail)}");
-        if (f.Normal.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<br><span class=\"muted\">Why it may be fine: {E(f.Normal)}</span>");
+        if (f.Normal.Length > 0) sb.Append(CultureInfo.InvariantCulture, $"<br><span class=\"muted\">{E(reference.Ui("find.fine"))} {E(f.Normal)}</span>");
         if (link && f.Level != Level.Info)
         {
-            sb.Append(CultureInfo.InvariantCulture, $"<br><a class=\"course\" target=\"_blank\" href=\"{E(reference.CourseLink(f.RuleId))}\">Learn more in the course</a>");
+            sb.Append(CultureInfo.InvariantCulture, $"<br><a class=\"course\" target=\"_blank\" href=\"{E(reference.CourseLink(f.RuleId))}\">{E(reference.Ui("find.course"))}</a>");
         }
         sb.Append("</div>\n");
     }
 
     private static void ReferenceTab(StringBuilder sb, PlanAnalysis? a, PlanReference reference)
     {
-        sb.Append("<h4>Columns</h4><table class=\"grid\">");
+        sb.Append(CultureInfo.InvariantCulture, $"<h4>{E(reference.Ui("ref.columns"))}</h4><table class=\"grid\">");
         foreach (var (name, text) in reference.Columns)
         {
             sb.Append(CultureInfo.InvariantCulture, $"<tr><td><b>{E(name)}</b></td><td style=\"white-space:normal\">{E(text)}</td></tr>");
@@ -266,7 +273,7 @@ public static class PlanReport
             .Select(r => reference.Operations.ContainsKey(r.FullOperation) ? r.FullOperation : r.Operation).Distinct(StringComparer.Ordinal).ToList() ?? [];
         if (used.Count > 0)
         {
-            sb.Append("<h4>Operations in this plan</h4><table class=\"grid\">");
+            sb.Append(CultureInfo.InvariantCulture, $"<h4>{E(reference.Ui("ref.operations"))}</h4><table class=\"grid\">");
             foreach (var name in used)
             {
                 var op = reference.Operations[name];
@@ -277,7 +284,7 @@ public static class PlanReport
         var notes = a?.Text.Notes ?? [];
         if (notes.Count > 0)
         {
-            sb.Append("<h4>Notes of this plan</h4><table class=\"grid\">");
+            sb.Append(CultureInfo.InvariantCulture, $"<h4>{E(reference.Ui("ref.notes"))}</h4><table class=\"grid\">");
             foreach (var note in notes)
             {
                 var info = reference.Note(note);
@@ -297,13 +304,6 @@ public static class PlanReport
         Level.Problem => "P",
         Level.Check => "C",
         _ => "I",
-    };
-
-    private static string Name(Level l) => l switch
-    {
-        Level.Problem => "Problem",
-        Level.Check => "Check",
-        _ => "Note",
     };
 
     private static string E(string s) => WebUtility.HtmlEncode(s);

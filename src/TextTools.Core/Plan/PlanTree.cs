@@ -47,8 +47,9 @@ public sealed class PlanTree
 
     public PlanStep? Step(int id) => Steps.FirstOrDefault(s => s.Id == id);
 
-    public static PlanTree Build(IReadOnlyList<PlanRow> rows, IReadOnlyList<DisplayMapRow> map, IReadOnlySet<int> textInactive)
+    public static PlanTree Build(IReadOnlyList<PlanRow> rows, IReadOnlyList<DisplayMapRow> map, IReadOnlySet<int> textInactive, PlanReference? reference = null)
     {
+        reference ??= PlanReference.Default;
         var inactive = map.Count > 0 ? map.Where(m => m.Skipped).Select(m => m.Op).ToHashSet() : [.. textInactive];
         var opByDisplay = map.Where(m => !m.Skipped).GroupBy(m => m.Display).ToDictionary(g => g.Key, g => g.First().Op);
         var parentOf = map.ToDictionary(m => m.Op, m => m.Parent == 0 ? 0 : opByDisplay.GetValueOrDefault(m.Parent, -1));
@@ -72,7 +73,7 @@ public sealed class PlanTree
 
         var order = 0;
         foreach (var root in steps.Where(s => s.Parent is null)) Number(root, 0, ref order);
-        foreach (var step in steps) Annotate(step);
+        foreach (var step in steps) Annotate(step, reference);
         return new PlanTree(steps, inactive);
     }
 
@@ -83,7 +84,7 @@ public sealed class PlanTree
         step.Order = ++order;
     }
 
-    private static void Annotate(PlanStep step)
+    private static void Annotate(PlanStep step, PlanReference reference)
     {
         var parent = step.Parent;
         if (parent is null) return;
@@ -93,22 +94,21 @@ public sealed class PlanTree
         if (string.Equals(op, "NESTED LOOPS", StringComparison.Ordinal) && index == 1)
         {
             step.RepeatedFor = first;
-            step.Annotations.Add($"Runs for each row of step {first.Order} (~{Rows(first)} {(first.Row.Rows == 1 ? "time" : "times")}).");
+            step.Annotations.Add(reference.Ui(first.Row.Rows == 1 ? "ann.nestedLoops.one" : "ann.nestedLoops.many",
+                ("step", first.Order.ToString(System.Globalization.CultureInfo.InvariantCulture)), ("n", Rows(first))));
         }
         else if (string.Equals(op, "FILTER", StringComparison.Ordinal) && index >= 1)
         {
             step.RepeatedFor = first;
-            step.Annotations.Add($"Subquery: runs for each row of step {first.Order} (results are cached for repeated values).");
+            step.Annotations.Add(reference.Ui("ann.filter", ("step", first.Order.ToString(System.Globalization.CultureInfo.InvariantCulture))));
         }
         else if (string.Equals(op, "HASH JOIN", StringComparison.Ordinal) && index <= 1)
         {
-            step.Annotations.Add(index == 0
-                ? "Build side: the hash table is built from these rows first."
-                : "Probe side: each row is looked up in the hash table.");
+            step.Annotations.Add(reference.Ui(index == 0 ? "ann.build" : "ann.probe"));
         }
         else if (parent.Parent is null && index < parent.Children.Count - 1 && parent.Row.Operation.EndsWith("STATEMENT", StringComparison.Ordinal))
         {
-            step.Annotations.Add("Scalar subquery in the select list: runs for each row of the result.");
+            step.Annotations.Add(reference.Ui("ann.scalar"));
         }
     }
 

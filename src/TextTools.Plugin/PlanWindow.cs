@@ -18,9 +18,11 @@ internal static class PlanWindow
 
     public static bool Show(string sql)
     {
-        var (data, error) = Explain(sql);
-        var analysis = data.Rows.Count > 0 ? PlanAnalysis.Analyze(data, sql) : null;
-        var html = PlanReport.Html(sql, analysis, data.Text, error, DateTimeOffset.Now);
+        // The report speaks the language of the IDE's translation (Preferences: Language).
+        var reference = PlanReference.For(Ide.TranslationLanguage, Ide.TranslationFile);
+        var (data, error) = Explain(sql, reference);
+        var analysis = data.Rows.Count > 0 ? PlanAnalysis.Analyze(data, sql, reference) : null;
+        var html = PlanReport.Html(sql, analysis, data.Text, error, DateTimeOffset.Now, reference);
         try
         {
             var dir = Path.Combine(Path.GetTempPath(), "TextTools");
@@ -35,16 +37,16 @@ internal static class PlanWindow
         }
     }
 
-    private static (PlanData Data, string? Error) Explain(string sql)
+    private static (PlanData Data, string? Error) Explain(string sql, PlanReference reference)
     {
-        if (!Ide.Connected) return (PlanData.Empty, "Not connected to a database: connect and run the command again.");
-        if (Ide.WindowIsRunning) return (PlanData.Empty, "The window is executing a statement: wait for it to finish and run the command again.");
+        if (!Ide.Connected) return (PlanData.Empty, reference.Ui("err.notConnected"));
+        if (Ide.WindowIsRunning) return (PlanData.Empty, reference.Ui("err.running"));
 
         // A statement id of our own: PLAN_TABLE and DBMS_XPLAN show exactly this plan, whatever else is in the session's PLAN_TABLE.
         var id = "TT" + Environment.TickCount64.ToString(CultureInfo.InvariantCulture);
         if (Ide.QueryColumn(PlanSql.Explain(id, sql), 0) is null)
         {
-            return (PlanData.Empty, $"EXPLAIN PLAN failed: {Ide.SqlErrorMessage()}");
+            return (PlanData.Empty, reference.Ui("err.explainFailed", ("message", Ide.SqlErrorMessage())));
         }
         var rows = Rows(PlanSql.Rows(id)).Select(PlanSql.ParseRow).OfType<PlanRow>().ToList();
         var map = Rows(PlanSql.DisplayMap(id)).Select(PlanSql.ParseDisplayMap).OfType<DisplayMapRow>().ToList();
@@ -54,7 +56,7 @@ internal static class PlanWindow
             : Ide.QueryColumn(PlanSql.Text(id, 0), MaxPlanLines) ?? [];
         if (rows.Count == 0 && text.Count == 0)
         {
-            return (PlanData.Empty, $"The plan could not be read: {Ide.SqlErrorMessage()}");
+            return (PlanData.Empty, reference.Ui("err.cannotRead", ("message", Ide.SqlErrorMessage())));
         }
         return (new PlanData(rows, map, text, Catalog(rows)), null);
     }

@@ -56,6 +56,9 @@ internal static unsafe class Ide
         if (rc != 0 || ((delegate* unmanaged[Cdecl]<int>)Fn(42))() != 0) return null;
         return FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0));
     }
+    // 130, 131: the translation file and its language the IDE uses (Preferences: Language); empty when none is used (English).
+    public static string TranslationFile => Has(130) ? FromNative(((delegate* unmanaged[Cdecl]<byte*>)Fn(130))()) : "";
+    public static string TranslationLanguage => Has(131) ? FromNative(((delegate* unmanaged[Cdecl]<byte*>)Fn(131))()) : "";
     // 14: IDE_GetWindowType - the current window: 1 SQL, 2 Test, 3 Program, 4 Command, 5 Plan, 6 Report, 7 HTML.
     public static int GetWindowType() => Has(14) ? ((delegate* unmanaged[Cdecl]<int>)Fn(14))() : 0;
     // 48: SQL_ErrorMessage - the last error of SQL_Execute (e.g. "ORA-00942: table or view does not exist").
