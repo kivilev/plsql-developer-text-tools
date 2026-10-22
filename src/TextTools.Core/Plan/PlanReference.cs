@@ -81,36 +81,9 @@ public sealed class PlanReference
     /// </summary>
     public static PlanReference For(string? language, string? file = null)
     {
-        var code = LanguageCode(language) ?? LanguageCode(file);
+        var code = IdeLanguage.Resolve(language, file);
         return code is null ? Default : ByLanguage.GetOrAdd(code, LoadLanguage);
     }
-
-    /// <summary>"Russian", "Russian.lang", "Русский" -> "ru"; null for English and anything unknown.</summary>
-    public static string? LanguageCode(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name)) return null;
-        foreach (var (code, markers) in Languages)
-        {
-            if (string.Equals(name.Trim(), code, StringComparison.OrdinalIgnoreCase)) return code;
-            if (markers.Any(m => name.Contains(m, StringComparison.OrdinalIgnoreCase))) return code;
-        }
-        return null;
-    }
-
-    private static readonly (string Code, string[] Markers)[] Languages =
-    [
-        ("pt", ["Brazil", "Portug", "Português", "Portugues"]),
-        ("zh", ["Chinese", "中文", "简体", "繁體", "Chinês"]),
-        ("fr", ["French", "Français", "Francais"]),
-        ("de", ["German", "Deutsch"]),
-        ("hu", ["Hungar", "Magyar"]),
-        ("ja", ["Japan", "日本"]),
-        ("ru", ["Russian", "Русск"]),
-        ("es", ["Spanish", "Español", "Espanol"]),
-    ];
-
-    /// <summary>The report languages: the codes of the <c>reference.&lt;code&gt;.json</c> files, one per translation of the IDE.</summary>
-    public static IReadOnlyList<string> LanguageCodes { get; } = [.. Languages.Select(l => l.Code)];
 
     public NoteInfo? Note(string note) => Notes.FirstOrDefault(n => note.Contains(n.Match, StringComparison.OrdinalIgnoreCase));
 

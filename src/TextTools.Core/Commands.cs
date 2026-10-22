@@ -136,8 +136,8 @@ public static class Commands
         new CopyCommand(SqlMenu, "Copy", "Copy SQL with constants resolved", ConstantResolver.CopySql,
             CopySample, CopySample.IndexOf("select", StringComparison.Ordinal)),
 
-        new PlanCommand(SqlMenu, "Plan", "Explain Plan with constants", PlanView.IdeWindow),
-        new PlanCommand(SqlMenu, "Plan", "Extended Explain Plan", PlanView.Extended),
+        new PlanCommand(SqlMenu, "Copy", "Explain Plan with constants", PlanView.IdeWindow),
+        new PlanCommand(SqlMenu, "Copy", "Extended Explain Plan", PlanView.Extended),
     ];
 
     private static TransformCommand T(string menu, string group, string name, Func<string, string> f, string? sample = null) =>

@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Extended Explain Plan reference and rule texts: data, not code. -->
-    <!-- reference.json (English) and reference.<code>.json (one per IDE translation); resource names TextTools.Core.Plan.reference[.<code>].json. -->
-    <!-- WithCulture=false: ".de" in the file name is a language code of ours, not a satellite-assembly culture. -->
+    <!-- Data, not code. WithCulture=false: ".de" in a file name is our language code, not a satellite-assembly culture. -->
+    <!-- Menu captions per IDE language: Menu/captions.<code>.json. -->
+    <EmbeddedResource Include="Menu/captions.*.json" WithCulture="false" />
+    <!-- Extended Explain Plan texts: reference.json (English) and reference.<code>.json (one per IDE translation). -->
     <EmbeddedResource Include="Plan/reference*.json" WithCulture="false" />
   </ItemGroup>
 

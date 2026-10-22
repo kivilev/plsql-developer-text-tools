@@ -9,20 +9,7 @@ public partial class PlanLocalizationTests
 {
     private static readonly DateTimeOffset At = new(2026, 10, 21, 4, 51, 0, TimeSpan.Zero);
 
-    /// <summary>The IDE's translation file names (Languages folder) and the report language each one gets.</summary>
-    public static TheoryData<string, string> IdeLanguages => new()
-    {
-        { "Brazilian.lang", "pt" },
-        { "Chinese.lang", "zh" },
-        { "French.lang", "fr" },
-        { "German.lang", "de" },
-        { "Hungarian.lang", "hu" },
-        { "Japanese.lang", "ja" },
-        { "Russian.lang", "ru" },
-        { "Spanish.lang", "es" },
-    };
-
-    public static TheoryData<string> Codes => [.. PlanReference.LanguageCodes];
+    public static TheoryData<string> Codes => [.. IdeLanguage.Codes];
 
     [GeneratedRegex(@"\{[A-Za-z]+\}", RegexOptions.None, matchTimeoutMilliseconds: 1000)]
     private static partial Regex Placeholder();
@@ -97,25 +84,12 @@ public partial class PlanLocalizationTests
     }
 
     [Theory]
-    [MemberData(nameof(IdeLanguages))]
-    public void TheIdeTranslationFileNameSelectsTheLanguage(string file, string code)
+    [MemberData(nameof(Codes))]
+    public void TheIdeLanguageSelectsTheReference(string code)
     {
-        Assert.Equal(code, PlanReference.LanguageCode(file));
-        Assert.Equal(code, PlanReference.LanguageCode(file.Replace(".lang", "", StringComparison.Ordinal)));
-        Assert.Equal(code, PlanReference.For("", file).Language);
-        Assert.Equal(code, PlanReference.For(file.Replace(".lang", "", StringComparison.Ordinal).ToUpperInvariant()).Language);
+        Assert.Equal(code, PlanReference.For(code).Language);
+        Assert.Equal(code, PlanReference.For("", code).Language);
     }
-
-    [Theory]
-    [InlineData("Русский", "ru")]
-    [InlineData("Español", "es")]
-    [InlineData("Português (Brasil)", "pt")]
-    [InlineData("中文", "zh")]
-    [InlineData("日本語", "ja")]
-    [InlineData("Deutsch", "de")]
-    [InlineData("Français", "fr")]
-    [InlineData("Magyar", "hu")]
-    public void NativeLanguageNamesAreRecognized(string name, string code) => Assert.Equal(code, PlanReference.LanguageCode(name));
 
     [Theory]
     [InlineData(null)]
@@ -125,7 +99,6 @@ public partial class PlanLocalizationTests
     [InlineData("Klingon")]
     public void NoTranslationOrAnUnknownOneMeansEnglish(string? name)
     {
-        Assert.Null(PlanReference.LanguageCode(name));
         Assert.Same(PlanReference.Default, PlanReference.For(name));
         Assert.Equal("", PlanReference.Default.Language);
     }
