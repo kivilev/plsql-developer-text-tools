@@ -12,8 +12,12 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
 
 - **SQL Tools → Explain Plan with constants**: the IDE's own Explain Plan of the statement under the cursor, with
   constants resolved like Copy SQL (bind F5 to it in Key Configuration to replace the built-in one).
-- **SQL Tools → Extended Explain Plan**: an HTML window with two tabs - **Plan** (`DBMS_XPLAN`) and **Findings**
-  (first test notes: full table scans, Cartesian joins). Running it again refreshes the same window.
+- **Menu in the language of the IDE**: submenu and item captions (Plug-Ins menu, ribbon, editor context menu) follow
+  the IDE's translation (Preferences → Language): Brazilian, Chinese, French, German, Hungarian, Japanese, Russian,
+  Spanish; English when the IDE has no translation. If a Key Configuration hotkey of a Text Tools item stops working
+  after switching the IDE language, bind it again.
+- **SQL Tools**: no separator line between Copy SQL with constants resolved and Explain Plan with constants.
+- **Extended Explain Plan** is taken out of the menu until it is stable (work continues in a draft pull request).
 
 ## [v0.2.0] - 2026-10-17
 

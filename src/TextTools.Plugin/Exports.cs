@@ -79,7 +79,7 @@ internal static unsafe partial class Exports
             if (Menu.IndexOf(name) is not { } index) continue;
             foreach (var window in (string[])["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"])
             {
-                Ide.CreatePopupItem(_pluginId, index, name, window);
+                Ide.CreatePopupItem(_pluginId, index, Menu.DisplayName(index), window);
             }
         }
 
@@ -87,7 +87,7 @@ internal static unsafe partial class Exports
         if (Ide.SysVersion < 1200) return;
         foreach (var (index, name) in Menu.Buttons)
         {
-            if (RibbonIcons.FileFor(name) is { } file) Ide.CreateToolButton(_pluginId, index, name, file);
+            if (RibbonIcons.FileFor(name) is { } file) Ide.CreateToolButton(_pluginId, index, Menu.DisplayName(index), file);
         }
     });
 
@@ -96,7 +96,12 @@ internal static unsafe partial class Exports
     {
         try
         {
-            if (index == 1) Menu.Build(Ide.SysVersion);
+            if (index == 1)
+            {
+                // The captions are UTF-8: ask the IDE for UTF-8 before the first (possibly translated) caption goes out.
+                if (!Ide.Utf8) Ide.Utf8 = Ide.PlugInSetting(_pluginId, "CHARMODE", "UTF8");
+                Menu.Build(Ide.SysVersion);
+            }
             return NativeStrings.Get(Menu.Caption(index));
         }
         catch

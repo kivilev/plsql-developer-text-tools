@@ -69,7 +69,6 @@ public static class Commands
     [
         "Copy SQL with constants resolved",
         "Explain Plan with constants",
-        "Extended Explain Plan",
         "List -> IN (...)",
         "Escape quotes ( ' -> '' )",
         "Unescape quotes ( '' -> ' )",
@@ -136,8 +135,8 @@ public static class Commands
         new CopyCommand(SqlMenu, "Copy", "Copy SQL with constants resolved", ConstantResolver.CopySql,
             CopySample, CopySample.IndexOf("select", StringComparison.Ordinal)),
 
-        new PlanCommand(SqlMenu, "Plan", "Explain Plan with constants", PlanView.IdeWindow),
-        new PlanCommand(SqlMenu, "Plan", "Extended Explain Plan", PlanView.Extended),
+        new PlanCommand(SqlMenu, "Copy", "Explain Plan with constants", PlanView.IdeWindow),
+        // Extended Explain Plan (PlanView.Extended) is not in the menu until it is stable: see the draft PR.
     ];
 
     private static TransformCommand T(string menu, string group, string name, Func<string, string> f, string? sample = null) =>

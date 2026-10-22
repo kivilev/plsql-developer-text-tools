@@ -54,7 +54,7 @@ public class PlanReportTests
     public void PlanCommandsAreInTheSqlMenuAndTheContextMenu()
     {
         var plans = Commands.All.OfType<PlanCommand>().ToList();
-        Assert.Equal([PlanView.IdeWindow, PlanView.Extended], plans.Select(p => p.View));
+        Assert.Equal([PlanView.IdeWindow], plans.Select(p => p.View)); // the extended window is off the menu until it is stable
         Assert.All(plans, p => Assert.Contains(p.Name, Commands.ContextMenu));
     }
 }
