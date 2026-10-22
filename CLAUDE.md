@@ -35,7 +35,16 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
   the DB query for "now" is skipped while the window executes. Details: skill `plsqldev-plugin-api`.
 - New command = function in Core + `Sample` + tests + one line in `Commands.All`; it appears in the menu by itself.
   Skill `add-command`.
-- Menu captions: ASCII only (the IDE may read them before UTF-8 mode) and no `[...]` (the IDE cuts it out).
+- **Every user-visible text is localized into all languages of the IDE's translations** (Brazilian, Chinese, French,
+  German, Hungarian, Japanese, Russian, Spanish; English is the source), chosen by `IDE_TranslationLanguage`
+  (Preferences → Language): menu captions, report and window texts, messages. New text = English key + the same key in
+  every language file (`Menu/captions.<code>.json`; the Extended Explain Plan report: `Plan/reference.json` +
+  `Plan/reference.<code>.json`, placeholders `{name}` unchanged, Oracle terms and identifiers not translated); tests
+  (`MenuCaptionsTests`, `PlanLocalizationTests`) fail when a language lacks a key or a placeholder differs. No English
+  text in code that a user reads: use `PlanReference.Ui(key, ...)` / `MenuCaptions`. Same for any new window.
+- Menu captions: the English ones (`Commands.All` names, the identity of a command) are ASCII only and have no `[...]`
+  (the IDE cuts it out). Displayed captions are translated (`Menu/captions.<code>.json`, UTF-8, no `[`, `]`, `&`, unique
+  per submenu) and used only once the IDE reads UTF-8 (`CHARMODE`); otherwise English.
 - Analyzers (.NET latest-recommended, Meziantou, SonarAnalyzer) run as errors. Fix the code; suppress only in
   `.editorconfig` for a path with a written reason.
 - Before a PR: `scripts/verify.ps1` green. Interop changes also need a check in the real IDE (skill `install-to-ide`).

@@ -92,10 +92,5 @@ Lines are separated by `⏎` in the examples below.
 | Command | Example input | Result |
 |---|---|---|
 | Copy SQL with constants resolved | `declare ⏎   c_new constant varchar2(3) := 'NEW'; ⏎   l_cnt number; ⏎ begin ⏎   select count(*) into l_cnt from orders where status = c_new; ⏎ end;` | `select count(*) from orders where status = 'NEW' /*c_new*/` |
-
-### Plan
-
-| Command | Example input | Result |
-|---|---|---|
 | Explain Plan with constants | (statement under the cursor) | `the IDE Plan Window with this statement, constants resolved` |
-| Extended Explain Plan | (statement under the cursor) | `an HTML window: Plan tab (DBMS_XPLAN) and Findings tab` |
+| Extended Explain Plan | (statement under the cursor) | `an HTML window: Plan (reading order, step panels), Findings (static rules), Text (DBMS_XPLAN + Copy), Reference` |

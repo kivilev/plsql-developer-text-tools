@@ -1,0 +1,75 @@
+## sql
+select * from country c where c.name = 'Russia'
+## rows
+"0",,"3","SELECT STATEMENT",,,,,,,"1","35","3",,,,
+"1","0","1","TABLE ACCESS","FULL","KIVI","COUNTRY","TABLE","""C""@""SEL$1""","SEL$1","1","35","3",,"NLSSORT(""C"".""NAME"",'nls_sort=''BINARY_CI''')=HEXTORAW('72757373696100')",,
+## map
+## tables
+"KIVI","COUNTRY","252","5","2026-10-17","N","NO","NO"
+## indexes
+"KIVI","COUNTRY_PK","KIVI","COUNTRY","VALID","VISIBLE","UNIQUE","NORMAL","ID"
+"KIVI","COUNTRY_ISO_ALPHA_2_UQ","KIVI","COUNTRY","VALID","VISIBLE","UNIQUE","NORMAL","ISO_ALPHA_2"
+"KIVI","COUNTRY_ISO_ALPHA_3_UQ","KIVI","COUNTRY","VALID","VISIBLE","UNIQUE","NORMAL","ISO_ALPHA_3"
+"KIVI","COUNTRY_NAME_UQ","KIVI","COUNTRY","VALID","VISIBLE","UNIQUE","NORMAL","NAME"
+## columns
+"KIVI","COUNTRY","ID","NUMBER"
+"KIVI","COUNTRY","NAME","VARCHAR2"
+"KIVI","COUNTRY","ISO_ALPHA_2","VARCHAR2"
+"KIVI","COUNTRY","ISO_ALPHA_3","VARCHAR2"
+## partkeys
+## text
+
+Plan hash value: 442942165
+
+-----------------------------------------------------------------------------
+| Id  | Operation         | Name    | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |         |     1 |    35 |     3   (0)| 00:00:01 |
+|*  1 |  TABLE ACCESS FULL| COUNTRY |     1 |    35 |     3   (0)| 00:00:01 |
+-----------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$1 / "C"@"SEL$1"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      FULL(@"SEL$1" "C"@"SEL$1")
+      OUTLINE_LEAF(@"SEL$1")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   1 - filter(NLSSORT("C"."NAME",'nls_sort=''BINARY_CI''')=HEXTORAW('727
+              57373696100'))
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - "C"."ID"[NUMBER,22], "C"."NAME"[VARCHAR2,400],
+       "C"."ISO_ALPHA_2"[VARCHAR2,8], "C"."ISO_ALPHA_3"[VARCHAR2,12]
+
+SQL Analysis Report (identified by operation id/Query Block Name/Object Alias):
+-------------------------------------------------------------------------------
+
+   1 -  SEL$1 / "C"@"SEL$1"
+           -  The following columns have predicates which preclude their
+              use as keys in index range scan. Consider rewriting the
+              predicates.
+                "NAME"
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER) [FINAL]
+

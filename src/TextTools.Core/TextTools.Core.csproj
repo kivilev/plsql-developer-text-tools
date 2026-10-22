@@ -6,4 +6,12 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Data, not code. WithCulture=false: ".de" in a file name is our language code, not a satellite-assembly culture. -->
+    <!-- Menu captions per IDE language: Menu/captions.<code>.json. -->
+    <EmbeddedResource Include="Menu/captions.*.json" WithCulture="false" />
+    <!-- Extended Explain Plan texts: reference.json (English) and reference.<code>.json (one per IDE translation). -->
+    <EmbeddedResource Include="Plan/reference*.json" WithCulture="false" />
+  </ItemGroup>
+
 </Project>

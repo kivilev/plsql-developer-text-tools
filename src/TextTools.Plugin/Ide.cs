@@ -56,6 +56,9 @@ internal static unsafe class Ide
         if (rc != 0 || ((delegate* unmanaged[Cdecl]<int>)Fn(42))() != 0) return null;
         return FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0));
     }
+    // 130, 131: the translation file and its language the IDE uses (Preferences: Language); empty when none is used (English).
+    public static string TranslationFile => Has(130) ? FromNative(((delegate* unmanaged[Cdecl]<byte*>)Fn(130))()) : "";
+    public static string TranslationLanguage => Has(131) ? FromNative(((delegate* unmanaged[Cdecl]<byte*>)Fn(131))()) : "";
     // 14: IDE_GetWindowType - the current window: 1 SQL, 2 Test, 3 Program, 4 Command, 5 Plan, 6 Report, 7 HTML.
     public static int GetWindowType() => Has(14) ? ((delegate* unmanaged[Cdecl]<int>)Fn(14))() : 0;
     // 48: SQL_ErrorMessage - the last error of SQL_Execute (e.g. "ORA-00942: table or view does not exist").
@@ -120,6 +123,24 @@ internal static unsafe class Ide
         while (rows.Count < maxRows && ((delegate* unmanaged[Cdecl]<int>)Fn(42))() == 0)
         {
             rows.Add(FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(0)));
+            ((delegate* unmanaged[Cdecl]<int>)Fn(43))();
+        }
+        return rows;
+    }
+    // 40, 41, 42, 43, 44: every column of every row (up to maxRows) as text, or null when the query failed.
+    // Without SQL_FieldCount (41) only the first column is read.
+    public static List<string[]>? QueryRows(string sql, int maxRows)
+    {
+        if (!Has(40) || !Has(42) || !Has(43) || !Has(44)) return null;
+        var rc = WithNative(sql, p => ((delegate* unmanaged[Cdecl]<byte*, int>)Fn(40))(p));
+        if (rc != 0) return null;
+        var fields = Has(41) ? Math.Clamp(((delegate* unmanaged[Cdecl]<int>)Fn(41))(), 0, 64) : 1;
+        var rows = new List<string[]>();
+        while (rows.Count < maxRows && ((delegate* unmanaged[Cdecl]<int>)Fn(42))() == 0)
+        {
+            var row = new string[fields];
+            for (var i = 0; i < fields; i++) row[i] = FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(i));
+            rows.Add(row);
             ((delegate* unmanaged[Cdecl]<int>)Fn(43))();
         }
         return rows;
