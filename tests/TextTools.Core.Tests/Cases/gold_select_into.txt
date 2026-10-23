@@ -1,0 +1,19 @@
+PROCEDURE get_branch(i_client IN NUMBER,
+                     o_branch OUT VARCHAR2) IS
+BEGIN
+  SELECT c.branch, SUBSTR(c.def_atm_account, -20)
+    INTO o_branch, v_account
+    FROM client c
+   WHERE c.id = i_client;
+  EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT = ''DD.MM.YYYY''';
+END get_branch;
+-----
+PROCEDURE get_branch(i_client IN NUMBER,
+                     o_branch OUT VARCHAR2) IS
+BEGIN
+  SELECT c.branch, SUBSTR(c.def_atm_account, -20)
+    INTO o_branch, v_account
+    FROM client c
+   WHERE c.id = i_client;
+  EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT = ''DD.MM.YYYY''';
+END get_branch;

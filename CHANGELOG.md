@@ -8,6 +8,14 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
 
 ## [Unreleased]
 
+### Features
+
+- **Format Tools**: 17 more layout rules (settings tabs "SQL" and "Wrapping", each one a switch, all on by default):
+  INSERT / SELECT / SELECT ... INTO / UPDATE SET / JOIN ... ON / subquery layouts, IF conditions on one logical line,
+  wrapping of lines past the margin (DECODE in pairs, BETWEEN, `||`, named arguments with `=>` aligned), aligned
+  declarations, comment indent, subprogram header tails on one line. The tokens, string literals and comments are
+  still verified before and after; a rule whose result would change any of them is skipped on its own.
+
 ## [v0.3.0] - 2026-10-23
 
 ### Features

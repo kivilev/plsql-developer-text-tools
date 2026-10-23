@@ -1,0 +1,17 @@
+BEGIN
+  EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT = ''DD.MM.YYYY''';
+  EXECUTE IMMEDIATE 'SELECT a_very_long_column_name FROM a_very_long_table_name WHERE a_condition = 1 AND other = 2' INTO v_x;
+  EXECUTE IMMEDIATE 'BEGIN
+    NULL;
+  END;';
+END;
+-----
+BEGIN
+  EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT = ''DD.MM.YYYY''';
+  EXECUTE IMMEDIATE
+    'SELECT a_very_long_column_name FROM a_very_long_table_name WHERE a_condition = 1 AND other = 2' INTO v_x;
+  EXECUTE IMMEDIATE
+    'BEGIN
+    NULL;
+  END;';
+END;

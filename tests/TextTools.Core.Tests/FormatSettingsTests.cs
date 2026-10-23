@@ -19,7 +19,7 @@ public class FormatSettingsTests
     {
         Assert.Equal(FormatSettings.All.Count, FormatSettings.All.Select(s => s.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.All(FormatSettings.All, s => Assert.InRange(s.Default, s.Min, s.Max));
-        Assert.Equal(["general", "case", "code", "blank"], FormatSettings.Tabs);
+        Assert.Equal(["general", "case", "code", "sql", "wrapping", "blank"], FormatSettings.Tabs);
     }
 
     [Fact]

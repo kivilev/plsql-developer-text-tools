@@ -1,0 +1,17 @@
+BEGIN
+  SELECT a.id
+    INTO v_id
+    FROM account a
+   WHERE a.client IN (
+     SELECT c.id
+       FROM client c
+      WHERE c.branch = i_branch
+   );
+END;
+-----
+BEGIN
+  SELECT a.id
+    INTO v_id
+    FROM account a
+   WHERE a.client IN (SELECT c.id FROM client c WHERE c.branch = i_branch);
+END;

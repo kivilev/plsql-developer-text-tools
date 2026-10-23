@@ -1,0 +1,13 @@
+BEGIN
+  SELECT a.x, a.y
+    INTO
+    v_x,
+    v_y
+    FROM t a;
+END;
+-----
+BEGIN
+  SELECT a.x, a.y
+    INTO v_x, v_y
+    FROM t a;
+END;

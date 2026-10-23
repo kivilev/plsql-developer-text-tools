@@ -1,0 +1,19 @@
+PROCEDURE p IS
+  v_a NUMBER;
+  v_long_name VARCHAR2(10);
+  c_x CONSTANT NUMBER := 1;
+BEGIN
+      -- a comment
+  v_a := 1;
+    -- before end
+END p;
+-----
+PROCEDURE p IS
+  v_a         NUMBER;
+  v_long_name VARCHAR2(10);
+  c_x         CONSTANT NUMBER := 1;
+BEGIN
+  -- a comment
+  v_a := 1;
+  -- before end
+END p;

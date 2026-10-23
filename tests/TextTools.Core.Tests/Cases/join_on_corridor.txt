@@ -1,0 +1,21 @@
+BEGIN
+  OPEN c FOR
+    SELECT a.id
+      FROM account a
+      LEFT JOIN client c
+          ON c.branch = a.branch
+        AND c.id_client = a.client
+      JOIN currency r
+              ON r.id = a.currency;
+END;
+-----
+BEGIN
+  OPEN c FOR
+    SELECT a.id
+      FROM account a
+      LEFT JOIN client c
+             ON c.branch = a.branch
+            AND c.id_client = a.client
+      JOIN currency r
+        ON r.id = a.currency;
+END;
