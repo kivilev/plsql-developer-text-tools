@@ -1,3 +1,4 @@
+using TextTools.Core.Formatting;
 using TextTools.Core.Sql;
 
 namespace TextTools.Core;
@@ -54,12 +55,16 @@ public enum PlanView
 /// </summary>
 public sealed record PlanCommand(string Menu, string Group, string Name, PlanView View) : Command(Menu, Group, Name);
 
+/// <summary>Opens the settings window of the formatting rules; needs no editor and changes no text.</summary>
+public sealed record SettingsCommand(string Menu, string Group, string Name) : Command(Menu, Group, Name);
+
 /// <summary>Everything that shows up in the plugin menu, in menu order. Add a line here to add a menu item.</summary>
 public static class Commands
 {
     public const string StringMenu = "String Tools";
     public const string DateMenu = "Date Tools";
     public const string SqlMenu = "SQL Tools";
+    public const string FormatMenu = "Format Tools";
 
     /// <summary>
     /// Commands also shown in the editor's context menu, in this order. The IDE draws plug-in context items as a flat
@@ -137,6 +142,10 @@ public static class Commands
 
         new PlanCommand(SqlMenu, "Copy", "Explain Plan with constants", PlanView.IdeWindow),
         // Extended Explain Plan (PlanView.Extended) is not in the menu until it is stable: see the draft PR.
+
+        T(FormatMenu, "Rules", "Apply formatting rules", t => PostFormatter.Format(t, PostFormatter.Current),
+            "PROCEDURE p IS\n  v_a t.a%type;\nBEGIN\n  v_long_name:=nvl(i_x,0);\n  v_b:=1;\nEND;"),
+        new SettingsCommand(FormatMenu, "Settings", "Settings"),
     ];
 
     private static TransformCommand T(string menu, string group, string name, Func<string, string> f, string? sample = null) =>

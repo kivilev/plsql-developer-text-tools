@@ -15,7 +15,11 @@ Development journal (in Russian): [docs/dev-journal.ru.md](docs/dev-journal.ru.m
 
 ```
 src/TextTools.Core/        pure string -> string transformations; all logic and all tests target this
-src/TextTools.Plugin/      interop: Exports (C exports), Ide (callbacks), Menu, Editor (apply to the editor), Clipboard, NativeStrings
+  Formatting/              the post-pass after the IDE's Beautifier: one file per rule, FormatSettings (the catalog of settings, the
+                           common vocabulary of the three IDEs), FormatProfile (values + JSON), TokenGuard (tokens must not change)
+  Menu/ Ui/                texts per IDE language (captions.<code>.json, texts.<code>.json): English is the source
+src/TextTools.Plugin/      interop: Exports (C exports), Ide (callbacks), Menu, Editor (apply to the editor), Clipboard, NativeStrings,
+                           SettingsWindow (plain Win32 window of the formatting rules), FormatSettingsStore (the profile file)
 tests/TextTools.Core.Tests/    xUnit: transforms, dates, robustness fuzzing of every command (coverage gate 95% lines)
 tests/TextTools.Plugin.Tests/  xUnit: menu layout
 tools/HostEmulator/        loads the native DLL like the IDE, fake callbacks; modes smoke|nocallbacks|noutf8|unload|stress|selftest|all

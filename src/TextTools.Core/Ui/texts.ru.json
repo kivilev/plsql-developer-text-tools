@@ -1,0 +1,21 @@
+{
+  "settings.title": "Настройки Format Tools",
+  "settings.saved": "Настройки Format Tools сохранены",
+  "tab.general": "Общие",
+  "tab.case": "Регистр",
+  "tab.code": "Код",
+  "tab.blank": "Пустые строки",
+  "setting.margin": "Правая граница",
+  "setting.builtinFunctionsUpper": "Встроенные функции в верхнем регистре (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... в верхнем регистре",
+  "setting.endWithName": "END с именем подпрограммы или пакета (END name;)",
+  "setting.alignAssignments": "Выравнивать := в группах присваиваний",
+  "setting.executeImmediateLiteralOnOwnLine": "Длинный литерал EXECUTE IMMEDIATE на отдельной строке",
+  "setting.blankLineBeforeSubprograms": "Пустая строка перед каждой PROCEDURE и FUNCTION",
+  "setting.noBlankLineBeforePackageEnd": "Убирать пустые строки перед закрывающим END пакета",
+  "setting.trimTrailingSpaces": "Удалять пробелы в конце строк",
+  "button.save": "Сохранить",
+  "button.default": "По умолчанию",
+  "button.close": "Закрыть",
+  "preview.title": "Предпросмотр"
+}

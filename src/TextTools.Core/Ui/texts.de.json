@@ -1,0 +1,21 @@
+{
+  "settings.title": "Format Tools Einstellungen",
+  "settings.saved": "Format Tools Einstellungen gespeichert",
+  "tab.general": "Allgemein",
+  "tab.case": "Schreibweise",
+  "tab.code": "Code",
+  "tab.blank": "Leerzeilen",
+  "setting.margin": "Rechter Rand",
+  "setting.builtinFunctionsUpper": "Eingebaute Funktionen in Großbuchstaben (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... in Großbuchstaben",
+  "setting.endWithName": "END mit dem Namen der Subprogramm- oder Package-Einheit (END name;)",
+  "setting.alignAssignments": "Zeichen := in Zuweisungsgruppen ausrichten",
+  "setting.executeImmediateLiteralOnOwnLine": "Langes EXECUTE IMMEDIATE-Literal in eigener Zeile",
+  "setting.blankLineBeforeSubprograms": "Leerzeile vor jeder PROCEDURE und FUNCTION",
+  "setting.noBlankLineBeforePackageEnd": "Leerzeilen vor dem abschließenden END des Packages entfernen",
+  "setting.trimTrailingSpaces": "Nachgestellte Leerzeichen entfernen",
+  "button.save": "Speichern",
+  "button.default": "Standard",
+  "button.close": "Schließen",
+  "preview.title": "Vorschau"
+}

@@ -1,0 +1,21 @@
+{
+  "settings.title": "Paramètres de Format Tools",
+  "settings.saved": "Paramètres de Format Tools enregistrés",
+  "tab.general": "Général",
+  "tab.case": "Casse",
+  "tab.code": "Code",
+  "tab.blank": "Lignes vides",
+  "setting.margin": "Marge droite",
+  "setting.builtinFunctionsUpper": "Fonctions intégrées en majuscules (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... en majuscules",
+  "setting.endWithName": "END avec le nom du sous-programme ou du package (END name;)",
+  "setting.alignAssignments": "Aligner := dans les groupes d'affectations",
+  "setting.executeImmediateLiteralOnOwnLine": "Long littéral EXECUTE IMMEDIATE sur sa propre ligne",
+  "setting.blankLineBeforeSubprograms": "Ligne vide avant chaque PROCEDURE et FUNCTION",
+  "setting.noBlankLineBeforePackageEnd": "Supprimer les lignes vides avant le END final du package",
+  "setting.trimTrailingSpaces": "Supprimer les espaces en fin de ligne",
+  "button.save": "Enregistrer",
+  "button.default": "Par défaut",
+  "button.close": "Fermer",
+  "preview.title": "Aperçu"
+}
