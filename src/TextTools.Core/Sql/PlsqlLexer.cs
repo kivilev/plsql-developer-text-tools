@@ -74,6 +74,66 @@ public static class PlsqlLexer
         return tokens;
     }
 
+    /// <summary>
+    /// The text with every comment blanked (spaces) and every string literal and quoted name filled with 'x', same length,
+    /// line breaks kept: what a rule may look at without ever matching inside a comment or a literal. Never fails.
+    /// </summary>
+    public static string Mask(string text)
+    {
+        var buf = text.ToCharArray();
+        var i = 0;
+        while (i < text.Length)
+        {
+            var c = text[i];
+            int end;
+            char fill;
+            if (c == '-' && At(text, i + 1) == '-')
+            {
+                var nl = text.IndexOf('\n', i);
+                end = nl < 0 ? text.Length : nl;
+                fill = ' ';
+            }
+            else if (c == '/' && At(text, i + 1) == '*')
+            {
+                var close = text.IndexOf("*/", i + 2, StringComparison.Ordinal);
+                end = close < 0 ? text.Length : close + 2;
+                fill = ' ';
+            }
+            else if (c == '\'')
+            {
+                end = PlainStringEnd(text, i + 1);
+                fill = 'x';
+            }
+            else if (c == '"')
+            {
+                var close = text.IndexOf('"', i + 1);
+                end = close < 0 ? text.Length : close + 1;
+                fill = 'x';
+            }
+            else if (char.IsLetter(c) && StringPrefixEnd(text, i) is > 0 and var stringEnd)
+            {
+                end = stringEnd;
+                fill = 'x';
+            }
+            else if (char.IsLetter(c))
+            {
+                i = WordEnd(text, i);
+                continue;
+            }
+            else
+            {
+                i++;
+                continue;
+            }
+            for (var k = i; k < end; k++)
+            {
+                if (buf[k] is not ('\n' or '\r')) buf[k] = fill;
+            }
+            i = end;
+        }
+        return new string(buf);
+    }
+
     public static bool IsIdentifierPart(char c) => char.IsLetterOrDigit(c) || c is '_' or '$' or '#';
 
     private static char At(string text, int i) => i < text.Length ? text[i] : '\0';

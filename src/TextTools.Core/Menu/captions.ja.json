@@ -44,5 +44,8 @@
   "ISO duration -> INTERVAL": "ISO duration -> INTERVAL",
   "Copy SQL with constants resolved": "定数を展開したSQLをコピー",
   "Explain Plan with constants": "定数を展開して実行計画を表示",
-  "Extended Explain Plan": "拡張実行計画"
+  "Extended Explain Plan": "拡張実行計画",
+  "Format Tools": "書式ツール",
+  "Apply formatting rules": "書式ルールを適用",
+  "Settings": "設定"
 }

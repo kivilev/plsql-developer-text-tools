@@ -18,6 +18,18 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
   after switching the IDE language, bind it again.
 - **SQL Tools**: no separator line between Copy SQL with constants resolved and Explain Plan with constants.
 - **Extended Explain Plan** is taken out of the menu until it is stable (work continues in a draft pull request).
+- **Format Tools → Apply formatting rules**: formatting rules that the IDE's Beautifier cannot express, applied to the
+  selection or the whole text after the Beautifier ran. Everything is inside the DLL (no external tools, no database).
+  Rules: `END name;` for named subprograms and packages, `:=` aligned in groups, Oracle built-in functions and `%TYPE`
+  / `%ROWTYPE` in upper case, a blank line before each PROCEDURE/FUNCTION (and its comment) but not before the closing
+  `END` of a package, a long or multi-line `EXECUTE IMMEDIATE` literal on its own line, no trailing blanks. Only layout
+  and case change: the tokens are compared before and after, and on any difference the text is left as it was.
+- **Format Tools → Settings**: a window like the IDE's Beautifier Rules: a tab per group (General, Case, Code, Blank
+  lines), a checkbox or number per rule, the text of a sample **Before** and **After** that follows every click, and
+  Save / Default / Close. The profile is a JSON file (`%APPDATA%\TextTools\format-rules.json`) that can be put into a
+  repository and copied to each machine; the menu command uses the saved profile. The window and its texts follow the
+  language of the IDE. Settings that several IDEs share (right margin, align assignments, ...) are one setting that
+  remembers its names in PL/SQL Developer, SQL Developer and DataGrip, so that their profiles can be imported later.
 
 ## [v0.2.0] - 2026-10-17
 

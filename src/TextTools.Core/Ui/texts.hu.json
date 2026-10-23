@@ -1,0 +1,21 @@
+{
+  "settings.title": "Format Tools beállításai",
+  "settings.saved": "A Format Tools beállításai elmentve",
+  "tab.general": "Általános",
+  "tab.case": "Kis- és nagybetű",
+  "tab.code": "Kód",
+  "tab.blank": "Üres sorok",
+  "setting.margin": "Jobb margó",
+  "setting.builtinFunctionsUpper": "Beépített függvények nagybetűvel (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... nagybetűvel",
+  "setting.endWithName": "END az alprogram vagy a csomag nevével (END name;)",
+  "setting.alignAssignments": ":= igazítása az értékadások csoportjában",
+  "setting.executeImmediateLiteralOnOwnLine": "Hosszú EXECUTE IMMEDIATE literál külön sorban",
+  "setting.blankLineBeforeSubprograms": "Üres sor minden PROCEDURE és FUNCTION előtt",
+  "setting.noBlankLineBeforePackageEnd": "A csomag záró END előtti üres sorok eltávolítása",
+  "setting.trimTrailingSpaces": "Sorvégi szóközök eltávolítása",
+  "button.save": "Mentés",
+  "button.default": "Alapértelmezett",
+  "button.close": "Bezárás",
+  "preview.title": "Előnézet"
+}

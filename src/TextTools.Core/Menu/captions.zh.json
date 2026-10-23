@@ -44,5 +44,8 @@
   "ISO duration -> INTERVAL": "ISO 时长 -> INTERVAL",
   "Copy SQL with constants resolved": "复制已代入常量的 SQL",
   "Explain Plan with constants": "带常量的执行计划",
-  "Extended Explain Plan": "扩展执行计划"
+  "Extended Explain Plan": "扩展执行计划",
+  "Format Tools": "格式化工具",
+  "Apply formatting rules": "应用格式化规则",
+  "Settings": "设置"
 }

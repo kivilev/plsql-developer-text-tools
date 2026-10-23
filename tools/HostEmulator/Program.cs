@@ -34,6 +34,9 @@ if (string.Equals(mode, "stress", StringComparison.Ordinal) && Environment.GetEn
     return RunChild(mode);
 }
 
+// Only the "settings" mode has someone to close the modal settings window; the other modes click every menu item.
+if (!string.Equals(mode, "settings", StringComparison.Ordinal)) Environment.SetEnvironmentVariable("TEXTTOOLS_NO_WINDOWS", "1");
+
 try
 {
     var host = new PluginHost(NativeLibrary.Load(dll), registerCallbacks: !string.Equals(mode, "nocallbacks", StringComparison.Ordinal));

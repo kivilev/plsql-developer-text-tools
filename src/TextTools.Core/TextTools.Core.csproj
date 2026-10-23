@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Menu captions per IDE language: data, not code. WithCulture=false: ".de" in the name is our language code, not a satellite-assembly culture. -->
+    <!-- Texts per IDE language: data, not code. WithCulture=false: ".de" in the name is our language code, not a satellite-assembly culture. -->
     <EmbeddedResource Include="Menu/captions.*.json" WithCulture="false" />
+    <EmbeddedResource Include="Ui/texts*.json" WithCulture="false" />
   </ItemGroup>
 
 </Project>
