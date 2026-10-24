@@ -12,6 +12,7 @@
   "setting.alignAssignments": "Alinear := en grupos de asignaciones",
   "setting.executeImmediateLiteralOnOwnLine": "Literal largo de EXECUTE IMMEDIATE en su propia línea",
   "setting.blankLineBeforeSubprograms": "Línea en blanco antes de cada PROCEDURE y FUNCTION",
+  "setting.blankLineAfterPackageHeader": "Línea en blanco tras la cabecera del paquete (antes del primer PROCEDURE o FUNCTION)",
   "setting.noBlankLineBeforePackageEnd": "Quitar las líneas en blanco antes del END final del paquete",
   "setting.trimTrailingSpaces": "Quitar los espacios al final de las líneas",
   "button.save": "Guardar",

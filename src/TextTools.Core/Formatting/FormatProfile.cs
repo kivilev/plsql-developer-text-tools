@@ -43,6 +43,7 @@ public sealed class FormatProfile
         EndWithName: IsOn("endWithName"),
         AlignAssignments: IsOn("alignAssignments"),
         BlankLineBeforeSubprograms: IsOn("blankLineBeforeSubprograms"),
+        BlankLineAfterPackageHeader: IsOn("blankLineAfterPackageHeader"),
         NoBlankLineBeforePackageEnd: IsOn("noBlankLineBeforePackageEnd"),
         ExecuteImmediateLiteralOnOwnLine: IsOn("executeImmediateLiteralOnOwnLine"),
         TrimTrailingSpaces: IsOn("trimTrailingSpaces"),

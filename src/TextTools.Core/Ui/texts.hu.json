@@ -12,6 +12,7 @@
   "setting.alignAssignments": ":= igazítása az értékadások csoportjában",
   "setting.executeImmediateLiteralOnOwnLine": "Hosszú EXECUTE IMMEDIATE literál külön sorban",
   "setting.blankLineBeforeSubprograms": "Üres sor minden PROCEDURE és FUNCTION előtt",
+  "setting.blankLineAfterPackageHeader": "Üres sor a csomagfej után (az első PROCEDURE vagy FUNCTION előtt)",
   "setting.noBlankLineBeforePackageEnd": "A csomag záró END előtti üres sorok eltávolítása",
   "setting.trimTrailingSpaces": "Sorvégi szóközök eltávolítása",
   "button.save": "Mentés",

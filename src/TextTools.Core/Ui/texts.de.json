@@ -12,6 +12,7 @@
   "setting.alignAssignments": "Zeichen := in Zuweisungsgruppen ausrichten",
   "setting.executeImmediateLiteralOnOwnLine": "Langes EXECUTE IMMEDIATE-Literal in eigener Zeile",
   "setting.blankLineBeforeSubprograms": "Leerzeile vor jeder PROCEDURE und FUNCTION",
+  "setting.blankLineAfterPackageHeader": "Leerzeile nach dem Package-Kopf (vor der ersten PROCEDURE oder FUNCTION)",
   "setting.noBlankLineBeforePackageEnd": "Leerzeilen vor dem abschließenden END des Packages entfernen",
   "setting.trimTrailingSpaces": "Nachgestellte Leerzeichen entfernen",
   "button.save": "Speichern",

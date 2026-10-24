@@ -12,6 +12,7 @@
   "setting.alignAssignments": "Align := in groups of assignments",
   "setting.executeImmediateLiteralOnOwnLine": "Long EXECUTE IMMEDIATE literal on its own line",
   "setting.blankLineBeforeSubprograms": "Blank line before each PROCEDURE and FUNCTION",
+  "setting.blankLineAfterPackageHeader": "Blank line after the package header (before the first PROCEDURE or FUNCTION)",
   "setting.noBlankLineBeforePackageEnd": "Remove blank lines before the closing END of a package",
   "setting.trimTrailingSpaces": "Remove trailing spaces",
   "button.save": "Save",

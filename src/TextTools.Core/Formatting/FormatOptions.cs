@@ -11,6 +11,7 @@ namespace TextTools.Core.Formatting;
 /// <param name="EndWithName">R07: <c>END;</c> of a named subprogram or package gets its name (<c>END open_account;</c>).</param>
 /// <param name="AlignAssignments">R08: <c>:=</c> aligned in a group of consecutive assignments.</param>
 /// <param name="BlankLineBeforeSubprograms">R19: a blank line before each PROCEDURE/FUNCTION (and the comment above it).</param>
+/// <param name="BlankLineAfterPackageHeader">A blank line between <c>CREATE ... PACKAGE BODY x IS</c> and the first subprogram; off by default (the ICBS standard has none).</param>
 /// <param name="NoBlankLineBeforePackageEnd">R20: no blank line before the closing <c>END</c> at column 0.</param>
 /// <param name="ExecuteImmediateLiteralOnOwnLine">R21: a long or multi-line literal of EXECUTE IMMEDIATE starts on its own line, 2 columns deeper.</param>
 /// <param name="TrimTrailingSpaces">No trailing blanks (except inside a multi-line string literal).</param>
@@ -39,6 +40,7 @@ public sealed record FormatOptions(
     bool EndWithName = true,
     bool AlignAssignments = true,
     bool BlankLineBeforeSubprograms = true,
+    bool BlankLineAfterPackageHeader = false,
     bool NoBlankLineBeforePackageEnd = true,
     bool ExecuteImmediateLiteralOnOwnLine = true,
     bool TrimTrailingSpaces = true,
@@ -67,7 +69,7 @@ public sealed record FormatOptions(
     /// <summary>Every rule off: the text stays as it is.</summary>
     public static FormatOptions None { get; } = new(
         Margin: 76, BuiltinFunctionsUpper: false, AttributesUpper: false, EndWithName: false, AlignAssignments: false,
-        BlankLineBeforeSubprograms: false, NoBlankLineBeforePackageEnd: false, ExecuteImmediateLiteralOnOwnLine: false, TrimTrailingSpaces: false,
+        BlankLineBeforeSubprograms: false, BlankLineAfterPackageHeader: false, NoBlankLineBeforePackageEnd: false, ExecuteImmediateLiteralOnOwnLine: false, TrimTrailingSpaces: false,
         SpaceAfterComma: false, TightParentheses: false, SelectIntoOnOneLine: false, UpdateSetLayout: false, JoinIfConditions: false, JoinOnAlignment: false,
         ShortParenGroupOnOneLine: false, InsertLayout: false, HeaderTailsOnOneLine: false, SelectColumnsOnePerLine: false, SubqueryLayout: false,
         AlignAliases: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,

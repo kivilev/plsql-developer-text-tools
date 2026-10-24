@@ -12,6 +12,7 @@
   "setting.alignAssignments": "Выравнивать := в группах присваиваний",
   "setting.executeImmediateLiteralOnOwnLine": "Длинный литерал EXECUTE IMMEDIATE на отдельной строке",
   "setting.blankLineBeforeSubprograms": "Пустая строка перед каждой PROCEDURE и FUNCTION",
+  "setting.blankLineAfterPackageHeader": "Пустая строка после заголовка пакета (перед первой PROCEDURE или FUNCTION)",
   "setting.noBlankLineBeforePackageEnd": "Убирать пустые строки перед закрывающим END пакета",
   "setting.trimTrailingSpaces": "Удалять пробелы в конце строк",
   "button.save": "Сохранить",

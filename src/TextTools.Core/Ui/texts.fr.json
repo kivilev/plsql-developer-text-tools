@@ -12,6 +12,7 @@
   "setting.alignAssignments": "Aligner := dans les groupes d'affectations",
   "setting.executeImmediateLiteralOnOwnLine": "Long littéral EXECUTE IMMEDIATE sur sa propre ligne",
   "setting.blankLineBeforeSubprograms": "Ligne vide avant chaque PROCEDURE et FUNCTION",
+  "setting.blankLineAfterPackageHeader": "Ligne vide après l'en-tête du package (avant la première PROCEDURE ou FUNCTION)",
   "setting.noBlankLineBeforePackageEnd": "Supprimer les lignes vides avant le END final du package",
   "setting.trimTrailingSpaces": "Supprimer les espaces en fin de ligne",
   "button.save": "Enregistrer",

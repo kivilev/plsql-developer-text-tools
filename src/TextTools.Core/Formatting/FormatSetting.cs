@@ -66,6 +66,7 @@ public static class FormatSettings
         new("shortParenGroupOnOneLine", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R14"))),
 
         new("blankLineBeforeSubprograms", "blank", SettingKind.Bool, 1, Sources: Src(("ICBS", "R19"))),
+        new("blankLineAfterPackageHeader", "blank", SettingKind.Bool, 0),
         new("noBlankLineBeforePackageEnd", "blank", SettingKind.Bool, 1, Sources: Src(("ICBS", "R20"))),
         new("trimTrailingSpaces", "blank", SettingKind.Bool, 1),
     ];

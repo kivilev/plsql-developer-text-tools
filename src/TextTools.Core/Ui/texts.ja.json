@@ -12,6 +12,7 @@
   "setting.alignAssignments": "代入文のグループで := を揃える",
   "setting.executeImmediateLiteralOnOwnLine": "長い EXECUTE IMMEDIATE リテラルを単独行にする",
   "setting.blankLineBeforeSubprograms": "各 PROCEDURE と FUNCTION の前に空行を入れる",
+  "setting.blankLineAfterPackageHeader": "パッケージ見出しの後に空行（最初の PROCEDURE または FUNCTION の前）",
   "setting.noBlankLineBeforePackageEnd": "パッケージ末尾の END の前の空行を削除",
   "setting.trimTrailingSpaces": "行末の空白を削除",
   "button.save": "保存",
