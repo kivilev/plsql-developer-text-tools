@@ -46,6 +46,8 @@ internal static unsafe partial class SettingsWindow
     private const int TabHeaderHeight = 28;
     private const int ButtonHeight = 28;
     private const int ButtonWidth = 110;
+    private const int MinColumnWidth = 480;
+    private static int _shownTab;
 
     private static nint _hwnd, _tab, _group, _previewLabel, _view, _save, _default, _close, _uiFont;
     private static int _dpi = 96;
@@ -190,7 +192,11 @@ internal static unsafe partial class SettingsWindow
         if (!GetClientRect(_hwnd, out var client)) return;
         int width = client.Right, height = client.Bottom;
         var gap = S(Gap);
-        var rows = Math.Max(1, Placements.Count == 0 ? 1 : Placements.Max(p => p.Row) + 1);
+        // The settings of the shown tab fill columns, so that the preview keeps the room.
+        var count = Math.Max(1, Placements.Where(p => p.Tab == _shownTab).Select(p => p.Row + 1).DefaultIfEmpty(1).Max());
+        var columns = Math.Clamp((width - 2 * gap) / S(MinColumnWidth), 1, 3);
+        var rows = (count + columns - 1) / columns;
+        var columnWidth = (width - 2 * gap - S(16)) / columns;
         var tabHeight = S(TabHeaderHeight);
         var groupHeight = S(20) + rows * S(RowHeight);
         var groupTop = gap + tabHeight - S(2);
@@ -199,11 +205,11 @@ internal static unsafe partial class SettingsWindow
         MoveWindow(_group, gap, groupTop + groupHeight, width - 2 * gap, 2, 1); // a line under the settings
         foreach (var p in Placements)
         {
-            var y = groupTop + S(24) + p.Row * S(RowHeight);
-            var x = gap + S(16);
-            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(220), S(20), 1);
-            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(228), y, S(70), S(22), 1);
-            else MoveWindow(p.Window, x, y, width - 2 * gap - S(40), S(22), 1);
+            var y = groupTop + S(24) + p.Row % rows * S(RowHeight);
+            var x = gap + S(16) + p.Row / rows * columnWidth;
+            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(160), S(20), 1);
+            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(168), y, S(70), S(22), 1);
+            else MoveWindow(p.Window, x, y, columnWidth - S(12), S(22), 1);
         }
 
         var previewTop = groupTop + groupHeight + gap;
@@ -222,6 +228,7 @@ internal static unsafe partial class SettingsWindow
 
     private static void ShowTab(int tab)
     {
+        _shownTab = tab;
         foreach (var p in Placements) ShowWindow(p.Window, p.Tab == tab ? SwShow : SwHide);
     }
 
@@ -301,6 +308,7 @@ internal static unsafe partial class SettingsWindow
                     return 0;
                 case WmNotify when lParam != 0 && ((nint*)lParam)[0] == _tab && *(int*)(lParam + 16) == TcnSelChange:
                     ShowTab((int)SendMessageW(_tab, TcmGetCurSel, 0, 0));
+                    Layout();
                     return 0;
                 case WmSize when wParam != SizeMinimized && _group != 0:
                     Layout();
