@@ -23,7 +23,6 @@ internal static unsafe partial class SettingsWindow
     private const int IdTab = 100;
     private const int IdSetting = 200;
     private const int IdPreview = 400;
-    private const uint SsCenter = 1;
 
     // Window styles and messages (winuser.h).
     private const uint WsChild = 0x40000000, WsVisible = 0x10000000, WsTabStop = 0x10000, WsCaption = 0x00C00000, WsSysMenu = 0x80000;
@@ -49,7 +48,7 @@ internal static unsafe partial class SettingsWindow
     private const int MinColumnWidth = 480;
     private static int _shownTab;
 
-    private static nint _hwnd, _tab, _group, _previewLabel, _view, _save, _default, _close, _uiFont;
+    private static nint _hwnd, _tab, _group, _view, _save, _default, _close, _uiFont;
     private static int _dpi = 96;
     private static bool _updating;
     private static UiTexts _texts = UiTexts.English;
@@ -170,7 +169,6 @@ internal static unsafe partial class SettingsWindow
             SettingControls[setting.Id] = control;
         }
 
-        _previewLabel = Child("STATIC", _texts.Text("preview.title"), SsCenter, 0);
         _view = CreateCodeView(_hwnd, IdPreview, _dpi);
 
         _save = Child("BUTTON", _texts.Text("button.save"), WsTabStop | BsDefPushButton, IdSave);
@@ -214,9 +212,8 @@ internal static unsafe partial class SettingsWindow
 
         var previewTop = groupTop + groupHeight + gap;
         var buttonsTop = height - gap - S(ButtonHeight);
-        var viewTop = previewTop + S(20);
+        var viewTop = previewTop;
         var viewHeight = Math.Max(S(40), buttonsTop - gap - viewTop);
-        MoveWindow(_previewLabel, gap, previewTop, width - 2 * gap, S(18), 1);
         MoveWindow(_view, gap, viewTop, width - 2 * gap, viewHeight, 1);
 
         MoveWindow(_save, gap, buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
