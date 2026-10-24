@@ -1,0 +1,13 @@
+BEGIN
+  insert into repayment_lead (hr_id, document_type, general_id, branch, loan_id, cl_acc, co_acc, purpose, pay_amount, state, message) values (i_data.hr_id, i_data.document_type, i_data.general_id, i_data.branch, i_data.loan_id, i_data.cl_acc, i_data.co_acc, i_data.purpose, i_data.pay_amount, i_data.state, i_data.message);
+END;
+-----
+BEGIN
+  INSERT INTO repayment_lead
+    (hr_id, document_type, general_id, branch, loan_id, cl_acc, co_acc,
+     purpose, pay_amount, state, message)
+  VALUES
+    (i_data.hr_id, i_data.document_type, i_data.general_id, i_data.branch,
+     i_data.loan_id, i_data.cl_acc, i_data.co_acc, i_data.purpose,
+     i_data.pay_amount, i_data.state, i_data.message);
+END;

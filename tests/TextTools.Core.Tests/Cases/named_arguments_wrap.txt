@@ -1,0 +1,12 @@
+PROCEDURE p IS
+BEGIN
+  account_kernel.open_account(i_branch => v_branch, i_client => v_client, i_currency => v_currency, o_code => v_code);
+END p;
+-----
+PROCEDURE p IS
+BEGIN
+  account_kernel.open_account(i_branch   => v_branch,
+                              i_client   => v_client,
+                              i_currency => v_currency,
+                              o_code     => v_code);
+END p;

@@ -1,0 +1,17 @@
+BEGIN
+  OPEN c FOR
+    SELECT
+    -- the key
+    a.id,
+           a.branch
+      FROM account a;
+END;
+-----
+BEGIN
+  OPEN c FOR
+    SELECT
+           -- the key
+           a.id,
+           a.branch
+      FROM account a;
+END;

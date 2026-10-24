@@ -1,0 +1,59 @@
+SELECT a.id,
+       a.branch,
+       c.name client_name
+  FROM account a
+  JOIN client c
+    ON c.branch = a.branch
+   AND c.id_client = a.client
+ WHERE a.branch = i_branch
+   AND a.state = account_const.c_state_active
+   AND (a.currency = i_currency OR i_currency IS NULL)
+ ORDER BY a.id_order;
+
+UPDATE card_applications t
+   SET t.status      = card_const.c_status_sent,
+       t.modify_date = SYSDATE
+ WHERE t.id = i_app_id;
+
+INSERT INTO deposit_access
+  (dep_id, branch, descrip)
+VALUES
+  (i_dep_id, i_branch, i_descrip);
+
+INSERT INTO repayment_lead
+  (hr_id, document_type, general_id, branch, loan_id, cl_acc, co_acc,
+   purpose, pay_amount, state, message)
+VALUES
+  (i_data.hr_id, i_data.document_type, i_data.general_id, i_data.branch,
+   i_data.loan_id, i_data.cl_acc, i_data.co_acc, i_data.purpose,
+   i_data.pay_amount, i_data.state, i_data.message);
+-----
+SELECT a.id,
+       a.branch,
+       c.name client_name
+  FROM account a
+  JOIN client c
+    ON c.branch = a.branch
+   AND c.id_client = a.client
+ WHERE a.branch = i_branch
+   AND a.state = account_const.c_state_active
+   AND (a.currency = i_currency OR i_currency IS NULL)
+ ORDER BY a.id_order;
+
+UPDATE card_applications t
+   SET t.status      = card_const.c_status_sent,
+       t.modify_date = SYSDATE
+ WHERE t.id = i_app_id;
+
+INSERT INTO deposit_access
+  (dep_id, branch, descrip)
+VALUES
+  (i_dep_id, i_branch, i_descrip);
+
+INSERT INTO repayment_lead
+  (hr_id, document_type, general_id, branch, loan_id, cl_acc, co_acc,
+   purpose, pay_amount, state, message)
+VALUES
+  (i_data.hr_id, i_data.document_type, i_data.general_id, i_data.branch,
+   i_data.loan_id, i_data.cl_acc, i_data.co_acc, i_data.purpose,
+   i_data.pay_amount, i_data.state, i_data.message);

@@ -46,25 +46,8 @@ internal static unsafe partial class SettingsWindow
     private const int TabHeaderHeight = 28;
     private const int ButtonHeight = 28;
     private const int ButtonWidth = 110;
-
-    /// <summary>The sample the preview formats: it shows every rule at work.</summary>
-    private const string Sample =
-        "CREATE OR REPLACE PACKAGE BODY demo_api IS\n" +
-        "  -- Opens an account (nvl and %type in a comment stay as they are)\n" +
-        "  PROCEDURE open_account(i_id IN NUMBER) IS\n" +
-        "    v_acc account%rowtype;\n" +
-        "    v_long_name_x NUMBER;   \n" +
-        "  BEGIN\n" +
-        "    v_acc.id:=nvl(i_id,0);\n" +
-        "    v_long_name_x:=substr(v_acc.name,1,10);\n" +
-        "    EXECUTE IMMEDIATE 'update account set state = 1 where id = :1 and branch = :2' USING i_id;\n" +
-        "  END;\n" +
-        "  FUNCTION is_ok RETURN BOOLEAN IS\n" +
-        "  BEGIN\n" +
-        "    RETURN TRUE;\n" +
-        "  END;\n" +
-        "\n" +
-        "END;";
+    private const int MinColumnWidth = 480;
+    private static int _shownTab;
 
     private static nint _hwnd, _tab, _group, _previewLabel, _view, _save, _default, _close, _uiFont;
     private static int _dpi = 96;
@@ -209,7 +192,11 @@ internal static unsafe partial class SettingsWindow
         if (!GetClientRect(_hwnd, out var client)) return;
         int width = client.Right, height = client.Bottom;
         var gap = S(Gap);
-        var rows = Math.Max(1, Placements.Count == 0 ? 1 : Placements.Max(p => p.Row) + 1);
+        // The settings of the shown tab fill columns, so that the preview keeps the room.
+        var count = Math.Max(1, Placements.Where(p => p.Tab == _shownTab).Select(p => p.Row + 1).DefaultIfEmpty(1).Max());
+        var columns = Math.Clamp((width - 2 * gap) / S(MinColumnWidth), 1, 3);
+        var rows = (count + columns - 1) / columns;
+        var columnWidth = (width - 2 * gap - S(16)) / columns;
         var tabHeight = S(TabHeaderHeight);
         var groupHeight = S(20) + rows * S(RowHeight);
         var groupTop = gap + tabHeight - S(2);
@@ -218,11 +205,11 @@ internal static unsafe partial class SettingsWindow
         MoveWindow(_group, gap, groupTop + groupHeight, width - 2 * gap, 2, 1); // a line under the settings
         foreach (var p in Placements)
         {
-            var y = groupTop + S(24) + p.Row * S(RowHeight);
-            var x = gap + S(16);
-            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(220), S(20), 1);
-            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(228), y, S(70), S(22), 1);
-            else MoveWindow(p.Window, x, y, width - 2 * gap - S(40), S(22), 1);
+            var y = groupTop + S(24) + p.Row % rows * S(RowHeight);
+            var x = gap + S(16) + p.Row / rows * columnWidth;
+            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(160), S(20), 1);
+            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(168), y, S(70), S(22), 1);
+            else MoveWindow(p.Window, x, y, columnWidth - S(12), S(22), 1);
         }
 
         var previewTop = groupTop + groupHeight + gap;
@@ -241,6 +228,7 @@ internal static unsafe partial class SettingsWindow
 
     private static void ShowTab(int tab)
     {
+        _shownTab = tab;
         foreach (var p in Placements) ShowWindow(p.Window, p.Tab == tab ? SwShow : SwHide);
     }
 
@@ -274,11 +262,15 @@ internal static unsafe partial class SettingsWindow
         }
     }
 
-    private static void UpdatePreview()
+    private static void UpdatePreview(bool revealChange = false)
     {
         var options = _profile.ToOptions();
-        SetCodeViewText(_view, PostFormatter.Format(Sample, options), options.Margin);
+        SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin, revealChange);
+        // The parts of line wrapping do nothing while wrapping is off: grey them out.
+        foreach (var id in WrapParts) EnableWindow(SettingControls[id], options.WrapLongLines ? 1 : 0);
     }
+
+    private static readonly string[] WrapParts = ["wrapDecodeInPairs", "wrapBetween", "alignNamedArguments"];
 
     private static void OnCommand(int id, int notification)
     {
@@ -299,7 +291,7 @@ internal static unsafe partial class SettingsWindow
                 break;
             case >= IdSetting and < IdPreview when !_updating && (notification == 0 || notification == EnChange): // a click or a typed number
                 ReadControlsIntoProfile();
-                UpdatePreview();
+                UpdatePreview(revealChange: true);
                 break;
         }
     }
@@ -316,6 +308,7 @@ internal static unsafe partial class SettingsWindow
                     return 0;
                 case WmNotify when lParam != 0 && ((nint*)lParam)[0] == _tab && *(int*)(lParam + 16) == TcnSelChange:
                     ShowTab((int)SendMessageW(_tab, TcmGetCurSel, 0, 0));
+                    Layout();
                     return 0;
                 case WmSize when wParam != SizeMinimized && _group != 0:
                     Layout();

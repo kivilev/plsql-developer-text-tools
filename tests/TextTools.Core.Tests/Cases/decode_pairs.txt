@@ -1,0 +1,14 @@
+PROCEDURE p IS
+BEGIN
+  v_status_text := DECODE(t.state, 0, 'Created', 1, 'Accepted for processing', 2, 'Rejected by the bank', 3, 'Paid', 'Unknown');
+END p;
+-----
+PROCEDURE p IS
+BEGIN
+  v_status_text := DECODE(t.state,
+                          0, 'Created',
+                          1, 'Accepted for processing',
+                          2, 'Rejected by the bank',
+                          3, 'Paid',
+                          'Unknown');
+END p;

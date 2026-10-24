@@ -1,0 +1,13 @@
+BEGIN
+  OPEN c FOR
+    SELECT a.id                                                                                                                alias_one,
+           a.very_long_column_name  alias_two
+      FROM account a;
+END;
+-----
+BEGIN
+  OPEN c FOR
+    SELECT a.id alias_one,
+           a.very_long_column_name alias_two
+      FROM account a;
+END;

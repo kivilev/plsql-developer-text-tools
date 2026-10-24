@@ -45,7 +45,24 @@ public sealed class FormatProfile
         BlankLineBeforeSubprograms: IsOn("blankLineBeforeSubprograms"),
         NoBlankLineBeforePackageEnd: IsOn("noBlankLineBeforePackageEnd"),
         ExecuteImmediateLiteralOnOwnLine: IsOn("executeImmediateLiteralOnOwnLine"),
-        TrimTrailingSpaces: IsOn("trimTrailingSpaces"));
+        TrimTrailingSpaces: IsOn("trimTrailingSpaces"),
+        TightParentheses: IsOn("tightParentheses"),
+        SelectIntoOnOneLine: IsOn("selectIntoOnOneLine"),
+        UpdateSetLayout: IsOn("updateSetLayout"),
+        JoinIfConditions: IsOn("joinIfConditions"),
+        JoinOnAlignment: IsOn("joinOnAlignment"),
+        ShortParenGroupOnOneLine: IsOn("shortParenGroupOnOneLine"),
+        InsertLayout: IsOn("insertLayout"),
+        HeaderTailsOnOneLine: IsOn("headerTailsOnOneLine"),
+        SelectColumnsOnePerLine: IsOn("selectColumnsOnePerLine"),
+        SubqueryLayout: IsOn("subqueryLayout"),
+        TightenAliasPadding: IsOn("tightenAliasPadding"),
+        WrapLongLines: IsOn("wrapLongLines"),
+        WrapDecodeInPairs: IsOn("wrapDecodeInPairs"),
+        WrapBetween: IsOn("wrapBetween"),
+        AlignNamedArguments: IsOn("alignNamedArguments"),
+        AlignDeclarations: IsOn("alignDeclarations"),
+        IndentComments: IsOn("indentComments"));
 
     /// <summary>{ "version": 1, "settings": { "margin": 76, "endWithName": true, ... } }, indented so that it diffs well in a repository.</summary>
     public string ToJson()
