@@ -120,4 +120,13 @@ public class IcbsRuleTests
             Assert.True(TokenGuard.Same(text, result), text);
         }
     }
+
+    [Fact]
+    public void ABlankAfterTheCommaIsOptionalAndNeverTouchesLiteralsOrComments()
+    {
+        var text = "BEGIN\n  v := NVL(a,0) + f(x,y,'a,b'); -- c,d\n  g(1,\n    2);\nEND;\n";
+        var on = FormatOptions.None with { SpaceAfterComma = true };
+        Assert.Equal("BEGIN\n  v := NVL(a, 0) + f(x, y, 'a,b'); -- c,d\n  g(1,\n    2);\nEND;\n", PostFormatter.Format(text, on));
+        Assert.Equal(text, PostFormatter.Format(text));
+    }
 }

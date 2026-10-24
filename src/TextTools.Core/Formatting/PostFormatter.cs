@@ -46,6 +46,7 @@ public static class PostFormatter
     {
         var steps = new Steps(text);
         steps.Run(o.TightParentheses, TightParenthesesRule.Apply);
+        steps.Run(o.SpaceAfterComma, SpaceAfterCommaRule.Apply);
         steps.Run(o.SelectIntoOnOneLine, SelectIntoRule.JoinIntoList);
         steps.Run(o.UpdateSetLayout, UpdateSetRule.AlignEquals);
         steps.Run(o.JoinIfConditions, IfConditionRule.Apply);

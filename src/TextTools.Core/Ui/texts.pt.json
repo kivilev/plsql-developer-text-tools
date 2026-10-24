@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "Subconsulta entre parênteses em uma linha quando couber",
   "setting.alignAliases": "SELECT: alinhar os aliases em uma coluna",
   "setting.tightParentheses": "Sem espaços dentro dos parênteses",
+  "setting.spaceAfterComma": "Espaço depois de cada vírgula: NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "Quebrar linhas maiores que a margem direita",
   "setting.wrapDecodeInPairs": "DECODE: quebrar em pares (condição, valor)",
   "setting.wrapBetween": "BETWEEN: quebrar antes do AND",

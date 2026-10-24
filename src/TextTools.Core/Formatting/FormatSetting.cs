@@ -48,6 +48,7 @@ public static class FormatSettings
         new("indentComments", "code", SettingKind.Bool, 1),
         new("headerTailsOnOneLine", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R18"))),
         new("tightParentheses", "code", SettingKind.Bool, 1),
+        new("spaceAfterComma", "code", SettingKind.Bool, 0, Sources: Src(("DataGrip", "Spaces > Other > After comma"))),
 
         new("insertLayout", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R13"))),
         new("selectColumnsOnePerLine", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R15"))),

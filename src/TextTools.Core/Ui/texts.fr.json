@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "Sous-requête entre parenthèses sur une ligne si elle tient",
   "setting.alignAliases": "SELECT : aligner les alias dans une colonne",
   "setting.tightParentheses": "Pas d'espaces à l'intérieur des parenthèses",
+  "setting.spaceAfterComma": "Espace après chaque virgule : NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "Couper les lignes plus longues que la marge droite",
   "setting.wrapDecodeInPairs": "DECODE : couper par paires (condition, valeur)",
   "setting.wrapBetween": "BETWEEN : couper avant AND",

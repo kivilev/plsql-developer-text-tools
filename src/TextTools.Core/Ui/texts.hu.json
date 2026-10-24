@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "Zárójeles allekérdezés egy sorban, ha elfér",
   "setting.alignAliases": "SELECT: az aliasok igazítása egy oszlopba",
   "setting.tightParentheses": "Nincs szóköz a zárójelek belsejében",
+  "setting.spaceAfterComma": "Szóköz minden vessző után: NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "A jobb margónál hosszabb sorok tördelése",
   "setting.wrapDecodeInPairs": "DECODE: tördelés párokban (feltétel, érték)",
   "setting.wrapBetween": "BETWEEN: tördelés az AND előtt",

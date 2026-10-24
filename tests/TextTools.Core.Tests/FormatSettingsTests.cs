@@ -33,7 +33,7 @@ public class FormatSettingsTests
         foreach (var setting in FormatSettings.All.Where(s => s.Kind == SettingKind.Bool))
         {
             var profile = new FormatProfile();
-            profile.Set(setting.Id, 0);
+            profile.Set(setting.Id, 1 - setting.Default);
             Assert.NotEqual(baseline, profile.ToOptions());
         }
         var margin = new FormatProfile();
@@ -165,7 +165,7 @@ public class FormatSettingsTests
         foreach (var setting in FormatSettings.All.Where(s => s.Kind == SettingKind.Bool))
         {
             var profile = new FormatProfile();
-            profile.Set(setting.Id, 0);
+            profile.Set(setting.Id, 1 - setting.Default);
             Assert.True(!string.Equals(baseline, PostFormatter.Format(FormatSample.Text, profile.ToOptions()), StringComparison.Ordinal), setting.Id);
         }
     }

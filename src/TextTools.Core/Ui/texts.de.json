@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "Unterabfrage in Klammern in einer Zeile, wenn sie passt",
   "setting.alignAliases": "SELECT: Aliase in einer Spalte ausrichten",
   "setting.tightParentheses": "Keine Leerzeichen innerhalb von Klammern",
+  "setting.spaceAfterComma": "Leerzeichen nach jedem Komma: NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "Zeilen länger als der rechte Rand umbrechen",
   "setting.wrapDecodeInPairs": "DECODE: paarweise umbrechen (Bedingung, Wert)",
   "setting.wrapBetween": "BETWEEN: vor AND umbrechen",

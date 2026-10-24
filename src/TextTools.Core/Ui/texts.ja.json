@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "括弧内のサブクエリは収まる場合1行にする",
   "setting.alignAliases": "SELECT：別名を1つの桁に揃える",
   "setting.tightParentheses": "括弧の内側に空白を入れない",
+  "setting.spaceAfterComma": "カンマの後に空白：NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "右マージンを超える行を折り返す",
   "setting.wrapDecodeInPairs": "DECODE：（条件, 値）の組で折り返す",
   "setting.wrapBetween": "BETWEEN：AND の前で折り返す",

@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "括号内的子查询在能放下时放在一行",
   "setting.alignAliases": "SELECT：别名对齐到同一列",
   "setting.tightParentheses": "括号内不留空格",
+  "setting.spaceAfterComma": "逗号后加空格：NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "超过右边距的行自动换行",
   "setting.wrapDecodeInPairs": "DECODE：按（条件，值）成对换行",
   "setting.wrapBetween": "BETWEEN：在 AND 之前换行",

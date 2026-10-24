@@ -31,6 +31,7 @@
   "setting.subqueryLayout": "Subquery in parentheses on one line when it fits",
   "setting.alignAliases": "SELECT: align the aliases in one column",
   "setting.tightParentheses": "No blanks inside parentheses",
+  "setting.spaceAfterComma": "Blank after each comma: NVL(1,0) -> NVL(1, 0)",
   "setting.wrapLongLines": "Wrap lines longer than the right margin",
   "setting.wrapDecodeInPairs": "DECODE: break in pairs (condition, value)",
   "setting.wrapBetween": "BETWEEN: break before AND",

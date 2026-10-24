@@ -46,6 +46,7 @@ public sealed class FormatProfile
         NoBlankLineBeforePackageEnd: IsOn("noBlankLineBeforePackageEnd"),
         ExecuteImmediateLiteralOnOwnLine: IsOn("executeImmediateLiteralOnOwnLine"),
         TrimTrailingSpaces: IsOn("trimTrailingSpaces"),
+        SpaceAfterComma: IsOn("spaceAfterComma"),
         TightParentheses: IsOn("tightParentheses"),
         SelectIntoOnOneLine: IsOn("selectIntoOnOneLine"),
         UpdateSetLayout: IsOn("updateSetLayout"),
