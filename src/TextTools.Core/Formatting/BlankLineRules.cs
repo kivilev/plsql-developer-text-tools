@@ -19,7 +19,7 @@ internal static partial class BlankLineRules
     private static partial Regex ClosingEnd();
 
     /// <summary>R19: a blank line before each PROCEDURE/FUNCTION and before the comment block above it; not right after IS/AS; right after the header CREATE ... IS only with <paramref name="afterHeader"/>.</summary>
-    public static string BeforeSubprograms(string text, bool afterHeader = false)
+    public static string BeforeSubprograms(string text, bool afterHeader = false, bool beforeEach = true)
     {
         var lines = text.Split('\n');
         var masked = PlsqlLexer.Mask(text).Split('\n');
@@ -33,7 +33,7 @@ internal static partial class BlankLineRules
                 var previous = k > 0 ? output[k - 1] : "";
                 var maskedPrevious = PlsqlLexer.Mask(previous).Trim();
                 var header = maskedPrevious.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase);
-                if (k > 0 && previous.Trim().Length > 0 && (header ? afterHeader && EndsWithIsOrAs().IsMatch(maskedPrevious) : !EndsWithIsOrAs().IsMatch(maskedPrevious)))
+                if (k > 0 && previous.Trim().Length > 0 && (header ? afterHeader && EndsWithIsOrAs().IsMatch(maskedPrevious) : beforeEach && !EndsWithIsOrAs().IsMatch(maskedPrevious)))
                 {
                     output.Insert(k, "");
                 }

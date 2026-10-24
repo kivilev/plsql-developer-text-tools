@@ -28,7 +28,7 @@ internal static unsafe partial class SettingsWindow
     private const uint WsChild = 0x40000000, WsVisible = 0x10000000, WsTabStop = 0x10000, WsCaption = 0x00C00000, WsSysMenu = 0x80000;
     private const uint WsClipSiblings = 0x04000000, WsClipChildren = 0x02000000, WsVScroll = 0x200000, WsHScroll = 0x100000, WsBorder = 0x800000;
     private const uint WsThickFrame = 0x40000, WsMaximizeBox = 0x10000, WsExDlgModalFrame = 1;
-    private const uint BsPushButton = 0, BsDefPushButton = 1, BsAutoCheckBox = 3, SsEtchedHorz = 0x10;
+    private const uint BsPushButton = 0, BsDefPushButton = 1, BsAutoCheckBox = 3;
     private const uint EsNumber = 0x2000;
     private const uint WmDestroy = 0x2, WmSize = 0x5, WmClose = 0x10, WmGetMinMaxInfo = 0x24, WmSetFont = 0x30, WmCommand = 0x111, WmNotify = 0x4E;
     private const uint BmGetCheck = 0xF0, BmSetCheck = 0xF1, TcmGetCurSel = 0x130B, TcmInsertItemW = 0x133E;
@@ -48,7 +48,7 @@ internal static unsafe partial class SettingsWindow
     private const int MinColumnWidth = 480;
     private static int _shownTab;
 
-    private static nint _hwnd, _tab, _group, _view, _save, _default, _close, _uiFont;
+    private static nint _hwnd, _tab, _view, _save, _default, _close, _uiFont;
     private static int _dpi = 96;
     private static bool _updating;
     private static UiTexts _texts = UiTexts.English;
@@ -144,8 +144,6 @@ internal static unsafe partial class SettingsWindow
                 SendMessageW(_tab, TcmInsertItemW, i, (nint)(&item));
             }
         }
-        // A line under the settings of the tab; they sit on the window colour (a themed tab page would be paler).
-        _group = Child("STATIC", "", SsEtchedHorz, 0);
 
         var tabs = FormatSettings.Tabs.ToList();
         var rowOfTab = new int[tabs.Count];
@@ -200,7 +198,6 @@ internal static unsafe partial class SettingsWindow
         var groupTop = gap + tabHeight - S(2);
 
         MoveWindow(_tab, gap, gap, width - 2 * gap, tabHeight, 1);
-        MoveWindow(_group, gap, groupTop + groupHeight, width - 2 * gap, 2, 1); // a line under the settings
         foreach (var p in Placements)
         {
             var y = groupTop + S(24) + p.Row % rows * S(RowHeight);
@@ -311,7 +308,7 @@ internal static unsafe partial class SettingsWindow
                     ShowTab((int)SendMessageW(_tab, TcmGetCurSel, 0, 0));
                     Layout();
                     return 0;
-                case WmSize when wParam != SizeMinimized && _group != 0:
+                case WmSize when wParam != SizeMinimized && _view != 0:
                     Layout();
                     return 0;
                 case WmGetMinMaxInfo when lParam != 0:

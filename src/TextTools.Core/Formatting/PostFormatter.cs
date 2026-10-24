@@ -67,7 +67,7 @@ public static class PostFormatter
         steps.Run(o.AlignDeclarations, AlignDeclarationsRule.Apply);
         steps.Run(o.IndentComments, CommentIndentRule.Apply);
         steps.Run(o.AttributesUpper, CaseRules.UpperAttributes);
-        steps.Run(o.BlankLineBeforeSubprograms, t => BlankLineRules.BeforeSubprograms(t, o.BlankLineAfterPackageHeader));
+        steps.Run(o.BlankLineBeforeSubprograms || o.BlankLineAfterPackageHeader, t => BlankLineRules.BeforeSubprograms(t, o.BlankLineAfterPackageHeader, o.BlankLineBeforeSubprograms));
         steps.Run(o.NoBlankLineBeforePackageEnd, BlankLineRules.NoBlankBeforePackageEnd);
         steps.Run(o.EndWithName, EndNameRule.Apply);
         steps.Run(o.TrimTrailingSpaces, TrimTrailing);

@@ -129,4 +129,13 @@ public class IcbsRuleTests
         Assert.Equal("BEGIN\n  v := NVL(a, 0) + f(x, y, 'a,b'); -- c,d\n  g(1,\n    2);\nEND;\n", PostFormatter.Format(text, on));
         Assert.Equal(text, PostFormatter.Format(text));
     }
+
+    [Fact]
+    public void ABlankLineAfterThePackageHeaderWorksOnItsOwn()
+    {
+        var text = "CREATE OR REPLACE PACKAGE BODY p IS\n  PROCEDURE a IS\n  BEGIN\n    NULL;\n  END a;\n  PROCEDURE b IS\n  BEGIN\n    NULL;\n  END b;\nEND p;\n";
+        var result = PostFormatter.Format(text, FormatOptions.None with { BlankLineAfterPackageHeader = true });
+        Assert.StartsWith("CREATE OR REPLACE PACKAGE BODY p IS\n\n  PROCEDURE a IS\n", result, StringComparison.Ordinal);
+        Assert.Contains("END a;\n  PROCEDURE b", result, StringComparison.Ordinal); // the other blank lines stay off
+    }
 }
