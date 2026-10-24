@@ -55,6 +55,7 @@ public static class FormatSettings
         new("updateSetLayout", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R10"))),
         new("joinOnAlignment", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R12"))),
         new("subqueryLayout", "sql", SettingKind.Bool, 1),
+        new("alignAliases", "sql", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignAliases"), ("SQLDev", "alignColumnAliases"), ("DataGrip", "Align column aliases"))),
         new("tightenAliasPadding", "sql", SettingKind.Bool, 1),
 
         new("wrapLongLines", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R02"))),

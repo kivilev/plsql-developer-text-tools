@@ -48,6 +48,11 @@ public static class FormatSample
         "         AND (a.currency = i_currency\n" +
         "          OR i_currency IS NULL)\n" +
         "         AND a.operation_date BETWEEN i_period_begin_date_of_report AND i_period_end_date_of_report;\n" +
+        "    OPEN c3 FOR\n" +
+        "      SELECT a.id          account_id,\n" +
+        "             a.branch      branch_code,\n" +
+        "             c.name        client_name\n" +
+        "        FROM account a;\n" +
         "    OPEN c2 FOR\n" +
         "      SELECT a.id" + new string(' ', 112) + "alias_one,\n" +
         "             a.very_long_column_name  alias_two\n" +
