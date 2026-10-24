@@ -222,6 +222,10 @@ internal static unsafe partial class SettingsWindow
         MoveWindow(_save, gap, buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_default, gap + S(ButtonWidth) + S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_close, width - gap - S(ButtonWidth), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        // The view keeps its old picture when it only moves: repaint it and the window around it, or ghosts of the old layout stay.
+        UpdateScrollbars(_view);
+        InvalidateRect(_view, 0, 1);
+        InvalidateRect(_hwnd, 0, 1);
     }
 
     private static bool IsNumberBox(nint window) => SettingControls.Any(c => c.Value == window && FormatSettings.Find(c.Key)?.Kind == SettingKind.Number);
