@@ -57,9 +57,17 @@ internal static unsafe partial class SettingsWindow
     }
 
     /// <summary>Shows <paramref name="text"/> (lines separated by \n) with a line at column <paramref name="margin"/>.</summary>
-    private static void SetCodeViewText(nint view, string text, int margin)
+    private static void SetCodeViewText(nint view, string text, int margin, bool revealChange = false)
     {
+        var previous = _viewLines;
         _viewLines = text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
+        if (revealChange)
+        {
+            // Show the first line that the change of a setting touched, so that the effect is in view.
+            var first = 0;
+            while (first < previous.Length && first < _viewLines.Length && string.Equals(previous[first], _viewLines[first], StringComparison.Ordinal)) first++;
+            if (first < _viewLines.Length) _viewTop = Math.Max(0, first - 3);
+        }
         _viewClasses = new CodeClass[_viewLines.Length][];
         var all = SyntaxHighlighter.Classify(string.Join('\n', _viewLines));
         var offset = 0;

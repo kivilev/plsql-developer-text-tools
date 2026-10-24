@@ -255,11 +255,15 @@ internal static unsafe partial class SettingsWindow
         }
     }
 
-    private static void UpdatePreview()
+    private static void UpdatePreview(bool revealChange = false)
     {
         var options = _profile.ToOptions();
-        SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin);
+        SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin, revealChange);
+        // The parts of line wrapping do nothing while wrapping is off: grey them out.
+        foreach (var id in WrapParts) EnableWindow(SettingControls[id], options.WrapLongLines ? 1 : 0);
     }
+
+    private static readonly string[] WrapParts = ["wrapDecodeInPairs", "wrapBetween", "alignNamedArguments"];
 
     private static void OnCommand(int id, int notification)
     {
@@ -280,7 +284,7 @@ internal static unsafe partial class SettingsWindow
                 break;
             case >= IdSetting and < IdPreview when !_updating && (notification == 0 || notification == EnChange): // a click or a typed number
                 ReadControlsIntoProfile();
-                UpdatePreview();
+                UpdatePreview(revealChange: true);
                 break;
         }
     }
