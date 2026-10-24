@@ -47,25 +47,6 @@ internal static unsafe partial class SettingsWindow
     private const int ButtonHeight = 28;
     private const int ButtonWidth = 110;
 
-    /// <summary>The sample the preview formats: it shows every rule at work.</summary>
-    private const string Sample =
-        "CREATE OR REPLACE PACKAGE BODY demo_api IS\n" +
-        "  -- Opens an account (nvl and %type in a comment stay as they are)\n" +
-        "  PROCEDURE open_account(i_id IN NUMBER) IS\n" +
-        "    v_acc account%rowtype;\n" +
-        "    v_long_name_x NUMBER;   \n" +
-        "  BEGIN\n" +
-        "    v_acc.id:=nvl(i_id,0);\n" +
-        "    v_long_name_x:=substr(v_acc.name,1,10);\n" +
-        "    EXECUTE IMMEDIATE 'update account set state = 1 where id = :1 and branch = :2' USING i_id;\n" +
-        "  END;\n" +
-        "  FUNCTION is_ok RETURN BOOLEAN IS\n" +
-        "  BEGIN\n" +
-        "    RETURN TRUE;\n" +
-        "  END;\n" +
-        "\n" +
-        "END;";
-
     private static nint _hwnd, _tab, _group, _previewLabel, _view, _save, _default, _close, _uiFont;
     private static int _dpi = 96;
     private static bool _updating;
@@ -277,7 +258,7 @@ internal static unsafe partial class SettingsWindow
     private static void UpdatePreview()
     {
         var options = _profile.ToOptions();
-        SetCodeViewText(_view, PostFormatter.Format(Sample, options), options.Margin);
+        SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin);
     }
 
     private static void OnCommand(int id, int notification)

@@ -156,4 +156,17 @@ public class FormatSettingsTests
         Assert.Equal("no.such.key", texts.Text("no.such.key"));
         Assert.Same(UiTexts.For("Russian"), UiTexts.For("Russian.lang"));
     }
+
+    [Fact]
+    public void EverySwitchChangesThePreviewSample()
+    {
+        var baseline = PostFormatter.Format(FormatSample.Text);
+        Assert.NotEqual(FormatSample.Text, baseline);
+        foreach (var setting in FormatSettings.All.Where(s => s.Kind == SettingKind.Bool))
+        {
+            var profile = new FormatProfile();
+            profile.Set(setting.Id, 0);
+            Assert.True(!string.Equals(baseline, PostFormatter.Format(FormatSample.Text, profile.ToOptions()), StringComparison.Ordinal), setting.Id);
+        }
+    }
 }
