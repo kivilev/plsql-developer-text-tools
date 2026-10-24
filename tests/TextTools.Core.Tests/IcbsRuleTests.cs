@@ -138,4 +138,14 @@ public class IcbsRuleTests
         Assert.StartsWith("CREATE OR REPLACE PACKAGE BODY p IS\n\n  PROCEDURE a IS\n", result, StringComparison.Ordinal);
         Assert.Contains("END a;\n  PROCEDURE b", result, StringComparison.Ordinal); // the other blank lines stay off
     }
+
+    [Fact]
+    public void SingleBlankBeforeAliasLeavesDeclarationsAndParametersAlone()
+    {
+        var text = "PROCEDURE p(i_a  IN  NUMBER,\n            o_b  OUT VARCHAR2) IS\nBEGIN\n  OPEN c FOR\n    SELECT a.id          account_id,\n           a.branch      branch_code\n      FROM account a;\nEND p;\n";
+        var result = PostFormatter.Format(text, FormatOptions.None with { SingleBlankBeforeAlias = true });
+        Assert.Contains("i_a  IN  NUMBER", result, StringComparison.Ordinal);
+        Assert.Contains("a.id account_id,", result, StringComparison.Ordinal);
+        Assert.Contains("a.branch branch_code", result, StringComparison.Ordinal);
+    }
 }

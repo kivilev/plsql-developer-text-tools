@@ -58,7 +58,7 @@ public sealed class FormatProfile
         HeaderTailsOnOneLine: IsOn("headerTailsOnOneLine"),
         SelectColumnsOnePerLine: IsOn("selectColumnsOnePerLine"),
         SubqueryLayout: IsOn("subqueryLayout"),
-        AlignAliases: IsOn("alignAliases"),
+        SingleBlankBeforeAlias: !IsOn("alignAliases"),
         WrapLongLines: IsOn("wrapLongLines"),
         WrapDecodeInPairs: IsOn("wrapDecodeInPairs"),
         WrapBetween: IsOn("wrapBetween"),

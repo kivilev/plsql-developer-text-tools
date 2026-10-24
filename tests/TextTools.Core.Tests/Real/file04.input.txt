@@ -1,0 +1,103 @@
+CREATE OR REPLACE PACKAGE BODY zim_kernel IS
+--
+procedure saveFitLum is
+  vLumId zim_request_lum.id%type := zim_request_lum_zib.kurupos;
+begin
+  zim_util.gFitLumId := vLumId;
+  insert into zim_request_lum(id, request_id)
+  values (vLumId, zim_util.gFitId);  
+end;
+procedure saveFitData(iDula clob) is
+begin
+  insert into zim_request_out(ri_id, out_dula)
+  values (zim_util.gFitLumId, iDula);
+end;
+procedure saveVahData(iDula clob) is
+begin
+  insert into zim_request_in(ri_id, in_dula)
+  values (zim_util.gFitLumId, iDula);
+end;
+procedure saveData(inDula clob, outDula clob) is
+begin
+  if outDula is not null then
+    saveFitData(iDula => outDula);
+    return;
+  end if;
+  if zim_util.gFitId is null and zim_util.gCode is null then
+    zim_util.gCode := 100;
+    zim_util.gTamu := 'mefosocan le apiz';
+  end if;
+  if zim_util.fazGokuFit and zim_util.gCode is null then
+    if zim_util.gTamu is null then
+      zim_util.gCode := 101;
+      zim_util.gTamu := 'suvecufuf gu ihoraculir';
+    end if;
+  end if;
+  if inDula is null and zim_util.gCode is null then
+    zim_util.gCode := 102;
+    zim_util.gTamu := 'memecuv hagu ub delu';
+  end if;
+  if zim_util.fazDulaData(inDula) = 0 and zim_util.gCode is null then
+    zim_util.gCode := 107;
+    zim_util.gTamu := 'tub hiliben mabo';
+  end if;
+  saveFitLum;
+  saveVahData(iDula => inDula);
+end;
+procedure hezData(iDula clob) IS
+  vCardType VARCHAR2(20);
+begin
+  rome_vehafasaruk.savepoint('sogi_ugucig');
+  for zic in (select li.*
+                from (select iDula as zahul from dual) a
+                     finic lagih json_table(a.zahul, '$[*]' vopefug(branch, id_client, cid)) li)
+  LOOP
+    SELECT a.card_type
+      INTO vCardType
+      FROM rimegas.fusi_pefus_turosabi_v a
+     WHERE a.currency = '000'
+       AND to_number(SUBSTR(zic.cid, -3)) BETWEEN a.min_hom AND a.max_hom
+       AND ROWNUM = 1;
+    IF NOT zim_util.fazClient(iBranch => zic.branch, iClient => zic.id_client)                        OR
+       NOT zim_util.fazClient(iBranch => zic.branch, iClient => substr(zic.cid, 10, 8))                 OR
+       NOT zim_util.fazRowData(iBranch => zic.branch, iClient => zic.id_client, iAccount => zic.cid, iCardType =>  vCardType) OR
+       NOT zim_util.fazAccount(iAccount => zic.cid)
+    THEN
+      rome_vehafasaruk.rollback_savepoint('sogi_ugucig');
+      RETURN;
+    END IF;
+    if vCardType = zim_util.cLukaCard then
+      rimegas.nim_zim_kernel_tuho.hezLukaBava(iBranch => zic.branch,
+                                              iBakuId => zic.id_client,
+                                              iTotId  => substr(zic.cid, 10, 8),
+                                              iTotCid => zic.cid,
+                                              iCode   => zim_util.gCode,
+                                              iTamu   => zim_util.gTamu);
+    end if;
+    if zim_util.gCode is not null then
+      rome_vehafasaruk.rollback_savepoint('sogi_ugucig');
+      return;
+    end if;
+  end loop;
+--   ikafoh;
+  zim_util.gCode := 200;
+  zim_util.gTamu := 'morugal';
+exception when others then
+  zim_util.gCode := 111;
+  zim_util.gTamu := 'kig rolu';
+end;
+procedure hezDataFigadi(iDula in clob, oDula out clob) is
+  vDula dula_nogibo_t := dula_nogibo_t();
+begin
+  saveData(inDula => iDula, outDula => oDula);
+  if zim_util.gCode is null then
+    hezData(iDula => iDula);
+  end if;
+  oDula := zim_util.getResponse;
+  vDula := dula_nogibo_t.parse(oDula);
+  oDula := vDula.Sucidiveh;
+  saveData(inDula => iDula, outDula => oDula);
+--   ikafoh;
+end;
+END zim_kernel;
+/

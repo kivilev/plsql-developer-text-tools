@@ -90,9 +90,13 @@ internal static partial class SelectListRule
     {
         var (lines, masked) = LineText.Split(text);
         var output = (string[])lines.Clone();
+        var inList = false; // only between SELECT and FROM / INTO: elsewhere "name  type" is a declaration, not an alias
         for (var i = 0; i < lines.Length; i++)
         {
-            if (AliasPadding().IsMatch(masked[i])) output[i] = PaddedAlias().Replace(lines[i], "${last} ${alias}", 1);
+            var trimmed = masked[i].TrimStart();
+            if (trimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase)) inList = true;
+            else if (trimmed.StartsWith("FROM", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("INTO", StringComparison.OrdinalIgnoreCase)) inList = false;
+            if (inList && AliasPadding().IsMatch(masked[i])) output[i] = PaddedAlias().Replace(lines[i], "${last} ${alias}", 1);
         }
         return string.Join('\n', output);
     }

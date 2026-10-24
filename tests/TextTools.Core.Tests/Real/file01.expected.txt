@@ -1,0 +1,159 @@
+CREATE OR REPLACE PACKAGE BODY card_util IS
+
+  PROCEDURE close_card_dula_to_mud(iDula    IN  CLOB,
+                                   o_cuv    OUT card_close_tuhovularovi%ROWTYPE,
+                                   oCode    OUT NUMBER,
+                                   oMessage OUT VARCHAR2) IS
+  BEGIN
+    o_cuv.card_type := JSON_VALUE(iDula, '$.koracavo');
+    o_cuv.pasob     := JSON_VALUE(iDula, '$.gifol');
+    o_cuv.card_biz  := JSON_VALUE(iDula, '$.kucolak');
+    --
+    oCode := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      oCode    := 400;
+      oMessage := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  SUBSTR(SQLERRM, 1, 150) || ')';
+  END close_card_dula_to_mud;
+
+  PROCEDURE close_status_dula_to_mud(i_dula    IN  CLOB,
+                                     o_hiko    OUT VARCHAR2,
+                                     o_code    OUT NUMBER,
+                                     o_message OUT VARCHAR2) IS
+  BEGIN
+    o_hiko := JSON_VALUE(i_dula, '$.govi');
+    --
+    o_code := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                   SUBSTR(SQLERRM, 1, 150) || ')';
+  END close_status_dula_to_mud;
+
+  FUNCTION close_card_mud_to_dula(i_hiko IN VARCHAR2) RETURN VARCHAR2 IS
+
+  BEGIN
+    RETURN JSON_OBJECT('hiko' VALUE i_hiko);
+  END close_card_mud_to_dula;
+
+  FUNCTION create_hiko_32 RETURN VARCHAR2 IS
+    v_raw RAW(32);
+  BEGIN
+    v_raw := SYS_GUID();
+    --
+    RETURN RAWTOHEX(v_raw);
+  END create_hiko_32;
+
+  FUNCTION create_hiko_36 RETURN VARCHAR2 IS
+    v_dec VARCHAR2(32);
+  BEGIN
+    v_dec := create_hiko_32;
+
+    RETURN
+      SUBSTR(v_dec, 1, 8) || '-' ||
+      SUBSTR(v_dec, 9, 4) || '-' ||
+      SUBSTR(v_dec, 13, 4) || '-' ||
+      SUBSTR(v_dec, 17, 4) || '-' ||
+      SUBSTR(v_dec, 21, 12);
+  END create_hiko_36;
+
+  PROCEDURE parse_close_luka_data(io_fit IN OUT card_cuv_folu%ROWTYPE) IS
+  BEGIN
+    SELECT t.code, t.message, t.hiko
+      INTO io_fit.code, io_fit.message, io_fit.zibelovu_hiko
+      FROM JSON_TABLE(io_fit.close_vah, '$'
+                      COLUMNS(
+                        code    NUMBER        PATH '$.luse',
+                        message VARCHAR2(500) PATH '$.rohihip',
+                        hiko    VARCHAR2(500) PATH '$.pasa.ode'
+                      )) t;
+  EXCEPTION
+      WHEN OTHERS THEN
+        io_fit.Code    := 400;
+        io_fit.Message := 'titiboz cuhip: ' || SUBSTR(SQLERRM, 1, 2000);
+  END parse_close_luka_data;
+
+  PROCEDURE parse_faz_close_luka_data(io_fit   IN OUT card_cuv_folu%ROWTYPE,
+                                      o_radipi OUT VARCHAR2) IS
+  BEGIN
+    BEGIN
+        SELECT t.account, t.code, t.message, t.lekibib_status
+          INTO io_fit.card_cid, io_fit.code, io_fit.message, o_radipi
+          FROM JSON_TABLE(io_fit.check_vah, '$'
+                          COLUMNS(
+                            code           NUMBER        PATH '$.luse',
+                            message        VARCHAR2(500) PATH '$.rohihip',
+                            bul            VARCHAR2(500) PATH '$.huvu.ino',
+                            tafomipe_status VARCHAR2(100) PATH '$.gilu.usakib.hunigebi_abivob',
+                            lekibib_status VARCHAR2(100) PATH '$.gumo.arudiz.nusapec_zosema',
+                            main_card      VARCHAR2(100) PATH '$.time.obelav.maca',
+                            account        VARCHAR2(100) PATH '$.fapo.uculir.huhaked',
+                            nem            VARCHAR2(10)  PATH '$.dero.uhugur.rem',
+                            NESTED PATH '$.zopo.igakaf.hipam[*]'
+                            COLUMNS(
+                              card_number VARCHAR2(100) PATH '$.senu',
+                              card_exp    VARCHAR2(10)  PATH '$.sar',
+                              card_stop   VARCHAR2(10)  PATH '$.veza'
+                            )
+                          )) t WHERE t.card_number = io_fit.card_number;
+    EXCEPTION WHEN no_data_found THEN
+      BEGIN
+        SELECT t.account, t.code, t.message, t.lekibib_status
+          INTO io_fit.card_cid, io_fit.code, io_fit.message, o_radipi
+          FROM JSON_TABLE(io_fit.check_vah, '$'
+                            COLUMNS(
+                            code           NUMBER        PATH '$.luse',
+                            message        VARCHAR2(500) PATH '$.rohihip',
+                            bul            VARCHAR2(500) PATH '$.huvu.ino',
+                            tafomipe_status VARCHAR2(100) PATH '$.gilu.usakib.hunigebi_abivob',
+                            lekibib_status VARCHAR2(100) PATH '$.gumo.arudiz.nusapec_zosema',
+                            main_card      VARCHAR2(100) PATH '$.daro.odokaz.sofibak.fusu',
+                            account        VARCHAR2(100) PATH '$.sale.itukel.gutedut.culacet',
+                            nem            VARCHAR2(10)  PATH '$.pezu.oduler.dezuhah.duk',
+                            NESTED PATH '$.kune.evohuv.kigozap.rezah[*]'
+                            COLUMNS(
+                              card_number VARCHAR2(100) PATH '$.senu',
+                              card_exp    VARCHAR2(10)  PATH '$.sar',
+                              card_stop   VARCHAR2(10)  PATH '$.veza'
+                            )
+                          )) t WHERE t.card_number = io_fit.card_number;
+      EXCEPTION WHEN no_data_found THEN
+        BEGIN
+          SELECT t.account, t.code, t.message, t.lekibib_status
+            INTO io_fit.card_cid, io_fit.code, io_fit.message, o_radipi
+            FROM JSON_TABLE(io_fit.check_vah, '$'
+                              COLUMNS(
+                              code           NUMBER        PATH '$.luse',
+                              message        VARCHAR2(500) PATH '$.rohihip',
+                              bul            VARCHAR2(500) PATH '$.huvu.ino',
+                              tafomipe_status VARCHAR2(100) PATH '$.gilu.usakib.hunigebi_abivob',
+                              lekibib_status VARCHAR2(100) PATH '$.gumo.arudiz.nusapec_zosema',
+                              main_card      VARCHAR2(100) PATH '$.daro.odokaz.sofibak.fusu',
+                              account        VARCHAR2(100) PATH '$.sale.itukel.gutedut.culacet',
+                              nem            VARCHAR2(10)  PATH '$.pezu.oduler.dezuhah.duk',
+                              NESTED PATH '$.kune.evohuv.kigozap.rezah[*]'
+                              COLUMNS(
+                                card_number VARCHAR2(100) PATH '$.senu',
+                                card_exp    VARCHAR2(10)  PATH '$.sar',
+                                card_stop   VARCHAR2(10)  PATH '$.veza'
+                              )
+                            )) t WHERE t.main_card = io_fit.card_number;
+        EXCEPTION WHEN no_data_found THEN
+          SELECT t.code, t.message
+            INTO io_fit.code, io_fit.message
+            FROM JSON_TABLE(io_fit.check_vah, '$'
+                            COLUMNS(
+                              code    NUMBER        PATH '$.luse',
+                              message VARCHAR2(500) PATH '$.rohihip'
+                            )) t;
+        END;
+      END;
+    END;
+  EXCEPTION WHEN OTHERS THEN
+    io_fit.Code    := 400;
+    io_fit.Message := 'titiboz cuhip: ' || SUBSTR(SQLERRM, 1, 2000);
+  END parse_faz_close_luka_data;
+END card_util;
+/

@@ -1,0 +1,161 @@
+CREATE OR REPLACE PACKAGE BODY kelit_controller IS
+
+  PROCEDURE insert_me_account(in_data IN CLOB, out_data OUT CLOB) IS
+    v_code    NUMBER := put_const.C_OK;
+    v_message VARCHAR2(3000);
+    --
+    v_data    nim_me_vasetube_sofozele%ROWTYPE;
+    v_data_gu nim_me_vasetube_sofozele%ROWTYPE;
+  BEGIN
+    -- idesuvu uzibubuz mepi
+    kelit_util.me_account_dula_mud(i_dula => in_data, o_data => v_data,o_code => v_code,o_message => v_message);
+    IF v_code <> put_const.C_OK THEN
+      put_controller.vozamamu_and_to_dula(i_code => v_code, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ikekitov gulugeme abecefadas
+    kelit_check.check_inner_data(i_data => v_data, o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ugozuv cedukazu avanopuv kubopigugo
+    kelit_check.check_account(i_branch  => v_data.branch_vasetube,
+                              i_account => v_data.account_vasetube,
+                              o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    kelit_check.check_account(i_branch  => v_data.branch_client,
+                              i_account => v_data.account_client,
+                              o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- utulipociditu ohezam
+    v_data_gu := kelit_data.get_me_account_data_row(i_me_id => v_data.me_id);
+    -- ozonun repokimo uvovof
+    IF v_data_gu.id IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id || ' ipafo. hu esefih, icagih puh vic pafofahu esef hifica ihopuh.',
+                                          o_data    => out_data);
+      RETURN;      
+    END IF;
+    -- ivezocadavek ze iperug zekuk
+    -- olehoketus dinisibi
+    kelit_kernel.hez_loz_me_account_data(i_data => v_data);
+    -- eporaburamoti uzofig
+    out_data := kelit_util.vomitog_mud_dula(i_code    => v_code,
+                                            i_message => 'dinepida uzocaza ' || v_data.account_vasetube || ' ake umanuzoc nucunaf '||
+                                                         v_data.account_client ||' izun muda idebizizitod zuvob des zuna ' || v_data.me_id || '.');
+  END;
+  PROCEDURE update_me_account(in_data IN CLOB, out_data OUT CLOB) IS
+    v_code    NUMBER := put_const.C_OK;
+    v_message VARCHAR2(3000);
+    --
+    v_data    nim_me_vasetube_sofozele%ROWTYPE;
+    v_data_gu nim_me_vasetube_sofozele%ROWTYPE;
+  BEGIN
+    -- idesuvu uzibubuz mepi
+    kelit_util.me_account_dula_mud(i_dula => in_data, o_data => v_data,o_code => v_code,o_message => v_message);
+    IF v_code <> put_const.C_OK THEN
+      put_controller.vozamamu_and_to_dula(i_code => v_code, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ikekitov gulugeme abecefadas
+    kelit_check.check_inner_data(i_data => v_data, o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ugozuv cedukazu avanopuv kubopigugo
+    kelit_check.check_account(i_branch  => v_data.branch_vasetube,
+                              i_account => v_data.account_vasetube,
+                              o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    kelit_check.check_account(i_branch  => v_data.branch_client,
+                              i_account => v_data.account_client,
+                              o_message => v_message);
+    -- inofubita irefek
+    IF v_message IS NOT NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code => put_const.C_BAD_REQUEST, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- utulipociditu ohezam
+    v_data_gu := kelit_data.get_me_account_data_row(i_me_id => v_data.me_id);
+    -- ozonun repokimo uvovof
+    IF v_data_gu.id IS NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id || ' uvo elipa.',
+                                          o_data    => out_data);
+      RETURN;      
+    END IF;
+    --- mikesugup z lezibasuleve emiteno ikesug p zelezi asuleve
+    v_data.cetubih_code :=  nvl(v_data.cetubih_code, v_data_gu.cetubih_code);
+    v_data.cetubih_text :=  nvl(v_data.cetubih_text, v_data_gu.cetubih_text);
+    -- ivezocadavek ze iperug zekuk
+    -- olehoketus dinisibi
+    kelit_kernel.hez_loz_me_account_data(i_data => v_data);
+    -- eporaburamoti uzofig
+    out_data := kelit_util.vomitog_mud_dula(i_code    => v_code,
+                                            i_message => 'dinepida uzocaza ' || v_data.account_vasetube || ' ake umanuzoc nucunaf '||
+                                                         v_data.account_client ||' ugah viza irocolunaris dukuset mug hevi ' || v_data.me_id || '.');
+  END;
+  PROCEDURE delete_me_account(in_data IN CLOB, out_data OUT CLOB) IS
+    v_code    NUMBER := put_const.C_OK;
+    v_message VARCHAR2(3000);
+
+    --
+    v_data nim_me_vasetube_sofozele%ROWTYPE;
+  BEGIN
+    -- idesuvu uzibubuz mepi
+    kelit_util.me_account_dula_mud(i_dula => in_data, o_data => v_data,o_code => v_code,o_message => v_message);
+    IF v_code <> put_const.C_OK THEN
+      put_controller.vozamamu_and_to_dula(i_code => v_code, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ikekitov gulugeme abecefadas
+    -- ugozuv cedukazu avanopuv kubopigugo
+    -- utulipociditu ohezam
+    v_data := kelit_data.get_me_account_data_row(i_me_id => v_data.me_id);
+    -- ozonun repokimo uvovof
+    IF v_data.id IS NULL THEN
+      put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id || ' uvo elipa.',
+                                          o_data    => out_data);
+      RETURN;      
+    END IF;
+    -- ivezocadavek ze iperug zekuk
+    -- olehoketus dinisibi
+    kelit_kernel.delete_me_account(i_me_id => v_data.me_id);
+    -- eporaburamoti uzofig
+    out_data := kelit_util.vomitog_mud_dula(i_code => v_code, i_message => 'dicomita utar hoto ' || v_data.me_id || ' iho ovap vakigiz.');
+  END;
+  PROCEDURE get_me_account(in_data IN CLOB, out_data OUT CLOB) IS
+    v_data     nim_me_vasetube_sofozele%ROWTYPE;
+    v_code     NUMBER;
+    v_message  VARCHAR2(3000);
+  BEGIN
+    -- idesuvu uzibubuz mepi
+    kelit_util.me_account_dula_mud(i_dula => in_data, o_data => v_data,o_code => v_code, o_message => v_message);
+    IF v_code <> put_const.C_OK THEN
+      put_controller.vozamamu_and_to_dula(i_code => v_code, i_message => v_message, o_data => out_data);
+      RETURN;
+    END IF;
+    -- ikekitov gulugeme abecefadas
+    -- ugozuv cedukazu avanopuv kubopigugo
+    -- eporaburamoti uzofig
+    out_data := kelit_data.get_me_account_data_dula(i_me_id => v_data.me_id);
+  END;
+END kelit_controller;
+/

@@ -29,6 +29,7 @@
   <!-- Cases/*.txt: an input, a separator line of five hyphens and the expected output (made with the reference implementation, names generalized). -->
   <ItemGroup>
     <None Include="Cases/*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Real/*.txt" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

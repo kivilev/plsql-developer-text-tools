@@ -26,7 +26,7 @@ namespace TextTools.Core.Formatting;
 /// <param name="HeaderTailsOnOneLine">R18 tail: RESULT_CACHE, AUTHID ..., IS of a subprogram header on the line of the header.</param>
 /// <param name="SelectColumnsOnePerLine">R15: one select column per line; the first column after a comment indented like the others.</param>
 /// <param name="SubqueryLayout">A subquery in parentheses on one line when it fits, else right after the parenthesis.</param>
-/// <param name="AlignAliases">The aliases of a select list in one column (as the Beautifier does); off: one blank before each alias.</param>
+/// <param name="SingleBlankBeforeAlias">The aliases of a select list get one blank before them instead of the column the Beautifier aligns them in.</param>
 /// <param name="WrapLongLines">R02: a line past the margin is broken at the outermost call or condition that covers it.</param>
 /// <param name="WrapDecodeInPairs">A long DECODE breaks in pairs "condition, value".</param>
 /// <param name="WrapBetween">A long <c>x BETWEEN a AND b</c> breaks before AND.</param>
@@ -55,7 +55,7 @@ public sealed record FormatOptions(
     bool HeaderTailsOnOneLine = true,
     bool SelectColumnsOnePerLine = true,
     bool SubqueryLayout = true,
-    bool AlignAliases = true,
+    bool SingleBlankBeforeAlias = false,
     bool WrapLongLines = true,
     bool WrapDecodeInPairs = true,
     bool WrapBetween = true,
@@ -72,6 +72,6 @@ public sealed record FormatOptions(
         BlankLineBeforeSubprograms: false, BlankLineAfterPackageHeader: false, NoBlankLineBeforePackageEnd: false, ExecuteImmediateLiteralOnOwnLine: false, TrimTrailingSpaces: false,
         SpaceAfterComma: false, TightParentheses: false, SelectIntoOnOneLine: false, UpdateSetLayout: false, JoinIfConditions: false, JoinOnAlignment: false,
         ShortParenGroupOnOneLine: false, InsertLayout: false, HeaderTailsOnOneLine: false, SelectColumnsOnePerLine: false, SubqueryLayout: false,
-        AlignAliases: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,
+        SingleBlankBeforeAlias: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,
         AlignDeclarations: false, IndentComments: false);
 }

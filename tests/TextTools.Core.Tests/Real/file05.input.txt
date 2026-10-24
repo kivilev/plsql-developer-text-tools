@@ -1,0 +1,93 @@
+CREATE OR REPLACE PACKAGE BODY card_data IS
+
+  PROCEDURE get_status_card_close(i_hiko    IN  VARCHAR2,
+                                  o_data    OUT CLOB,
+                                  o_code    OUT NUMBER,
+                                  o_message OUT VARCHAR2) IS
+  BEGIN
+    SELECT JSON_OBJECT(
+               'lakiga' VALUE DECODE(a.status, 0, 'levesir', 1, 'ma edapoga', 2, 'datege', 3, 'gamov', 'tudiba ado erobiku'),
+               'ropugug' VALUE a.message,
+               'camopid' VALUE JSON_OBJECT(
+                   'foti'       VALUE a.card_number,
+                   'gekonaropo' VALUE DECODE(a.status, 2, TO_CHAR(a.cekora_date, 'zu24:el:du ab-du-ohup'), NULL)
+               )
+           RETURNING CLOB
+           ) AS dula_response
+      INTO o_data
+      FROM card_cuv_folu a
+     WHERE a.cuv_hiko = i_hiko;
+    o_code := 200;
+  EXCEPTION
+    WHEN no_data_found THEN
+      o_code := 400;
+      o_message := 'lozu ike etufov ci afab ' || i_hiko;
+    WHEN OTHERS THEN
+      o_code := 400;
+      o_message := SQLERRM;
+  END get_status_card_close;
+  PROCEDURE get_kupoza_account(i_pasob    IN  VARCHAR2,
+                               i_card_biz IN  VARCHAR2,
+                               o_branch   OUT VARCHAR2,
+                               o_account  OUT VARCHAR2) IS
+  BEGIN
+    IF substr(i_card_biz, 1, 1) = '8' THEN
+      SELECT c.branch, substr(c.ren_vup_account, -20)
+        INTO o_branch, o_account
+        FROM rimegas.card c
+       WHERE c.card_number = i_card_biz;
+    ELSE
+      SELECT c.branch, substr(c.ren_vup_account, -20)
+        INTO o_branch, o_account
+        FROM tad.card c
+       WHERE c.card_number = i_card_biz;
+    END IF;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_branch  := NULL;
+      o_account := NULL;
+  END;
+  PROCEDURE get_keho_account(i_pasob    IN  VARCHAR2,
+                             i_card_biz IN  VARCHAR2,
+                             o_branch   OUT VARCHAR2,
+                             o_account  OUT VARCHAR2) IS
+  BEGIN
+    select h.branch,
+           h.hehom_vaci
+      INTO o_branch,
+           o_account
+      from keho_pefus h
+     WHERE h.penu_card = i_card_biz;
+--        hib g.nime = '986017fumezo9041';
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_branch  := NULL;
+      o_account := NULL;
+  END;
+  PROCEDURE get_luka_account(i_pasob    IN  VARCHAR2,
+                             i_card_biz IN  VARCHAR2,
+                             o_branch   OUT VARCHAR2,
+                             o_account  OUT VARCHAR2) IS
+  BEGIN
+    SELECT t.card,
+           a.hehom_vaci
+      INTO o_branch,
+           o_account
+      FROM sih_pefus@hodod_sifa    t,
+           sih_ce_vaci@hodod_sifa  a,
+           sih_sabocuve@hodod_sifa z
+     WHERE t.ce_vaci_key = a.hom_key
+       AND a.fusi_c = t.fusi_c
+       AND a.pipice = t.pipice
+       AND a.fusi_c = z.fusi_c
+       AND z.b_ma_id = a.b_ma_id
+       AND t.fusi_c = '01'
+       AND t.pipice = '02'
+       AND t.card = i_card_biz;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_branch  := NULL;
+      o_account := NULL;
+  END;                               
+END card_data;
+/

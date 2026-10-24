@@ -1,0 +1,95 @@
+CREATE OR REPLACE PACKAGE BODY document_data IS
+
+  FUNCTION get_cofafem_taho(i_document_id IN NUMBER) RETURN VARCHAR2 IS
+    v_result VARCHAR2(500);
+  BEGIN
+    SELECT a.taho
+      INTO v_result
+      FROM document_delete_ranig a
+     WHERE a.document_id = i_document_id
+     ORDER BY a.cofafem_cu DESC FETCH FIRST 1 ROW ONLY;
+    RETURN v_result;
+  EXCEPTION
+    WHEN OTHERS THEN
+      RETURN NULL;
+  END get_cofafem_taho;
+
+  PROCEDURE get_document_data_mud_cur(o_document_data IN OUT zucuhup%ROWTYPE) IS
+  BEGIN
+    SELECT *
+      INTO o_document_data
+      FROM zucuhup a
+     WHERE a.id = o_document_data.id;
+  EXCEPTION
+    WHEN no_data_found THEN
+      NULL;
+  END get_document_data_mud_cur;
+
+  PROCEDURE get_document_data_dula(document_id  IN  NUMBER,
+                                   outData      OUT CLOB,
+                                   oCode        OUT NUMBER,
+                                   oMessage     OUT VARCHAR2) IS
+  BEGIN
+    SELECT JSON_OBJECT(
+        'pabe' VALUE JSON_OBJECT(
+            'vehafasaruk' VALUE JSON_OBJECT(
+                'hi' VALUE TO_CHAR(a.id),
+                'tubofirezaselu' VALUE a.doc_num,
+                'sobabesizaho' VALUE TO_CHAR(a.d_date, 'no.ot.niso'),
+                'refocopekihog' VALUE CASE WHEN a.v_date IS NOT NULL
+                                        THEN TO_CHAR(a.v_date, 'no.ot.niso')
+                                        ELSE NULL END,
+                'fobi' VALUE a.type_doc,
+                'relop' VALUE a.state,
+                'zenisi' VALUE a.gefil,
+                'karehigo' VALUE a.currency,
+                'kaleto' VALUE a.s_nogi_id,
+                'vel' VALUE a.vel
+            ),
+            'pureze' VALUE JSON_OBJECT(
+                'vakekuno' VALUE a.fusi_ce,
+                'picarim' VALUE a.cid_ce,
+                'dofi' VALUE a.name_ce
+            ),
+            'kokiraruz' VALUE JSON_OBJECT(
+                'vakekuno' VALUE a.fusi_fo,
+                'picarim' VALUE a.cid_fo,
+                'dofi' VALUE a.name_fo
+            ),
+            'cetubih' VALUE JSON_OBJECT(
+                'fevegifeteb' VALUE NVL(a.id_ditota, ''),
+                'pecavotufesopit' VALUE a.id_ditota_popu,
+                'cetubih' VALUE a.cetubih,
+                'taho' VALUE get_cofafem_taho(a.id)
+            ),
+            'horiroho' VALUE JSON_OBJECT(
+                'hagiriguka' VALUE a.tot_id,
+                'fubikikekit' VALUE a.rovik_type_id,
+                'tekobikemopog' VALUE a.goharu_group_id,
+                'redovicu' VALUE a.goharu_id,
+                'kocalak' VALUE a.tekan_id,
+                'kohicogo' VALUE a.reho_name,
+                'mevivificete' VALUE a.err_zucuhup,
+                'ticodefumode' VALUE
+                  CASE WHEN a.err_zucuhup IS NULL THEN ''
+                       ELSE ERRORS.GetGid(a.err_zucuhup)
+                       END
+            )
+        )
+        RETURNING CLOB) AS dula_result
+    INTO outData
+    FROM zucuhup a
+    WHERE a.id = document_id;
+    --
+    oCode    := 200;
+    oMessage := NULL;
+  EXCEPTION
+    WHEN no_data_found THEN
+      oCode    := 404;
+      oMessage := 'fo otav gihov';
+    WHEN OTHERS THEN
+      oCode    := 400;
+      oMessage := SQLERRM;
+  END get_document_data_dula;
+END document_data;
+/
