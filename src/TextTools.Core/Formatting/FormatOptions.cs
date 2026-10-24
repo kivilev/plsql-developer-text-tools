@@ -25,7 +25,6 @@ namespace TextTools.Core.Formatting;
 /// <param name="SelectColumnsOnePerLine">R15: one select column per line; the first column after a comment indented like the others.</param>
 /// <param name="SubqueryLayout">A subquery in parentheses on one line when it fits, else right after the parenthesis.</param>
 /// <param name="AlignAliases">The aliases of a select list in one column (as the Beautifier does); off: one blank before each alias.</param>
-/// <param name="TightenAliasPadding">With <paramref name="AlignAliases"/>: an alias column that would push a line past 120 is not padded.</param>
 /// <param name="WrapLongLines">R02: a line past the margin is broken at the outermost call or condition that covers it.</param>
 /// <param name="WrapDecodeInPairs">A long DECODE breaks in pairs "condition, value".</param>
 /// <param name="WrapBetween">A long <c>x BETWEEN a AND b</c> breaks before AND.</param>
@@ -53,7 +52,6 @@ public sealed record FormatOptions(
     bool SelectColumnsOnePerLine = true,
     bool SubqueryLayout = true,
     bool AlignAliases = true,
-    bool TightenAliasPadding = true,
     bool WrapLongLines = true,
     bool WrapDecodeInPairs = true,
     bool WrapBetween = true,
@@ -70,6 +68,6 @@ public sealed record FormatOptions(
         BlankLineBeforeSubprograms: false, NoBlankLineBeforePackageEnd: false, ExecuteImmediateLiteralOnOwnLine: false, TrimTrailingSpaces: false,
         TightParentheses: false, SelectIntoOnOneLine: false, UpdateSetLayout: false, JoinIfConditions: false, JoinOnAlignment: false,
         ShortParenGroupOnOneLine: false, InsertLayout: false, HeaderTailsOnOneLine: false, SelectColumnsOnePerLine: false, SubqueryLayout: false,
-        AlignAliases: false, TightenAliasPadding: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,
+        AlignAliases: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,
         AlignDeclarations: false, IndentComments: false);
 }

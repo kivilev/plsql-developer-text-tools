@@ -30,7 +30,6 @@
   "setting.joinOnAlignment": "JOIN：ON と AND を JOIN キーワードに揃える",
   "setting.subqueryLayout": "括弧内のサブクエリは収まる場合1行にする",
   "setting.alignAliases": "SELECT：別名を1つの桁に揃える",
-  "setting.tightenAliasPadding": "…ただし120桁を超える場合は揃えない（別名の前に空白1つ）",
   "setting.tightParentheses": "括弧の内側に空白を入れない",
   "setting.wrapLongLines": "右マージンを超える行を折り返す",
   "setting.wrapDecodeInPairs": "DECODE：（条件, 値）の組で折り返す",

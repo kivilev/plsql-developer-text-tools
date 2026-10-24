@@ -57,7 +57,6 @@ public sealed class FormatProfile
         SelectColumnsOnePerLine: IsOn("selectColumnsOnePerLine"),
         SubqueryLayout: IsOn("subqueryLayout"),
         AlignAliases: IsOn("alignAliases"),
-        TightenAliasPadding: IsOn("tightenAliasPadding"),
         WrapLongLines: IsOn("wrapLongLines"),
         WrapDecodeInPairs: IsOn("wrapDecodeInPairs"),
         WrapBetween: IsOn("wrapBetween"),

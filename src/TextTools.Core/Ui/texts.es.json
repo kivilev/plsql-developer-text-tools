@@ -30,7 +30,6 @@
   "setting.joinOnAlignment": "JOIN: ON y AND alineados con la palabra JOIN",
   "setting.subqueryLayout": "Subconsulta entre paréntesis en una línea si cabe",
   "setting.alignAliases": "SELECT: alinear los alias en una columna",
-  "setting.tightenAliasPadding": "…pero no más allá de la columna 120 (si no, un espacio antes del alias)",
   "setting.tightParentheses": "Sin espacios dentro de los paréntesis",
   "setting.wrapLongLines": "Dividir las líneas más largas que el margen derecho",
   "setting.wrapDecodeInPairs": "DECODE: dividir por pares (condición, valor)",

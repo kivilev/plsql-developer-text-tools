@@ -53,10 +53,6 @@ public static class FormatSample
         "             a.branch      branch_code,\n" +
         "             c.name        client_name\n" +
         "        FROM account a;\n" +
-        "    OPEN c2 FOR\n" +
-        "      SELECT a.id" + new string(' ', 112) + "alias_one,\n" +
-        "             a.very_long_column_name  alias_two\n" +
-        "        FROM account a;\n" +
         "    IF v_acc.state = account_const.c_state_active AND v_acc.currency = i_currency\n" +
         "       OR i_currency IS NULL THEN\n" +
         "      v_text := DECODE(v_acc.state, 0, 'Created', 1, 'Accepted for processing', 2, 'Rejected by the bank', 3, 'Paid', 'Unknown');\n" +

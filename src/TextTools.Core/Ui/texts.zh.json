@@ -30,7 +30,6 @@
   "setting.joinOnAlignment": "JOIN：ON 和 AND 与 JOIN 关键字对齐",
   "setting.subqueryLayout": "括号内的子查询在能放下时放在一行",
   "setting.alignAliases": "SELECT：别名对齐到同一列",
-  "setting.tightenAliasPadding": "…但不超过 120 列（否则别名前只留一个空格）",
   "setting.tightParentheses": "括号内不留空格",
   "setting.wrapLongLines": "超过右边距的行自动换行",
   "setting.wrapDecodeInPairs": "DECODE：按（条件，值）成对换行",

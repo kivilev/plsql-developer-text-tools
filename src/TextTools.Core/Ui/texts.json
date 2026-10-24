@@ -30,7 +30,6 @@
   "setting.joinOnAlignment": "JOIN: ON and AND aligned to the JOIN keyword",
   "setting.subqueryLayout": "Subquery in parentheses on one line when it fits",
   "setting.alignAliases": "SELECT: align the aliases in one column",
-  "setting.tightenAliasPadding": "...but not past 120 columns (else one blank before the alias)",
   "setting.tightParentheses": "No blanks inside parentheses",
   "setting.wrapLongLines": "Wrap lines longer than the right margin",
   "setting.wrapDecodeInPairs": "DECODE: break in pairs (condition, value)",

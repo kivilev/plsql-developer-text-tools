@@ -272,7 +272,6 @@ internal static unsafe partial class SettingsWindow
         SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin, revealChange);
         // The parts of line wrapping do nothing while wrapping is off: grey them out.
         foreach (var id in WrapParts) EnableWindow(SettingControls[id], options.WrapLongLines ? 1 : 0);
-        EnableWindow(SettingControls["tightenAliasPadding"], options.AlignAliases ? 1 : 0);
     }
 
     private static readonly string[] WrapParts = ["wrapDecodeInPairs", "wrapBetween", "alignNamedArguments"];

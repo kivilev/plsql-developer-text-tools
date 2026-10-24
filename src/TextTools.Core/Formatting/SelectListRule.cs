@@ -85,26 +85,14 @@ internal static partial class SelectListRule
         return string.Join('\n', lines);
     }
 
-    /// <summary>A column of aliases that pushes a select list line past <paramref name="hard"/> is not aligned (for the whole group).</summary>
-    public static string TightenAliasPadding(string text, int hard = 120)
+    /// <summary>The aliases of a select list are not aligned: one blank before each alias.</summary>
+    public static string UnalignAliases(string text)
     {
         var (lines, masked) = LineText.Split(text);
         var output = (string[])lines.Clone();
-        var i = 0;
-        while (i < lines.Length)
+        for (var i = 0; i < lines.Length; i++)
         {
-            if (!AliasPadding().IsMatch(masked[i]))
-            {
-                i++;
-                continue;
-            }
-            var j = i;
-            while (j + 1 < lines.Length && AliasPadding().IsMatch(masked[j + 1])) j++;
-            if (Enumerable.Range(i, j - i + 1).Max(k => lines[k].TrimEnd().Length) > hard)
-            {
-                for (var k = i; k <= j; k++) output[k] = PaddedAlias().Replace(lines[k], "${last} ${alias}", 1);
-            }
-            i = j + 1;
+            if (AliasPadding().IsMatch(masked[i])) output[i] = PaddedAlias().Replace(lines[i], "${last} ${alias}", 1);
         }
         return string.Join('\n', output);
     }

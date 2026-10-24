@@ -30,7 +30,6 @@
   "setting.joinOnAlignment": "JOIN: ON и AND по правому краю слова JOIN",
   "setting.subqueryLayout": "Подзапрос в скобках в одну строку, если помещается",
   "setting.alignAliases": "SELECT: выравнивать псевдонимы в один столбец",
-  "setting.tightenAliasPadding": "...но не дальше 120 колонок (иначе один пробел перед псевдонимом)",
   "setting.tightParentheses": "Без пробелов внутри скобок",
   "setting.wrapLongLines": "Переносить строки длиннее правого поля",
   "setting.wrapDecodeInPairs": "DECODE: перенос парами (условие, значение)",
