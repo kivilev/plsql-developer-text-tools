@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: dividir antes de AND",
   "setting.alignNamedArguments": "Alinear el => de los argumentos con nombre",
   "setting.joinIfConditions": "Condición IF en una línea lógica (división en AND/OR)",
-  "setting.shortParenGroupOnOneLine": "Condición corta entre paréntesis en una línea"
+  "setting.shortParenGroupOnOneLine": "Condición corta entre paréntesis en una línea",
+  "button.export": "Exportar...",
+  "button.import": "Importar...",
+  "settings.exported": "Reglas guardadas en el archivo",
+  "settings.imported": "Reglas leídas del archivo, ajustes establecidos: ",
+  "settings.fileError": "No se pudo leer o escribir el archivo",
+  "dialog.filter": "Reglas de formato"
 }

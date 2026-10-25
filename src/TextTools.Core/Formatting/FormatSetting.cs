@@ -44,7 +44,7 @@ public static class FormatSettings
         new("endWithName", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R07"))),
         new("alignAssignments", "code", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignAssignmentGroups"), ("SQLDev", "alignAssignments"), ("DataGrip", "Align assignments"), ("ICBS", "R08"))),
         new("executeImmediateLiteralOnOwnLine", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R21"))),
-        new("alignDeclarations", "code", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignDeclarations"), ("SQLDev", "alignDeclarations"))),
+        new("alignDeclarations", "code", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignDeclarationGroups"), ("SQLDev", "alignDeclarations"))),
         new("indentComments", "code", SettingKind.Bool, 1),
         new("headerTailsOnOneLine", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R18"))),
         new("tightParentheses", "code", SettingKind.Bool, 1),
@@ -56,7 +56,7 @@ public static class FormatSettings
         new("updateSetLayout", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R10"))),
         new("joinOnAlignment", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R12"))),
         new("subqueryLayout", "sql", SettingKind.Bool, 1),
-        new("alignAliases", "sql", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignAliases"), ("SQLDev", "alignColumnAliases"), ("DataGrip", "Align column aliases"))),
+        new("alignAliases", "sql", SettingKind.Bool, 1, Sources: Src(("SQLDev", "alignColumnAliases"), ("DataGrip", "Align column aliases"))),
 
         new("wrapLongLines", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R02"))),
         new("wrapDecodeInPairs", "wrapping", SettingKind.Bool, 1),

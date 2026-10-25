@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: break before AND",
   "setting.alignNamedArguments": "Align => of named arguments",
   "setting.joinIfConditions": "IF conditions on one logical line (wrapped at AND/OR)",
-  "setting.shortParenGroupOnOneLine": "Short parenthesised condition on one line"
+  "setting.shortParenGroupOnOneLine": "Short parenthesised condition on one line",
+  "button.export": "Export...",
+  "button.import": "Import...",
+  "settings.exported": "Rules saved to the file",
+  "settings.imported": "Rules read from the file, settings set: ",
+  "settings.fileError": "Could not read or write the file",
+  "dialog.filter": "Format rules"
 }

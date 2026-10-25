@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: quebrar antes do AND",
   "setting.alignNamedArguments": "Alinhar => dos argumentos nomeados",
   "setting.joinIfConditions": "Condição do IF em uma linha lógica (quebra em AND/OR)",
-  "setting.shortParenGroupOnOneLine": "Condição curta entre parênteses em uma linha"
+  "setting.shortParenGroupOnOneLine": "Condição curta entre parênteses em uma linha",
+  "button.export": "Exportar...",
+  "button.import": "Importar...",
+  "settings.exported": "Regras salvas no arquivo",
+  "settings.imported": "Regras lidas do arquivo, configurações definidas: ",
+  "settings.fileError": "Não foi possível ler ou gravar o arquivo",
+  "dialog.filter": "Regras de formatação"
 }

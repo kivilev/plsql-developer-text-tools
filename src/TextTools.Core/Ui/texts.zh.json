@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN：在 AND 之前换行",
   "setting.alignNamedArguments": "对齐命名参数的 =>",
   "setting.joinIfConditions": "IF 条件合并为一个逻辑行（在 AND/OR 处换行）",
-  "setting.shortParenGroupOnOneLine": "较短的括号条件放在一行"
+  "setting.shortParenGroupOnOneLine": "较短的括号条件放在一行",
+  "button.export": "导出...",
+  "button.import": "导入...",
+  "settings.exported": "规则已保存到文件",
+  "settings.imported": "已从文件读取规则，设置项数：",
+  "settings.fileError": "无法读取或写入文件",
+  "dialog.filter": "格式规则"
 }

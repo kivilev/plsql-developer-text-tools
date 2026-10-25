@@ -121,4 +121,58 @@ public sealed class FormatProfile
         }
         return profile;
     }
+
+    /// <summary>
+    /// The profile as a text file in the style of the Beautifier's rules file of PL/SQL Developer (<c>.br</c>): <c>Key=Value</c> per line,
+    /// <c>Version=1</c> first, <c>TRUE</c> / <c>FALSE</c> for switches, the setting id with a capital first letter as the key.
+    /// </summary>
+    public string ToRulesText()
+    {
+        var sb = new System.Text.StringBuilder("Version=1\r\n");
+        foreach (var s in FormatSettings.All)
+        {
+            var key = char.ToUpperInvariant(s.Id[0]) + s.Id[1..];
+            var value = Get(s.Id).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if (s.Kind == SettingKind.Bool) value = IsOn(s.Id) ? "TRUE" : "FALSE";
+            sb.Append(key).Append('=').Append(value).Append("\r\n");
+        }
+        return sb.ToString();
+    }
+
+    /// <summary>
+    /// Reads a rules text into this profile: our own file, or the rules file of PL/SQL Developer (its keys are known from
+    /// <see cref="FormatSetting.Sources"/>, e.g. <c>RightMargin</c>, <c>AlignAssignmentGroups</c>). Unknown keys are ignored, settings
+    /// that the text does not mention keep their value. Returns the number of settings that were set.
+    /// </summary>
+    public int ReadRulesText(string? text)
+    {
+        var applied = 0;
+        if (string.IsNullOrWhiteSpace(text)) return 0;
+        foreach (var raw in text.Split('\n'))
+        {
+            var line = raw.Trim();
+            var eq = line.IndexOf('=', StringComparison.Ordinal);
+            if (eq <= 0) continue;
+            var key = line[..eq].Trim();
+            var value = line[(eq + 1)..].Trim();
+            var setting = FormatSettings.All.FirstOrDefault(s => string.Equals(s.Id, key, StringComparison.OrdinalIgnoreCase))
+                ?? FormatSettings.All.FirstOrDefault(s => s.Sources is { } src && src.TryGetValue("PLSQLDev", out var name) && string.Equals(name, key, StringComparison.OrdinalIgnoreCase));
+            if (setting is null) continue;
+            int number;
+            if (string.Equals(value, "TRUE", StringComparison.OrdinalIgnoreCase)) number = 1;
+            else if (string.Equals(value, "FALSE", StringComparison.OrdinalIgnoreCase)) number = 0;
+            else if (!int.TryParse(value, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out number)) continue;
+            Set(setting.Id, number);
+            applied++;
+        }
+        return applied;
+    }
+
+    /// <summary>A new profile (the defaults) with a rules text read into it.</summary>
+    public static FormatProfile FromRulesText(string? text, out int applied)
+    {
+        var profile = new FormatProfile();
+        applied = profile.ReadRulesText(text);
+        return profile;
+    }
 }

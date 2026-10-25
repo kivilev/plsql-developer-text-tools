@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: перенос перед AND",
   "setting.alignNamedArguments": "Выравнивать => именованных аргументов",
   "setting.joinIfConditions": "Условие IF одной логической строкой (перенос по AND/OR)",
-  "setting.shortParenGroupOnOneLine": "Короткое условие в скобках в одну строку"
+  "setting.shortParenGroupOnOneLine": "Короткое условие в скобках в одну строку",
+  "button.export": "Экспорт...",
+  "button.import": "Импорт...",
+  "settings.exported": "Правила сохранены в файл",
+  "settings.imported": "Правила прочитаны из файла, настроек задано: ",
+  "settings.fileError": "Не удалось прочитать или записать файл",
+  "dialog.filter": "Правила форматирования"
 }

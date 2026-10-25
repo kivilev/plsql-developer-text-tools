@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN：AND の前で折り返す",
   "setting.alignNamedArguments": "名前付き引数の => を揃える",
   "setting.joinIfConditions": "IF 条件を1つの論理行にする（AND/OR で折り返し）",
-  "setting.shortParenGroupOnOneLine": "短い括弧付き条件を1行にする"
+  "setting.shortParenGroupOnOneLine": "短い括弧付き条件を1行にする",
+  "button.export": "エクスポート...",
+  "button.import": "インポート...",
+  "settings.exported": "ルールをファイルに保存しました",
+  "settings.imported": "ファイルからルールを読み込みました。設定数：",
+  "settings.fileError": "ファイルを読み書きできません",
+  "dialog.filter": "書式ルール"
 }

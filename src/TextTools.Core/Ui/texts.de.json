@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: vor AND umbrechen",
   "setting.alignNamedArguments": "=> benannter Argumente ausrichten",
   "setting.joinIfConditions": "IF-Bedingung in einer logischen Zeile (Umbruch bei AND/OR)",
-  "setting.shortParenGroupOnOneLine": "Kurze Bedingung in Klammern in einer Zeile"
+  "setting.shortParenGroupOnOneLine": "Kurze Bedingung in Klammern in einer Zeile",
+  "button.export": "Exportieren...",
+  "button.import": "Importieren...",
+  "settings.exported": "Regeln in der Datei gespeichert",
+  "settings.imported": "Regeln aus der Datei gelesen, Einstellungen gesetzt: ",
+  "settings.fileError": "Datei konnte nicht gelesen oder geschrieben werden",
+  "dialog.filter": "Formatierungsregeln"
 }

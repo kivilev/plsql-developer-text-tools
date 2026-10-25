@@ -38,5 +38,11 @@
   "setting.wrapBetween": "BETWEEN: tördelés az AND előtt",
   "setting.alignNamedArguments": "A névvel megadott argumentumok => jelének igazítása",
   "setting.joinIfConditions": "Az IF feltétele egy logikai sorban (tördelés AND/OR mentén)",
-  "setting.shortParenGroupOnOneLine": "Rövid zárójeles feltétel egy sorban"
+  "setting.shortParenGroupOnOneLine": "Rövid zárójeles feltétel egy sorban",
+  "button.export": "Exportálás...",
+  "button.import": "Importálás...",
+  "settings.exported": "A szabályok fájlba mentve",
+  "settings.imported": "Szabályok beolvasva a fájlból, beállítva: ",
+  "settings.fileError": "A fájl nem olvasható vagy nem írható",
+  "dialog.filter": "Formázási szabályok"
 }

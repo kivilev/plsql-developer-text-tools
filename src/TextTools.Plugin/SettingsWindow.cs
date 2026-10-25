@@ -20,6 +20,8 @@ internal static unsafe partial class SettingsWindow
     private const int IdSave = 1;
     private const int IdClose = 2;
     private const int IdDefault = 3;
+    private const int IdExport = 4;
+    private const int IdImport = 5;
     private const int IdTab = 100;
     private const int IdSetting = 200;
     private const int IdPreview = 400;
@@ -48,7 +50,7 @@ internal static unsafe partial class SettingsWindow
     private const int MinColumnWidth = 480;
     private static int _shownTab;
 
-    private static nint _hwnd, _tab, _view, _save, _default, _close, _uiFont;
+    private static nint _hwnd, _tab, _view, _save, _default, _export, _import, _close, _uiFont;
     private static int _dpi = 96;
     private static bool _updating;
     private static UiTexts _texts = UiTexts.English;
@@ -171,6 +173,8 @@ internal static unsafe partial class SettingsWindow
 
         _save = Child("BUTTON", _texts.Text("button.save"), WsTabStop | BsDefPushButton, IdSave);
         _default = Child("BUTTON", _texts.Text("button.default"), WsTabStop | BsPushButton, IdDefault);
+        _export = Child("BUTTON", _texts.Text("button.export"), WsTabStop | BsPushButton, IdExport);
+        _import = Child("BUTTON", _texts.Text("button.import"), WsTabStop | BsPushButton, IdImport);
         _close = Child("BUTTON", _texts.Text("button.close"), WsTabStop | BsPushButton, IdClose);
         ShowTab(0);
     }
@@ -215,6 +219,8 @@ internal static unsafe partial class SettingsWindow
 
         MoveWindow(_save, gap, buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_default, gap + S(ButtonWidth) + S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        MoveWindow(_export, width - gap - 3 * S(ButtonWidth) - 2 * S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        MoveWindow(_import, width - gap - 2 * S(ButtonWidth) - S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_close, width - gap - S(ButtonWidth), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         // The view keeps its old picture when it only moves: repaint it and the window around it, or ghosts of the old layout stay.
         if (_view != 0)
@@ -279,6 +285,12 @@ internal static unsafe partial class SettingsWindow
         {
             case IdClose:
                 DestroyWindow(_hwnd);
+                break;
+            case IdExport:
+                ExportRules();
+                break;
+            case IdImport:
+                ImportRules();
                 break;
             case IdDefault:
                 _profile = new FormatProfile();
