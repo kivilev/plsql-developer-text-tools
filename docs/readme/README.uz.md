@@ -26,30 +26,69 @@
 
 ## Qanday muammolarni hal qiladi
 
-### 1. Beautifier kod standartiga rioya qilmaydi
+### 1. Kengaytirilgan Beautifier
 
-`END nom;`, `:=` ustun bo‘yicha, `INSERT` / `SELECT` / `JOIN` joylashuvi, uzun qatorlar, bo‘sh qatorlar. **Format Tools** bu qoidalarni Beautifier'dan keyin qo‘shadi. Har bir qoida alohida belgi, natija darhol ko‘rinadi, qoidalarni faylga saqlab, jamoaga berish mumkin.
+*Format Tools*
 
-<p align="center"><img src="../assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="../assets/settings.png" alt="Format Tools settings window" width="640"></p>
+IDE Beautifier'idan keyin ishlaydi va uning qoidalar fayli ifodalay olmaydigan narsalarni qo‘shadi: 25 dan ortiq variant, har biri alohida belgi, natija darhol ko‘rinadi. Qoidalarni jamoa uchun faylga saqlash mumkin (Beautifier `.br` faylidagi mos sozlamalarni import qilish mumkin).
 
-### 2. Paket konstantalari bor so‘rov ishlamaydi
+- `END nom;`, `:=` ustun bo‘yicha, tekislangan e’lonlar, izohlar o‘z kodi chekinishida
+- `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON`, ichki so‘rovlar joylashuvi
+- uzun qatorlar o‘ng chegarada bo‘linadi: `DECODE` juftlab, `BETWEEN`, `||`, `=>` ustun bo‘yicha
+- `IF` shartlari bitta mantiqiy qatorda, qavs ichidagi qisqa guruhlar bir qatorda
+- o‘rnatilgan funksiyalar va `%TYPE` katta harfda, xohlasangiz vergul keyin bo‘sh joy
+- protseduralar orasida bo‘sh qator, yopuvchi `END` oldida yo‘q, `EXECUTE IMMEDIATE` joylashuvi, oxirgi bo‘sh joylarsiz
+- kodning o‘zi o‘zgarmaydi: tokenlar oldin va keyin solishtiriladi, ko‘rinishdan ko‘pini o‘zgartiradigan qoida o‘tkazib yuboriladi
 
-**Copy SQL with constants resolved**: `c_new` `'NEW'` bo‘ladi, o‘zgaruvchilar bind-o‘zgaruvchiga aylanadi, `INTO` olib tashlanadi. SQL Window yoki Explain Plan'ga qo‘ying.
+<p align="center"><img src="../assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="../assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. So‘rovni konstantalar bilan nusxalash
 
-### 3. ORA-01795: `IN` da 1000 dan ortiq qiymat
+*SQL Tools*
 
-Ro‘yxatni qo‘ying (qatorlar yoki `1, 2, 3`) — Oracle qabul qiladigan guruhlarga bo‘lingan `IN (...)` oling.
+Kursorni paket, protsedura yoki blok ichidagi so‘rovga qo‘ying va SQL Window yoki Explain Plan'da o‘zi ishlaydigan operatorni oling.
 
-<p align="center"><img src="../assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- PL/SQL konstantalari qiymatga almashadi: `status = c_new` → `status = 'NEW' /*c_new*/`
+- o‘zgaruvchi va parametrlar bind-o‘zgaruvchiga aylanadi (`:i_customer`), `INTO`, `BULK COLLECT INTO` va `RETURNING ... INTO` olib tashlanadi
+- konstantalar PL/SQL kabi qidiriladi: blok, paket tanasi, spetsifikatsiya; ulanish bo‘lsa boshqa paketlar bazadan o‘qiladi
+- **Explain Plan with constants**: o‘sha operator IDE reja oynasida
 
-### 4. Mayda ishlar — bir bosishda
+<p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case, qo‘shtirnoqlar va `q'[...]'`, Base64 / HEX / URL, qatorlarni saralash, joriy sana `TO_DATE` sifatida, epoch va Java/.NET sana niqoblari. Barcha buyruqlar: [commands.md](../commands.md).
+### 3. Satr utilitalari
 
-> Kodning o‘zi o‘zgarmaydi: tokenlar oldin va keyin solishtiriladi, faqat ko‘rinishdan ko‘pini o‘zgartiradigan qoida o‘tkazib yuboriladi.
+*String Tools*
+
+Qo‘lda qayta yozadigan hamma narsa bir bosishda: belgilangan matnda yoki butun matnda.
+
+- **Ro‘yxat → `IN (...)`** qatorlar, `1 2 3`, `a, b` yoki Excel'dan; 1000 dan ortiq qiymat ORA-01795 ga olib kelmaydi
+- **Registr**: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, kirill)
+- **Qo‘shtirnoq**: ekranlash va qaytarish, `q'[...]'`, qatorlar → `'a' || chr(10) || 'b'`
+- **Kodlash**: Base64, URL, HEX
+- **Qatorlar**: saralash, teskari tartib, takrorlar va bo‘sh qatorlarni o‘chirish, oxirgi bo‘sh joylarni kesish, `:=` va `=>` bo‘yicha tekislash
+
+<p align="center"><img src="../assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="../assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. Sana utilitalari
+
+*Date Tools*
+
+Joriy vaqt va doim qidiradigan barcha sana formatlari.
+
+- **Hozir**: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch (ulanish bo‘lsa `SYSTIMESTAMP` dan)
+- **Aylantirish**: epoch ↔ `TIMESTAMP`, `13.10.2026 14:30` → `TO_DATE(...)` yoki `DATE` / `TIMESTAMP` literali
+- **Niqoblar**: Java va .NET `yyyy-MM-dd HH:mm` ↔ Oracle `YYYY-MM-DD HH24:MI`, `PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="../assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/date-convert.png" alt="" width="880"></p>
+
+Misollar bilan barcha buyruqlar: [commands.md](../commands.md)
 
 ## O‘rnatish
 

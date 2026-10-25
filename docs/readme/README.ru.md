@@ -26,30 +26,69 @@
 
 ## Какие боли решает
 
-### 1. Beautifier не соблюдает стандарт кода
+### 1. Расширенный Beautifier
 
-`END имя;`, `:=` в столбик, раскладка `INSERT` / `SELECT` / `JOIN`, длинные строки, пустые строки. **Format Tools** добавляет эти правила после Beautifier. Каждое правило отдельной галочкой, превью сразу видно, правила можно выгрузить в файл и раздать команде.
+*Format Tools*
 
-<p align="center"><img src="../assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="../assets/settings.png" alt="Format Tools settings window" width="640"></p>
+Работает после Beautifier в IDE и добавляет то, что его файл правил выразить не может: больше 25 опций, каждая отдельной галочкой, с превью. Правила можно выгрузить в файл для команды (совпадающие настройки из `.br` файла Beautifier можно импортировать).
 
-### 2. Запрос с константами пакета не запускается
+- `END имя;`, `:=` в столбик, выровненные объявления, комментарии с отступом своего кода
+- раскладка `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON`, подзапросов
+- длинные строки переносятся по правому полю: `DECODE` парами, `BETWEEN`, `||`, `=>` в столбик
+- условия `IF` одной логической строкой, короткие группы в скобках в одну строку
+- встроенные функции и `%TYPE` в верхнем регистре, пробел после запятой (по желанию)
+- пустые строки между подпрограммами и без пустой перед закрывающим `END`, раскладка `EXECUTE IMMEDIATE`, без пробелов в хвостах
+- сам код не меняется: токены сравниваются до и после, правило, которое трогает больше чем оформление, пропускается
 
-**Copy SQL with constants resolved**: `c_new` становится `'NEW'`, переменные — bind-переменными, `INTO` убирается. Вставляйте в SQL Window или Explain Plan.
+<p align="center"><img src="../assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="../assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. Копирование запроса с подстановкой констант
 
-### 3. ORA-01795: больше 1000 значений в `IN`
+*SQL Tools*
 
-Вставьте список (строки или `1, 2, 3`) и получите `IN (...)`, разбитый на группы, которые Oracle принимает.
+Поставьте курсор в запрос внутри пакета, процедуры или блока и получите оператор, который запускается сам в SQL Window или Explain Plan.
 
-<p align="center"><img src="../assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- константы PL/SQL заменяются значениями: `status = c_new` → `status = 'NEW' /*c_new*/`
+- переменные и параметры становятся bind-переменными (`:i_customer`), `INTO`, `BULK COLLECT INTO` и `RETURNING ... INTO` убираются
+- константы ищутся как в PL/SQL: блок, тело пакета, спецификация; чужие пакеты читаются из базы, если есть соединение
+- **Explain Plan with constants**: тот же оператор в окне плана IDE
 
-### 4. Мелкая рутина — одним щелчком
+<p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case, кавычки и `q'[...]'`, Base64 / HEX / URL, сортировка строк, текущая дата как `TO_DATE`, epoch и маски дат Java/.NET. Все команды: [commands.md](../commands.md).
+### 3. Строковые утилиты
 
-> Сам код не меняется: токены сравниваются до и после, а правило, которое тронуло бы больше, чем оформление, пропускается.
+*String Tools*
+
+Всё, что вы перепечатываете руками, одним щелчком: на выделении или на всём тексте.
+
+- **Список → `IN (...)`** из строк, `1 2 3`, `a, b` или Excel; больше 1000 значений не упираются в ORA-01795
+- **Регистр**: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, кириллица)
+- **Кавычки**: экранирование и обратно, `q'[...]'`, строки → `'a' || chr(10) || 'b'`
+- **Кодирование**: Base64, URL, HEX
+- **Строки**: сортировка, разворот, удаление дублей и пустых строк, обрезка хвостов, выравнивание по `:=` и `=>`
+
+<p align="center"><img src="../assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="../assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. Утилиты для дат
+
+*Date Tools*
+
+Текущее время и все форматы дат, которые приходится постоянно гуглить.
+
+- **Сейчас**: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch (из `SYSTIMESTAMP`, если есть соединение)
+- **Конвертация**: epoch ↔ `TIMESTAMP`, `13.10.2026 14:30` → `TO_DATE(...)` или литерал `DATE` / `TIMESTAMP`
+- **Маски**: Java и .NET `yyyy-MM-dd HH:mm` ↔ Oracle `YYYY-MM-DD HH24:MI`, `PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="../assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/date-convert.png" alt="" width="880"></p>
+
+Все команды с примерами: [commands.md](../commands.md)
 
 ## Установка
 

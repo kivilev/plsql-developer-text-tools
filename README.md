@@ -26,30 +26,69 @@
 
 ## What it solves
 
-### 1. The Beautifier does not follow your code standard
+### 1. Extended Beautifier
 
-`END name;`, `:=` in columns, `INSERT` / `SELECT` / `JOIN` layout, long lines, blank lines. **Format Tools** adds these rules after the Beautifier. One checkbox per rule, a live preview, and the rules can be exported to a file and shared with the team.
+*Format Tools*
 
-<p align="center"><img src="docs/assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="docs/assets/settings.png" alt="Format Tools settings window" width="640"></p>
+Runs after the IDE's Beautifier and adds what its rules file cannot express: 25+ options, each one a checkbox, with a live preview. Rules can be exported to a file for the team (matching settings of the Beautifier's `.br` file can be imported).
 
-### 2. A query with package constants does not run
+- `END name;`, `:=` in columns, aligned declarations, comments at the indent of their code
+- layout of `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON`, subqueries
+- long lines wrapped at the margin: `DECODE` in pairs, `BETWEEN`, `||`, `=>` aligned
+- `IF` conditions on one logical line, short groups in parentheses on one line
+- built-in functions and `%TYPE` in upper case, an optional blank after each comma
+- blank lines between subprograms, none before the closing `END`, `EXECUTE IMMEDIATE` layout, no trailing blanks
+- the code never changes: tokens are compared before and after, a rule that touches more than layout is skipped
 
-**Copy SQL with constants resolved**: `c_new` becomes `'NEW'`, variables become binds, `INTO` is removed. Paste it into a SQL Window or Explain Plan.
+<p align="center"><img src="docs/assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="docs/assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="docs/assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="docs/assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. Copy a query with constants resolved
 
-### 3. ORA-01795: more than 1000 values in `IN`
+*SQL Tools*
 
-Paste a list (lines or `1, 2, 3`), get `IN (...)` split into groups that Oracle accepts.
+Put the cursor in a query inside a package, procedure or block and get a statement that runs on its own in a SQL Window or Explain Plan.
 
-<p align="center"><img src="docs/assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- PL/SQL constants become their values: `status = c_new` → `status = 'NEW' /*c_new*/`
+- variables and parameters become bind variables (`:i_customer`), `INTO`, `BULK COLLECT INTO` and `RETURNING ... INTO` are removed
+- constants are found like PL/SQL does: block, package body, specification; other packages are read from the database when connected
+- **Explain Plan with constants**: the same statement in the IDE's Plan Window
 
-### 4. Small chores, one click
+<p align="center"><img src="docs/assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case, quotes and `q'[...]'`, Base64 / HEX / URL, sorting lines, the current date as `TO_DATE`, epoch and Java/.NET date masks. All commands: [commands.md](docs/commands.md).
+### 3. String utilities
 
-> The code itself never changes: tokens are compared before and after, and a rule that would touch more than layout is skipped.
+*String Tools*
+
+Everything you retype by hand, in one click, on the selection or the whole text.
+
+- **List → `IN (...)`** from lines, `1 2 3`, `a, b` or Excel; more than 1000 values do not hit ORA-01795
+- **Case**: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic)
+- **Quotes**: escape / unescape, `q'[...]'`, lines → `'a' || chr(10) || 'b'`
+- **Encode**: Base64, URL, HEX
+- **Lines**: sort, reverse, remove duplicates and empty lines, trim, align by `:=` and `=>`
+
+<p align="center"><img src="docs/assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="docs/assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. Date utilities
+
+*Date Tools*
+
+The current time and every date format you keep looking up.
+
+- **Now**: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch (from `SYSTIMESTAMP` when connected)
+- **Convert**: epoch ↔ `TIMESTAMP`, `13.10.2026 14:30` → `TO_DATE(...)` or a `DATE` / `TIMESTAMP` literal
+- **Masks**: Java and .NET `yyyy-MM-dd HH:mm` ↔ Oracle `YYYY-MM-DD HH24:MI`, `PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="docs/assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/date-convert.png" alt="" width="880"></p>
+
+All commands with examples: [commands.md](docs/commands.md)
 
 ## Install
 

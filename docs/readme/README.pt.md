@@ -26,30 +26,69 @@
 
 ## Que problemas resolve
 
-### 1. O Beautifier não segue o seu padrão de código
+### 1. Beautifier ampliado
 
-`END nome;`, `:=` em colunas, o layout de `INSERT` / `SELECT` / `JOIN`, linhas longas, linhas em branco. O **Format Tools** adiciona essas regras depois do Beautifier. Uma caixa por regra, pré-visualização ao vivo, e as regras podem ser exportadas para um arquivo e compartilhadas com a equipe.
+*Format Tools*
 
-<p align="center"><img src="../assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="../assets/settings.png" alt="Format Tools settings window" width="640"></p>
+Roda depois do Beautifier da IDE e acrescenta o que o arquivo de regras dele não consegue expressar: mais de 25 opções, cada uma com sua caixa e pré-visualização ao vivo. As regras podem ser exportadas para um arquivo da equipe (as configurações coincidentes do `.br` do Beautifier podem ser importadas).
 
-### 2. Uma consulta com constantes de pacote não executa
+- `END nome;`, `:=` em colunas, declarações alinhadas, comentários com o recuo do seu código
+- layout de `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON` e subconsultas
+- linhas longas quebradas na margem: `DECODE` em pares, `BETWEEN`, `||`, `=>` alinhados
+- condições `IF` em uma linha lógica, grupos curtos entre parênteses em uma linha
+- funções internas e `%TYPE` em maiúsculas, espaço após a vírgula (opcional)
+- linhas em branco entre subprogramas e nenhuma antes do `END` final, layout de `EXECUTE IMMEDIATE`, sem espaços no fim
+- o código não muda: os tokens são comparados antes e depois e uma regra que mexesse em mais que o layout é ignorada
 
-**Copy SQL with constants resolved**: `c_new` vira `'NEW'`, variáveis viram binds, o `INTO` é removido. Cole numa SQL Window ou no Explain Plan.
+<p align="center"><img src="../assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="../assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. Copiar uma consulta com as constantes resolvidas
 
-### 3. ORA-01795: mais de 1000 valores no `IN`
+*SQL Tools*
 
-Cole uma lista (linhas ou `1, 2, 3`) e receba `IN (...)` dividido em grupos que o Oracle aceita.
+Ponha o cursor numa consulta dentro de um pacote, procedimento ou bloco e receba um comando que roda sozinho numa SQL Window ou no Explain Plan.
 
-<p align="center"><img src="../assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- constantes PL/SQL viram seus valores: `status = c_new` → `status = 'NEW' /*c_new*/`
+- variáveis e parâmetros viram binds (`:i_customer`); `INTO`, `BULK COLLECT INTO` e `RETURNING ... INTO` são removidos
+- as constantes são achadas como no PL/SQL: bloco, corpo do pacote, especificação; com conexão, outros pacotes são lidos do banco
+- **Explain Plan with constants**: o mesmo comando na janela de plano da IDE
 
-### 4. Tarefas pequenas, um clique
+<p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case, aspas e `q'[...]'`, Base64 / HEX / URL, ordenar linhas, a data atual como `TO_DATE`, epoch e máscaras de data Java/.NET. Todos os comandos: [commands.md](../commands.md).
+### 3. Utilitários de texto
 
-> O código em si não muda: os tokens são comparados antes e depois, e uma regra que mexesse em mais que o layout é ignorada.
+*String Tools*
+
+Tudo o que você redigita à mão, com um clique, na seleção ou no texto todo.
+
+- **Lista → `IN (...)`** de linhas, `1 2 3`, `a, b` ou Excel; mais de 1000 valores sem ORA-01795
+- **Caixa**: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, cirílico)
+- **Aspas**: escapar e desfazer, `q'[...]'`, linhas → `'a' || chr(10) || 'b'`
+- **Codificação**: Base64, URL, HEX
+- **Linhas**: ordenar, inverter, remover duplicadas e vazias, aparar, alinhar por `:=` e `=>`
+
+<p align="center"><img src="../assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="../assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. Utilitários de datas
+
+*Date Tools*
+
+A hora atual e todos os formatos de data que você vive procurando.
+
+- **Agora**: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch (de `SYSTIMESTAMP` se conectado)
+- **Converter**: epoch ↔ `TIMESTAMP`, `13.10.2026 14:30` → `TO_DATE(...)` ou literal `DATE` / `TIMESTAMP`
+- **Máscaras**: Java e .NET `yyyy-MM-dd HH:mm` ↔ Oracle `YYYY-MM-DD HH24:MI`, `PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="../assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/date-convert.png" alt="" width="880"></p>
+
+Todos os comandos com exemplos: [commands.md](../commands.md)
 
 ## Instalação
 

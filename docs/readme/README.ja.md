@@ -26,30 +26,69 @@
 
 ## 解決する課題
 
-### 1. Beautifier がコード規約に従わない
+### 1. 拡張 Beautifier
 
-`END 名前;`、`:=` の桁揃え、`INSERT` / `SELECT` / `JOIN` のレイアウト、長い行、空行。**Format Tools** が Beautifier の後にこれらのルールを加えます。ルールごとにチェックボックス、リアルタイムのプレビュー、ルールはファイルに書き出してチームで共有できます。
+*Format Tools*
 
-<p align="center"><img src="../assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="../assets/settings.png" alt="Format Tools settings window" width="640"></p>
+IDE の Beautifier の後に実行され、ルールファイルでは表現できない整形を加えます。25 以上のオプションがそれぞれチェックボックスで、リアルタイムにプレビューできます。ルールはファイルに書き出してチームで共有でき、Beautifier の `.br` ファイルのうち共通する設定は取り込めます。
 
-### 2. パッケージの定数を含むクエリが実行できない
+- `END 名前;`、`:=` の桁揃え、宣言の整列、コメントのインデントをコードに合わせる
+- `INSERT`、`SELECT`、`SELECT ... INTO`、`UPDATE ... SET`、`JOIN ... ON`、サブクエリのレイアウト
+- 長い行を右マージンで折り返し：`DECODE` は組ごと、`BETWEEN`、`||`、`=>` を揃える
+- `IF` の条件を 1 つの論理行に、短い括弧グループは 1 行に
+- 組み込み関数と `%TYPE` を大文字に、カンマの後の空白（任意）
+- サブプログラム間に空行、閉じる `END` の前は空行なし、`EXECUTE IMMEDIATE` のレイアウト、行末の空白除去
+- コード自体は変わりません。前後でトークンを比較し、レイアウト以外に触れるルールはスキップします
 
-**Copy SQL with constants resolved**：`c_new` は `'NEW'` に、変数はバインド変数に、`INTO` は削除されます。SQL Window や Explain Plan にそのまま貼り付けられます。
+<p align="center"><img src="../assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="../assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. 定数を解決したクエリのコピー
 
-### 3. ORA-01795：`IN` に 1000 件超
+*SQL Tools*
 
-リスト（改行区切りまたは `1, 2, 3`）を貼ると、Oracle が受け付けるグループに分けた `IN (...)` になります。
+パッケージ、プロシージャ、ブロック内のクエリにカーソルを置くだけで、SQL Window や Explain Plan でそのまま実行できる文が得られます。
 
-<p align="center"><img src="../assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- PL/SQL の定数を値に置換：`status = c_new` → `status = 'NEW' /*c_new*/`
+- 変数とパラメータはバインド変数（`:i_customer`）に、`INTO`、`BULK COLLECT INTO`、`RETURNING ... INTO` は削除
+- 定数は PL/SQL と同じ順に探索：ブロック、パッケージ本体、仕様部。接続時は他のパッケージをデータベースから取得
+- **Explain Plan with constants**：同じ文を IDE のプランウィンドウで表示
 
-### 4. 細かな作業をワンクリックで
+<p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case、引用符と `q'[...]'`、Base64 / HEX / URL、行の並べ替え、現在日時の `TO_DATE`、epoch と Java/.NET の日付書式。全コマンド：[commands.md](../commands.md)。
+### 3. 文字列ユーティリティ
 
-> コード自体は変わりません。整形の前後でトークンを比較し、レイアウト以外に触れるルールはスキップします。
+*String Tools*
+
+手で打ち直していることを、選択範囲またはテキスト全体にワンクリックで。
+
+- **リスト → `IN (...)`**：改行、`1 2 3`、`a, b`、Excel から。1000 件を超えても ORA-01795 になりません
+- **ケース**：camelCase、PascalCase、snake_case、UPPER_SNAKE_CASE、kebab-case（`$`、`#`、キリル文字対応）
+- **引用符**：エスケープと解除、`q'[...]'`、行 → `'a' || chr(10) || 'b'`
+- **エンコード**：Base64、URL、HEX
+- **行**：並べ替え、反転、重複・空行の削除、行末の空白除去、`:=` と `=>` の桁揃え
+
+<p align="center"><img src="../assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="../assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. 日付ユーティリティ
+
+*Date Tools*
+
+現在時刻と、いつも調べ直している日付形式。
+
+- **現在**：`DATE`、`TIMESTAMP`、`TIMESTAMP WITH TIME ZONE`、`TO_DATE(...)`、ISO 8601、Unix epoch（接続時は `SYSTIMESTAMP`）
+- **変換**：epoch ↔ `TIMESTAMP`、`13.10.2026 14:30` → `TO_DATE(...)` または `DATE` / `TIMESTAMP` リテラル
+- **書式**：Java と .NET の `yyyy-MM-dd HH:mm` ↔ Oracle の `YYYY-MM-DD HH24:MI`、`PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="../assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/date-convert.png" alt="" width="880"></p>
+
+例つきの全コマンド: [commands.md](../commands.md)
 
 ## インストール
 

@@ -26,30 +26,69 @@
 
 ## 解决的痛点
 
-### 1. Beautifier 不符合你的代码规范
+### 1. 增强版 Beautifier
 
-`END 名称;`、`:=` 按列对齐、`INSERT` / `SELECT` / `JOIN` 排版、过长的行、空行。**Format Tools** 在 Beautifier 之后补上这些规则。每条规则一个复选框，实时预览，规则可导出为文件分享给团队。
+*Format Tools*
 
-<p align="center"><img src="../assets/format.png" alt="Before and after Format Tools" width="880"></p>
-<p align="center"><img src="../assets/settings.png" alt="Format Tools settings window" width="640"></p>
+在 IDE 的 Beautifier 之后运行，补上其规则文件无法表达的内容：25 个以上选项，每个一个复选框，带实时预览。规则可导出为文件分享给团队（可导入 Beautifier `.br` 文件中相同的设置）。
 
-### 2. 带包常量的查询无法直接运行
+- `END 名称;`、`:=` 按列对齐、对齐声明、注释与所属代码同缩进
+- `INSERT`、`SELECT`、`SELECT ... INTO`、`UPDATE ... SET`、`JOIN ... ON`、子查询的排版
+- 过长的行在右边距处换行：`DECODE` 成对、`BETWEEN`、`||`、`=>` 对齐
+- `IF` 条件合并为一个逻辑行，括号内的短条件放在一行
+- 内置函数和 `%TYPE` 大写，逗号后加空格（可选）
+- 子程序之间空行、结尾 `END` 前不空行、`EXECUTE IMMEDIATE` 排版、去掉行尾空格
+- 代码本身不变：前后对比所有记号，超出排版范围的规则会被跳过
 
-**Copy SQL with constants resolved**：`c_new` 变成 `'NEW'`，变量变成绑定变量，去掉 `INTO`。直接粘贴到 SQL Window 或 Explain Plan。
+<p align="center"><img src="../assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="../assets/settings-wrapping.png" alt="" width="700"></p>
 
-<p align="center"><img src="../assets/copy-sql.png" alt="Copy SQL with constants resolved" width="880"></p>
+### 2. 复制已解析常量的查询
 
-### 3. ORA-01795：`IN` 中超过 1000 个值
+*SQL Tools*
 
-粘贴列表（每行一个或 `1, 2, 3`），得到按 Oracle 可接受的分组拆开的 `IN (...)`。
+把光标放在包、过程或块中的查询里，得到可以直接在 SQL Window 或 Explain Plan 中运行的语句。
 
-<p align="center"><img src="../assets/in-list.png" alt="List to IN (...)" width="420"></p>
+- PL/SQL 常量替换为其值：`status = c_new` → `status = 'NEW' /*c_new*/`
+- 变量和参数变为绑定变量（`:i_customer`），去掉 `INTO`、`BULK COLLECT INTO` 和 `RETURNING ... INTO`
+- 常量的查找方式与 PL/SQL 一致：块、包体、包规范；已连接时从数据库读取其他包
+- **Explain Plan with constants**：同一语句显示在 IDE 的计划窗口
 
-### 4. 琐碎工作，一键完成
+<p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>
 
-camelCase / snake_case、引号与 `q'[...]'`、Base64 / HEX / URL、行排序、当前日期转 `TO_DATE`、epoch 与 Java/.NET 日期格式。全部命令：[commands.md](../commands.md)。
+### 3. 字符串工具
 
-> 代码本身不会被改动：格式化前后会比较所有记号，超出排版范围的规则会被跳过。
+*String Tools*
+
+所有你手工重复输入的内容，一键完成，作用于选中文本或全部文本。
+
+- **列表 → `IN (...)`**：来自多行、`1 2 3`、`a, b` 或 Excel；超过 1000 个值也不会触发 ORA-01795
+- **大小写**：camelCase、PascalCase、snake_case、UPPER_SNAKE_CASE、kebab-case（支持 `$`、`#`、西里尔字母）
+- **引号**：转义与还原、`q'[...]'`、多行 → `'a' || chr(10) || 'b'`
+- **编码**：Base64、URL、HEX
+- **行**：排序、反转、去重、去空行、去行尾空格、按 `:=` 和 `=>` 对齐
+
+<p align="center"><img src="../assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="../assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. 日期工具
+
+*Date Tools*
+
+当前时间，以及你总要去查的各种日期格式。
+
+- **当前时间**：`DATE`、`TIMESTAMP`、`TIMESTAMP WITH TIME ZONE`、`TO_DATE(...)`、ISO 8601、Unix epoch（已连接时取自 `SYSTIMESTAMP`）
+- **转换**：epoch ↔ `TIMESTAMP`，`13.10.2026 14:30` → `TO_DATE(...)` 或 `DATE` / `TIMESTAMP` 字面量
+- **格式掩码**：Java 和 .NET 的 `yyyy-MM-dd HH:mm` ↔ Oracle 的 `YYYY-MM-DD HH24:MI`，`PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="../assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="../assets/date-convert.png" alt="" width="880"></p>
+
+全部命令及示例: [commands.md](../commands.md)
 
 ## 安装
 
