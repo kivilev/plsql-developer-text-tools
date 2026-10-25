@@ -85,8 +85,36 @@
     <div class="group"><div class="buttons"><div class="bigbtn dim ghost">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Documentation</div></div><div class="label">PL/SQL Doc</div></div>
     <div class="group"><div class="buttons">
-      <div class="bigbtn" id="btn-string"><svg viewBox="0 0 24 24" fill="none" stroke="#2b6cb0" stroke-width="1.8"><path d="M5 6h14M12 6v13M8 19h8"/></svg>String Tools &#x25BE;</div>
-      <div class="bigbtn" id="btn-date"><svg viewBox="0 0 24 24" fill="none" stroke="#2b6cb0" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>Date Tools &#x25BE;</div>
+      <div class="bigbtn" id="btn-string"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="7" fill="#1E293B"/>
+    <rect x="16.5" y="9" width="9" height="15" rx="2" fill="#0EA5A4" opacity="0.45"/>
+    <path d="M5.5 9.5h9M10 9.5v14" stroke="#F8FAFC" stroke-width="3" stroke-linecap="round"/>
+    <path d="M21 9.5v11.5a2.2 2.2 0 0 0 2.6 2.1M18 13.5h6" stroke="#5EEAD4" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+    <rect x="26.6" y="7.5" width="1.9" height="17" rx="0.9" fill="#F8FAFC"/>
+  </svg>String Tools &#x25BE;</div>
+      <div class="bigbtn" id="btn-date"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="2" y="4.5" width="28" height="25.5" rx="5" fill="#F8FAFC" stroke="#1E293B" stroke-width="2"/>
+    <path d="M2 10.5a5 5 0 0 1 5-5h18a5 5 0 0 1 5 5v1.5H2z" fill="#1E293B"/>
+    <path d="M9.5 2.5v5M22.5 2.5v5" stroke="#1E293B" stroke-width="2.6" stroke-linecap="round"/>
+    <g fill="#94A3B8"><rect x="6.5" y="15" width="4" height="3.4" rx="0.8"/><rect x="14" y="15" width="4" height="3.4" rx="0.8"/>
+      <rect x="6.5" y="21.5" width="4" height="3.4" rx="0.8"/><rect x="21.5" y="21.5" width="4" height="3.4" rx="0.8"/></g>
+    <rect x="20.5" y="14" width="6" height="5.4" rx="1.2" fill="#0EA5A4"/>
+    <rect x="13" y="20.5" width="6" height="5.4" rx="1.2" fill="#5EEAD4" stroke="#0EA5A4" stroke-width="1"/>
+  </svg>Date Tools &#x25BE;</div>
+      <div class="bigbtn" id="btn-sql"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="7" fill="#1E293B"/>
+    <path d="M5 8.5v13c0 1.7 3.1 3 7 3s7-1.3 7-3v-13z" fill="#94A3B8"/>
+    <path d="M5 15c0 1.7 3.1 3 7 3s7-1.3 7-3" stroke="#1E293B" stroke-width="1.4" fill="none"/>
+    <ellipse cx="12" cy="8.5" rx="7" ry="3" fill="#F8FAFC"/>
+    <rect x="17" y="14" width="11" height="13" rx="2" fill="#0EA5A4" stroke="#1E293B" stroke-width="1.2"/>
+    <path d="M20 18.5h5M20 22.5h3.5" stroke="#F8FAFC" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>SQL Tools &#x25BE;</div>
+      <div class="bigbtn" id="btn-format"><svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="7" fill="#1E293B"/>
+    <path d="M7 9h14M7 14.5h18M7 20h11" stroke="#F8FAFC" stroke-width="2.8" stroke-linecap="round"/>
+    <path d="M22 20.5l2.6 2.6 4-5" stroke="#5EEAD4" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M7 25.5h8" stroke="#0EA5A4" stroke-width="2.8" stroke-linecap="round"/>
+  </svg>Format Tools &#x25BE;</div>
     </div><div class="label">Text Tools</div></div>
   </div>
   <div class="doc">
@@ -102,7 +130,7 @@
   <div class="endcard hidden" id="endcard">
     <img src="../../docs/assets/logo-dark.svg" width="84" height="84" alt="">
     <h1>Text Tools for PL/SQL Developer</h1>
-    <p>40 commands for strings and dates &#xB7; free &#xB7; MIT</p>
+    <p>Format, SQL, string and date tools &#xB7; free &#xB7; MIT</p>
     <code>github.com/kivilev/plsql-developer-text-tools</code>
   </div>
 </div>
@@ -118,28 +146,41 @@ const DATE_MENU = ["Now: DATE '2026-10-13'","Now: TIMESTAMP '2026-10-13 14:30:00
   'Epoch -> TIMESTAMP (UTC)','Date -> Unix epoch (UTC if no offset)','Date -> TO_DATE(...)','Date -> DATE / TIMESTAMP literal','-',
   'Java/.NET mask -> Oracle mask','Oracle mask -> Java mask','Oracle mask -> .NET mask'];
 
+const SQL_MENU = ['Copy SQL with constants resolved', 'Explain Plan with constants'];
+const FORMAT_MENU = ['Apply formatting rules', 'Settings'];
+const BUTTONS = { string: 'btn-string', date: 'btn-date', sql: 'btn-sql', format: 'btn-format' };
+const MENUS = { string: STRING_MENU, date: DATE_MENU, sql: SQL_MENU, format: FORMAT_MENU };
+
 // ---- scenes: text before/after, selection, menu path, status (all outputs from TextTools.Core) ----
 // sel: [line, colFrom, line, colTo] (0-based, colTo exclusive); caret: [line, col]
 const SCENES = [
-  { step: '1  A column of values  →  IN (...)',
+  { step: '1  Beautifier output  \u2192  your code standard',
+    before: ['PROCEDURE close_account(i_id IN NUMBER) IS', '  v_name VARCHAR2(100);', '  v_len NUMBER;', 'BEGIN', '  v_name:=nvl( i_id,0 );',
+             '  v_len:=substr(v_name,1,10);', '  INSERT INTO deposit (id, branch) VALUES (i_id, i_branch);', 'END;'],
+    after:  ['PROCEDURE close_account(i_id IN NUMBER) IS', '  v_name VARCHAR2(100);', '  v_len  NUMBER;', 'BEGIN', '  v_name := NVL(i_id,0);',
+             '  v_len  := SUBSTR(v_name,1,10);', '  INSERT INTO deposit', '    (id, branch)', '  VALUES', '    (i_id, i_branch);', 'END close_account;'],
+    caret: [0, 0], menu: 'format', item: 'Apply formatting rules', changed: [0, 0, 10, 18],
+    status: 'Text Tools: Apply formatting rules',
+    caption: ['END name; \u00B7 := in columns \u00B7 INSERT / JOIN layout \u00B7 upper-case built-ins', 'Tokens are checked before and after: only layout and case change'] },
+  { step: '2  A query with package constants  \u2192  runs on its own',
+    before: ['declare', "  c_new constant varchar2(3) := 'NEW';", '  l_cnt number;', 'begin', '  select count(*) into l_cnt from orders where status = c_new;', 'end;'],
+    after:  ['declare', "  c_new constant varchar2(3) := 'NEW';", '  l_cnt number;', 'begin', '  select count(*) into l_cnt from orders where status = c_new;', 'end;'],
+    sel: [4, 2, 4, 61], grow: 'chars', menu: 'sql', item: 'Copy SQL with constants resolved', changed: null,
+    status: 'Text Tools: SQL copied: 1 constant',
+    caption: ["Clipboard: select count(*) from orders where status = 'NEW' /*c_new*/", 'Paste it into a SQL Window or Explain Plan. The editor is not changed.'] },
+  { step: '3  A column of values  →  IN (...)',
     before: ['select order_id, status', '  from orders', ' where customer_id', '1042', '1043', '2077', '3150', '4211'],
     after:  ['select order_id, status', '  from orders', ' where customer_id', 'IN (1042, 1043, 2077, 3150, 4211)'],
     sel: [3, 0, 7, 4], grow: 'lines', menu: 'string', item: 'List -> IN (...)', changed: [3, 0, 3, 33],
     status: "Text Tools: List -> IN (...)  (e.g. 42, O'Neil -> IN ('42', 'O''Neil'))",
     caption: ['Also from one line: 1 2 3, a;b, a⇥b (Excel).', '1000+ values → IN (SELECT column_value FROM TABLE(sys.odcinumberlist(...)))'] },
-  { step: '2  Identifier case',
+  { step: '4  Identifier case',
     before: ['select customerId, firstName, orderDate', '  from orders'],
     after:  ['select customer_id, first_name, order_date', '  from orders'],
     sel: [0, 7, 0, 39], grow: 'chars', menu: 'string', item: 'snake_case', changed: [0, 7, 0, 42],
     status: 'Text Tools: snake_case  (e.g. firstName -> first_name)',
     caption: ['camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case', '$, # and Cyrillic identifiers supported'] },
-  { step: '3  Current time from the database',
-    before: ['select *', '  from orders', ' where created_at >= ', "   and shipped_at < 13.10.2026 14:30"],
-    after:  ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < 13.10.2026 14:30"],
-    caret: [2, 21], menu: 'date', item: "Now: TIMESTAMP '2026-10-13 14:30:00'", changed: [2, 21, 2, 52],
-    status: "Text Tools: TIMESTAMP '2026-10-14 15:42:07' (from database)",
-    caption: ['SYSTIMESTAMP when connected, the PC clock otherwise', 'DATE, TIMESTAMP [WITH TIME ZONE], TO_DATE, ISO 8601, epoch'] },
-  { step: '4  Any date  →  TO_DATE(...)',
+  { step: '5  Any date  →  TO_DATE(...)',
     before: ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < 13.10.2026 14:30"],
     after:  ['select *', '  from orders', " where created_at >= TIMESTAMP '2026-10-14 15:42:07'", "   and shipped_at < TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')"],
     sel: [3, 20, 3, 36], grow: 'chars', menu: 'date', item: 'Date -> TO_DATE(...)', changed: [3, 20, 3, 75],
@@ -162,7 +203,7 @@ const lerp = (a, b, k) => a + (b - a) * k;
 function highlight(s) {
   return esc(s)
     .replace(/('[^']*')/g, '<span class="str">$1</span>')
-    .replace(/\b(select|from|where|and|in|IN|TIMESTAMP|TO_DATE|SELECT|FROM|TABLE)\b(?![^<]*<\/span>)/g, '<span class="kw">$1</span>')
+    .replace(/\b(select|from|where|and|in|IN|TIMESTAMP|TO_DATE|SELECT|FROM|TABLE|PROCEDURE|IS|BEGIN|END|INSERT|INTO|VALUES|VARCHAR2|NUMBER|declare|begin|end|constant|into|count|varchar2|number)\b(?![^<]*<\/span>)/g, '<span class="kw">$1</span>')
     .replace(/(^|[\s(,])(\d+)(?=[\s,)]|$)(?![^<]*<\/span>)/g, '$1<span class="num">$2</span>');
 }
 
@@ -190,9 +231,9 @@ function drawEditor(lines, range, cls, caret) {
 function drawMenu(which, hotItem) {
   const m = $('menu');
   if (!which) { m.classList.add('hidden'); return; }
-  const items = which === 'string' ? STRING_MENU : DATE_MENU;
+  const items = MENUS[which];
   m.innerHTML = items.map(x => x === '-' ? '<div class="sep"></div>' : `<div class="it${x === hotItem ? ' hot' : ''}" data-x="${esc(x)}">${esc(x)}</div>`).join('');
-  const btn = $(which === 'string' ? 'btn-string' : 'btn-date').getBoundingClientRect();
+  const btn = $(BUTTONS[which]).getBoundingClientRect();
   const st = $('stage').getBoundingClientRect();
   m.style.left = (btn.left - st.left) + 'px';
   m.style.top = (btn.bottom - st.top + 2) + 'px';
@@ -206,7 +247,7 @@ function itemPos(which, name) {
   return [r.left - st.left + 60, r.top - st.top + 8];
 }
 function btnPos(which) {
-  const r = $(which === 'string' ? 'btn-string' : 'btn-date').getBoundingClientRect(), st = $('stage').getBoundingClientRect();
+  const r = $(BUTTONS[which]).getBoundingClientRect(), st = $('stage').getBoundingClientRect();
   return [r.left - st.left + 37, r.top - st.top + 30];
 }
 function charPos(line, col) {
@@ -241,7 +282,7 @@ function renderScene(sc, t, prevStatus) {
   if (t >= T.clickItem) {
     lines = sc.after;
     const f = t - T.clickItem;
-    if (f < 1.6) { range = sc.changed; cls = 'flash'; }
+    if (f < 1.6 && sc.changed) { range = sc.changed; cls = 'flash'; }
   }
   drawEditor(lines, range, cls, caret);
 
@@ -252,8 +293,7 @@ function renderScene(sc, t, prevStatus) {
   const iPos = itemPos(sc.menu, sc.item);
   const hot = menuOpen && t >= T.toItem + 0.55 ? sc.item : null;
   drawMenu(menuOpen ? sc.menu : null, hot);
-  $('btn-string').classList.toggle('hot', (sc.menu === 'string') && t >= T.toBtn + 0.4 && t < T.clickItem);
-  $('btn-date').classList.toggle('hot', (sc.menu === 'date') && t >= T.toBtn + 0.4 && t < T.clickItem);
+  for (const k of Object.keys(BUTTONS)) $(BUTTONS[k]).classList.toggle('hot', (sc.menu === k) && t >= T.toBtn + 0.4 && t < T.clickItem);
 
   // pointer path: text -> button -> item -> rests
   let p;
