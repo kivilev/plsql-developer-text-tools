@@ -9,7 +9,7 @@
 
 <p align="center">补足 PL/SQL Developer Beautifier 做不到的格式化，让包中的查询可以直接运行，并省去琐碎的文本操作。原生 64 位插件，只需一个 DLL。</p>
 
-<p align="center">[English](../../README.md) · [Русский](README.ru.md) · [Oʻzbekcha](README.uz.md) · [Español](README.es.md) · [Português](README.pt.md) · **中文** · [日本語](README.ja.md) · [हिन्दी](README.hi.md)</p>
+<p align="center"><a href="../../README.md">English</a> &middot; <a href="README.ru.md">Русский</a> &middot; <a href="README.uz.md">Oʻzbekcha</a> &middot; <a href="README.es.md">Español</a> &middot; <a href="README.pt.md">Português</a> &middot; <b>中文</b> &middot; <a href="README.ja.md">日本語</a> &middot; <a href="README.hi.md">हिन्दी</a></p>
 
 <p align="center">
   <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>

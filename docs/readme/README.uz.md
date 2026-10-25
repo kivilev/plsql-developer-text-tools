@@ -9,7 +9,7 @@
 
 <p align="center">PL/SQL Developer Beautifier bajarolmaydigan ishni tugatadi, paketdagi so‘rovni mustaqil ishlaydigan holatga keltiradi va mayda matn ishlarini yo‘qotadi. Mahalliy 64-bitli plagin: bitta DLL yetarli.</p>
 
-<p align="center">[English](../../README.md) · [Русский](README.ru.md) · **Oʻzbekcha** · [Español](README.es.md) · [Português](README.pt.md) · [中文](README.zh.md) · [日本語](README.ja.md) · [हिन्दी](README.hi.md)</p>
+<p align="center"><a href="../../README.md">English</a> &middot; <a href="README.ru.md">Русский</a> &middot; <b>Oʻzbekcha</b> &middot; <a href="README.es.md">Español</a> &middot; <a href="README.pt.md">Português</a> &middot; <a href="README.zh.md">中文</a> &middot; <a href="README.ja.md">日本語</a> &middot; <a href="README.hi.md">हिन्दी</a></p>
 
 <p align="center">
   <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>

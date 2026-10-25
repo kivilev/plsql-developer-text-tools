@@ -9,7 +9,7 @@
 
 <p align="center">Fixes what PL/SQL Developer's Beautifier leaves undone, makes a query from a package run on its own, and removes small text chores. A native 64-bit plug-in, nothing to install but one DLL.</p>
 
-<p align="center">**English** · [Русский](docs/readme/README.ru.md) · [Oʻzbekcha](docs/readme/README.uz.md) · [Español](docs/readme/README.es.md) · [Português](docs/readme/README.pt.md) · [中文](docs/readme/README.zh.md) · [日本語](docs/readme/README.ja.md) · [हिन्दी](docs/readme/README.hi.md)</p>
+<p align="center"><b>English</b> &middot; <a href="docs/readme/README.ru.md">Русский</a> &middot; <a href="docs/readme/README.uz.md">Oʻzbekcha</a> &middot; <a href="docs/readme/README.es.md">Español</a> &middot; <a href="docs/readme/README.pt.md">Português</a> &middot; <a href="docs/readme/README.zh.md">中文</a> &middot; <a href="docs/readme/README.ja.md">日本語</a> &middot; <a href="docs/readme/README.hi.md">हिन्दी</a></p>
 
 <p align="center">
   <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>

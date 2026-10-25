@@ -9,7 +9,7 @@
 
 <p align="center">PL/SQL Developer の Beautifier では足りない整形を補い、パッケージ内のクエリをそのまま実行できる形にし、細かなテキスト作業をなくします。ネイティブ 64 ビットのプラグインで、DLL ひとつだけです。</p>
 
-<p align="center">[English](../../README.md) · [Русский](README.ru.md) · [Oʻzbekcha](README.uz.md) · [Español](README.es.md) · [Português](README.pt.md) · [中文](README.zh.md) · **日本語** · [हिन्दी](README.hi.md)</p>
+<p align="center"><a href="../../README.md">English</a> &middot; <a href="README.ru.md">Русский</a> &middot; <a href="README.uz.md">Oʻzbekcha</a> &middot; <a href="README.es.md">Español</a> &middot; <a href="README.pt.md">Português</a> &middot; <a href="README.zh.md">中文</a> &middot; <b>日本語</b> &middot; <a href="README.hi.md">हिन्दी</a></p>
 
 <p align="center">
   <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>
