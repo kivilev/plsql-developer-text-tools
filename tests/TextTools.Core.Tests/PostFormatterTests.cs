@@ -96,9 +96,9 @@ public class PostFormatterTests
     [Fact]
     public void AMultiLineAssignmentEndsItsGroup()
     {
-        const string input = "BEGIN\n  a := f(1,\n         2);\n  bb := 3;\nEND;";
+        const string input = "BEGIN\n  a := f('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',\n         'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');\n  bb := 3;\nEND;";
         var result = PostFormatter.Format(input);
-        Assert.Contains("  a := f(1,", result, StringComparison.Ordinal);
+        Assert.Contains("  a := f('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',", result, StringComparison.Ordinal);
         Assert.Contains("  bb := 3;", result, StringComparison.Ordinal); // a group of one: single spaces
     }
 

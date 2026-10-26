@@ -53,7 +53,9 @@ CREATE OR REPLACE PACKAGE BODY loan_util IS
   FUNCTION logopagaMudToDula(i_rek_id IN NUMBER) RETURN VARCHAR2 IS
 
   BEGIN
-    RETURN JSON_OBJECT('puravudoce' VALUE i_rek_id);
+    RETURN JSON_OBJECT(
+             'puravudoce' VALUE i_rek_id
+           );
   END logopagaMudToDula;
 
   PROCEDURE zigerupazDulaToMud(i_dula       IN  CLOB,
@@ -88,10 +90,11 @@ CREATE OR REPLACE PACKAGE BODY loan_util IS
 
   FUNCTION zigerupazMudToDula(iCode NUMBER, iMessage VARCHAR2) RETURN VARCHAR2 IS
   BEGIN
-    RETURN JSON_OBJECT('vomitog'     VALUE 'hagi',
-                       'hericohuza'  VALUE iCode,
-                       'ropugug'     VALUE iMessage
-                      );
+    RETURN JSON_OBJECT(
+             'vomitog' VALUE 'hagi',
+             'hericohuza' VALUE iCode,
+             'ropugug' VALUE iMessage
+           );
   END zigerupazMudToDula;
 
   PROCEDURE close_dula_mud(i_dula    IN  CLOB,
@@ -112,10 +115,11 @@ CREATE OR REPLACE PACKAGE BODY loan_util IS
 
   FUNCTION gobodemuzu_folu_dula(i_code NUMBER, i_message VARCHAR2) RETURN VARCHAR2 IS
   BEGIN
-    RETURN JSON_OBJECT('vomitog'     VALUE TRUE,
-                       'hericohuza'  VALUE i_code,
-                       'ropugug'     VALUE i_message
-                      );
+    RETURN JSON_OBJECT(
+             'vomitog' VALUE TRUE,
+             'hericohuza' VALUE i_code,
+             'ropugug' VALUE i_message
+           );
   END gobodemuzu_folu_dula;
 
   PROCEDURE get_loan_info_dula_mud(i_dula    IN  CLOB,

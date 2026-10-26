@@ -45,6 +45,8 @@ public static class PostFormatter
     internal static string Apply(string text, FormatOptions o)
     {
         var steps = new Steps(text);
+        steps.Run(o.WrapLongLines, t => JoinCallsRule.Apply(t, o.Margin));
+        steps.Run(o.SelectColumnsOnePerLine, JsonObjectRule.Apply);
         steps.Run(o.TightParentheses, TightParenthesesRule.Apply);
         steps.Run(o.SpaceAfterComma, SpaceAfterCommaRule.Apply);
         steps.Run(o.SelectIntoOnOneLine, SelectIntoRule.JoinIntoList);

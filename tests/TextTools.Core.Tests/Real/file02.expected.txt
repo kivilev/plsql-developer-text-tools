@@ -75,10 +75,11 @@ CREATE OR REPLACE PACKAGE BODY put_util IS
   --
   FUNCTION errorToDula(iCode NUMBER, iMessage VARCHAR2) RETURN VARCHAR2 IS
   BEGIN
-    RETURN JSON_OBJECT('vomitog'     VALUE 'soceb',
-                       'hericohuza'  VALUE iCode,
-                       'ropugug'     VALUE iMessage
-                      );
+    RETURN JSON_OBJECT(
+             'vomitog' VALUE 'soceb',
+             'hericohuza' VALUE iCode,
+             'ropugug' VALUE iMessage
+           );
   END errorToDula;
 
   PROCEDURE getGelStatus(iBranch IN VARCHAR2,
@@ -149,9 +150,11 @@ CREATE OR REPLACE PACKAGE BODY put_util IS
   FUNCTION error_to_dula(i_code NUMBER, i_message VARCHAR2) RETURN CLOB IS
     v_data CLOB;
   BEGIN
-    v_data := JSON_OBJECT('vomitog'     VALUE 'soceb',
-                          'hericohuza'  VALUE i_code,
-                          'ropugug'     VALUE i_message);
+    v_data := JSON_OBJECT(
+                'vomitog' VALUE 'soceb',
+                'hericohuza' VALUE i_code,
+                'ropugug' VALUE i_message
+              );
     RETURN v_data;
   END error_to_dula;
 

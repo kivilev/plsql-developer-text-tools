@@ -7,7 +7,5 @@ END;
 -----
 BEGIN
   v_x := NVL(v_a, 0);
-  v_y := f(
-    1,
-    2);
+  v_y := f(1, 2);
 END;
