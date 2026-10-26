@@ -100,4 +100,53 @@ internal static partial class SelectListRule
         }
         return string.Join('\n', output);
     }
+
+    /// <summary>
+    /// The columns of the aliases the Beautifier aligned stay aligned, except for a group of consecutive select list lines that
+    /// the alignment pushes past the hard limit of the code standard (120): in that group every alias gets one blank before it.
+    /// </summary>
+    public static string TightenAliasPadding(string text, int hard = 120)
+    {
+        var (lines, masked) = LineText.Split(text);
+        var output = (string[])lines.Clone();
+        var inList = new bool[lines.Length]; // from SELECT up to, not including, FROM / INTO
+        var inside = false;
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var trimmed = masked[i].TrimStart();
+            if (trimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+            {
+                inside = !ClauseEnd().IsMatch(masked[i]);
+                inList[i] = true;
+            }
+            else if (inside && (trimmed.StartsWith("FROM", StringComparison.OrdinalIgnoreCase) || trimmed.StartsWith("INTO", StringComparison.OrdinalIgnoreCase)))
+            {
+                inside = false;
+            }
+            else
+            {
+                inList[i] = inside;
+            }
+        }
+        var n = 0;
+        while (n < lines.Length)
+        {
+            if (!(inList[n] && AliasPadding().IsMatch(masked[n])))
+            {
+                n++;
+                continue;
+            }
+            var last = n;
+            while (last + 1 < lines.Length && inList[last + 1] && AliasPadding().IsMatch(masked[last + 1])) last++;
+            if (Enumerable.Range(n, last - n + 1).Max(k => lines[k].TrimEnd().Length) > hard)
+            {
+                for (var k = n; k <= last; k++) output[k] = PaddedAlias().Replace(lines[k], "${last} ${alias}", 1);
+            }
+            n = last + 1;
+        }
+        return string.Join('\n', output);
+    }
+
+    [GeneratedRegex(@"\b(?:FROM|INTO)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex ClauseEnd();
 }

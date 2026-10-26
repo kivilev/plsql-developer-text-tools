@@ -149,4 +149,30 @@ public class IcbsRuleTests
         Assert.Contains("a.id account_id,", result, StringComparison.Ordinal);
         Assert.Contains("a.branch branch_code", result, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void AlignedAliasesStayUnlessTheAlignmentPushesALinePast120()
+    {
+        var shortList = "BEGIN"+"\n  OPEN c FOR"+"\n    SELECT a.id          account_id,"+"\n           a.branch      branch_code"+"\n      FROM account a;"+"\nEND;"+"\n";
+        var on = FormatOptions.None with { TightenAliasPadding = true };
+        Assert.Equal(shortList, PostFormatter.Format(shortList, on)); // within the limit: the columns the Beautifier made stay
+
+        var wide = new string('x', 90);
+        var longList = "BEGIN"+"\n  OPEN c FOR"+"\n    SELECT a.id" + new string(' ', 100) + "account_id,"+"\n           a." + wide + "   branch_code"+"\n      FROM account a;"+"\nEND;"+"\n";
+        var result = PostFormatter.Format(longList, on);
+        Assert.Contains("a.id account_id,", result, StringComparison.Ordinal); // the whole group is tightened
+        Assert.Contains(wide + " branch_code", result, StringComparison.Ordinal);
+        Assert.Equal(longList, PostFormatter.Format(longList, FormatOptions.None)); // the rule off: untouched
+    }
+
+    [Fact]
+    public void ALongConcatenationIsBrokenAtTheOperatorNotInsideTheCall()
+    {
+        var text = "BEGIN"+"\n"+"  IF x THEN"+"\n"+"    oMessage := 'Error by checking fromBranch.(' || SUBSTR(SQLERRM, 1, 150) || ')';"+"\n"+"  END IF;"+"\n"+"END;"+"\n";
+        var result = PostFormatter.Format(text, FormatOptions.None with { WrapLongLines = true });
+        Assert.Contains("SUBSTR(SQLERRM, 1, 150)", result, StringComparison.Ordinal);
+        Assert.DoesNotContain("SQLERRM,"+"\n", result, StringComparison.Ordinal);
+        Assert.Contains("'Error by checking fromBranch.(' ||"+"\n", result, StringComparison.Ordinal);
+        Assert.True(TokenGuard.Same(text, result));
+    }
 }

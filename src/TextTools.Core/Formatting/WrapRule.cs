@@ -127,6 +127,14 @@ internal static partial class WrapRule
             return Expand(between, line, margin, false, choices, onlyLong: true);
         }
 
+        // A chain of || is broken at the operator before any call in it is split argument by argument:
+        // SUBSTR(SQLERRM, 1, 150) must stay in one piece (code standard, section 5).
+        // A line that only the closing semicolon pushes past the margin stays as it is.
+        if (splitters && effective > margin && HasTopLevelConcat(masked))
+        {
+            return WrapConcat(line, masked, margin) is { } concat ? Expand(concat, line, margin, false, choices, onlyLong: true) : [line];
+        }
+
         var candidates = new List<(int Open, int Close, string Separator)>();
         foreach (var (open, close) in pairs.OrderBy(p => p.Open))
         {
@@ -313,6 +321,18 @@ internal static partial class WrapRule
     }
 
     /// <summary>A top-level <c>||</c> chain filled up to the margin: the break after <c>||</c>, the continuation under the first operand.</summary>
+    private static bool HasTopLevelConcat(string masked)
+    {
+        var depth = 0;
+        for (var i = 0; i < masked.Length; i++)
+        {
+            if (masked[i] == '(') depth++;
+            else if (masked[i] == ')') depth--;
+            else if (masked[i] == '|' && depth == 0 && i + 1 < masked.Length && masked[i + 1] == '|') return true;
+        }
+        return false;
+    }
+
     private static List<string>? WrapConcat(string line, string masked, int margin)
     {
         var depth = 0;

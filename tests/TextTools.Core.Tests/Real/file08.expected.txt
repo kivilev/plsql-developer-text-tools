@@ -131,9 +131,7 @@ CREATE OR REPLACE PACKAGE BODY loan_util IS
     WHEN OTHERS THEN
       o_code    := 400;
       o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
-                   SUBSTR(SQLERRM,
-                                                                      1,
-                                                                      200) || ')';
+                   SUBSTR(SQLERRM, 1, 200) || ')';
   END get_loan_info_dula_mud;
 
   PROCEDURE get_client_loan_list_dula_mud(i_dula    IN  CLOB,
@@ -147,9 +145,7 @@ CREATE OR REPLACE PACKAGE BODY loan_util IS
     WHEN OTHERS THEN
       o_code    := 400;
       o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
-                   SUBSTR(SQLERRM,
-                                                                      1,
-                                                                      200) || ')';
+                   SUBSTR(SQLERRM, 1, 200) || ')';
   END get_client_loan_list_dula_mud;
 END loan_util;
 /

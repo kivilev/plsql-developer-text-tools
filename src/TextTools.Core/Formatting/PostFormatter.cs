@@ -58,6 +58,7 @@ public static class PostFormatter
         steps.Run(o.SelectColumnsOnePerLine, SelectListRule.AfterComment);
         steps.Run(o.SubqueryLayout, t => SubqueryRule.Apply(t, o.Margin));
         steps.Run(o.BuiltinFunctionsUpper, CaseRules.UpperBuiltinFunctions);
+        steps.Run(o.TightenAliasPadding, t => SelectListRule.TightenAliasPadding(t));
         steps.Run(o.SingleBlankBeforeAlias, t => SelectListRule.UnalignAliases(t));
         steps.Run(o.UpdateSetLayout, UpdateSetRule.JoinBareSet);
         steps.Run(o.ExecuteImmediateLiteralOnOwnLine, t => ExecuteImmediateRule.Apply(t, o.Margin));
