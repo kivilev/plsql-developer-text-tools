@@ -133,9 +133,13 @@ internal static unsafe partial class Exports
         {
             SelfTest.FromCommandWindow(feedback, Marshal.PtrToStringUTF8((nint)parameters) ?? "");
         }
+        else if (string.Equals(cmd.Trim(), "format", StringComparison.OrdinalIgnoreCase))
+        {
+            BatchFormat.Run(feedback, Marshal.PtrToStringUTF8((nint)parameters) ?? "");
+        }
         else
         {
-            Ide.CommandFeedback(feedback, "Text Tools: unknown command; available: selftest [result.json]");
+            Ide.CommandFeedback(feedback, "Text Tools: unknown command; available: selftest [result.json], format <input> <beautifier output> <result>");
         }
     });
 

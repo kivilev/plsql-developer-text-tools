@@ -153,6 +153,17 @@ internal static unsafe class Ide
         Has(219) && WithNative(setting, s => WithNative(value, v =>
             ((delegate* unmanaged[Cdecl]<int, byte*, byte*, int>)Fn(219))(pluginId, s, v) != 0));
 
+    // 162: IDE_BeautifyText(S) - the text formatted by the Beautifier with the rules that are set in the IDE; null when it cannot.
+    public static string? BeautifyText(string text)
+    {
+        if (!Has(162)) return null;
+        return WithNative(text, p =>
+        {
+            var result = ((delegate* unmanaged[Cdecl]<byte*, byte*>)Fn(162))(p);
+            return result == null ? null : FromNative(result);
+        });
+    }
+
     private static string FromNative(byte* p) => p == null ? "" : Marshal.PtrToStringUTF8((nint)p) ?? "";
 
     private delegate T NativeFunc<out T>(byte* p);

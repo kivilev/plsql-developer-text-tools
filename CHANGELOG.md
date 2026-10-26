@@ -15,6 +15,12 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
   wrapping of lines past the margin (DECODE in pairs, BETWEEN, `||`, named arguments with `=>` aligned), aligned
   declarations, comment indent, subprogram header tails on one line. The tokens, string literals and comments are
   still verified before and after; a rule whose result would change any of them is skipped on its own.
+- **Format Tools** (developer command): in a Command Window `plugin PlsqlDevTextTools format <input folder> <Beautifier output folder> <result folder>`
+  runs every package, type and body file of a folder through the IDE's Beautifier and then through the Text Tools rules, and
+  writes both results; it is how the whole formatting is compared with another formatter on the same files.
+- **Format Tools**: a select list whose aligned aliases would push a line past 120 characters gets one blank before the
+  aliases (the code standard's line limit); a long `||` chain is broken at the operator instead of inside a call; a blank
+  after each comma is on by default (`SUBSTR(x, 1, 3)`); settings can be exported to and imported from a `.ttr` file.
 
 ## [v0.3.0] - 2026-10-23
 
