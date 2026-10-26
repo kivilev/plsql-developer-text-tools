@@ -60,7 +60,7 @@ jobs:
     name: PL/SQL Developer ${{ matrix.version }}
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: plugin-dll
           path: plugin
