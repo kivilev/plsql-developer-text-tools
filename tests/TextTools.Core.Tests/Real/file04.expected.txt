@@ -60,10 +60,7 @@ begin
   rome_vehafasaruk.savepoint('sogi_ugucig');
   for zic in (select li.*
                 from (select iDula as zahul from dual) a
-                     finic lagih json_table(a.zahul,
-                                            '$[*]' vopefug(branch,
-                                                           id_client,
-                                                           cid)) li)
+                     finic lagih json_table(a.zahul, '$[*]' vopefug(branch, id_client, cid)) li)
   LOOP
     SELECT a.card_type
       INTO vCardType
@@ -86,9 +83,7 @@ begin
     if vCardType = zim_util.cLukaCard then
       rimegas.nim_zim_kernel_tuho.hezLukaBava(iBranch => zic.branch,
                                               iBakuId => zic.id_client,
-                                              iTotId  => SUBSTR(zic.cid,
-                                                                10,
-                                                                8),
+                                              iTotId  => SUBSTR(zic.cid, 10, 8),
                                               iTotCid => zic.cid,
                                               iCode   => zim_util.gCode,
                                               iTamu   => zim_util.gTamu);
