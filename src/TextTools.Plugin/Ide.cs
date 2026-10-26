@@ -127,6 +127,24 @@ internal static unsafe class Ide
         }
         return rows;
     }
+    // 40, 41, 42, 43, 44: every column of every row (up to maxRows) as text, or null when the query failed.
+    // Without SQL_FieldCount (41) only the first column is read.
+    public static List<string[]>? QueryRows(string sql, int maxRows)
+    {
+        if (!Has(40) || !Has(42) || !Has(43) || !Has(44)) return null;
+        var rc = WithNative(sql, p => ((delegate* unmanaged[Cdecl]<byte*, int>)Fn(40))(p));
+        if (rc != 0) return null;
+        var fields = Has(41) ? Math.Clamp(((delegate* unmanaged[Cdecl]<int>)Fn(41))(), 0, 64) : 1;
+        var rows = new List<string[]>();
+        while (rows.Count < maxRows && ((delegate* unmanaged[Cdecl]<int>)Fn(42))() == 0)
+        {
+            var row = new string[fields];
+            for (var i = 0; i < fields; i++) row[i] = FromNative(((delegate* unmanaged[Cdecl]<int, byte*>)Fn(44))(i));
+            rows.Add(row);
+            ((delegate* unmanaged[Cdecl]<int>)Fn(43))();
+        }
+        return rows;
+    }
     // 141, 142, 143
     public static int GetCursorX() => Has(141) ? ((delegate* unmanaged[Cdecl]<int>)Fn(141))() : 0;
     public static int GetCursorY() => Has(142) ? ((delegate* unmanaged[Cdecl]<int>)Fn(142))() : 0;

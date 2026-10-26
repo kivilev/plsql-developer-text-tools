@@ -41,8 +41,11 @@ connected, other packages' specifications are read from the database (`ALL_SOURC
 value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_x`). The editor is not changed; the
 result goes to the clipboard.
 
-**SQL Tools → Explain Plan with constants.** The same statement, explained in the IDE's own Plan Window (bind F5 to it
-in Key Configuration).
+**SQL Tools → Explain Plan with constants / Extended Explain Plan.** The same statement, explained: in the IDE's own
+Plan Window (bind F5 to it in Key Configuration), or in an HTML window that explains the plan without AI: steps in reading
+order with "runs for each row of step N", each step in plain words with its predicates, table statistics and indexes,
+**Findings** from 19 static rules (conversions on indexed columns, full scans inside nested loops, broken partition
+pruning, unused hints, missing statistics, ...) each with "why it may be fine", and the raw `DBMS_XPLAN` text to copy.
 
 **Format Tools → Apply formatting rules.** Run the IDE's Beautifier first, then this command on the selection or the
 whole text: it adds what the Beautifier's rules file cannot express (`END name;`, `:=` in columns, built-in functions

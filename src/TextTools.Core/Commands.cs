@@ -74,6 +74,7 @@ public static class Commands
     [
         "Copy SQL with constants resolved",
         "Explain Plan with constants",
+        "Extended Explain Plan",
         "List -> IN (...)",
         "Escape quotes ( ' -> '' )",
         "Unescape quotes ( '' -> ' )",
@@ -141,7 +142,7 @@ public static class Commands
             CopySample, CopySample.IndexOf("select", StringComparison.Ordinal)),
 
         new PlanCommand(SqlMenu, "Copy", "Explain Plan with constants", PlanView.IdeWindow),
-        // Extended Explain Plan (PlanView.Extended) is not in the menu until it is stable: see the draft PR.
+        new PlanCommand(SqlMenu, "Copy", "Extended Explain Plan", PlanView.Extended),
 
         T(FormatMenu, "Rules", "Apply formatting rules", t => PostFormatter.Format(t, PostFormatter.Current),
             "PROCEDURE p IS\n  v_a t.a%type;\nBEGIN\n  v_long_name:=nvl(i_x,0);\n  v_b:=1;\nEND;"),

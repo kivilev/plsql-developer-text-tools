@@ -1,0 +1,68 @@
+## sql
+select * from result r where r.rowid is not null
+## rows
+"0",,"3","SELECT STATEMENT",,,,,,,"119","490280","3",,,,
+"1","0","1","TABLE ACCESS","FULL","STAND","RESULT","TABLE","""R""@""SEL$1""","SEL$1","119","490280","3",,,,
+## map
+## tables
+"STAND","RESULT",,,,"N","NO",
+## indexes
+## columns
+"STAND","RESULT","CHECK_ID","VARCHAR2"
+"STAND","RESULT","METRIC","VARCHAR2"
+"STAND","RESULT","ACT_VALUE","VARCHAR2"
+"STAND","RESULT","EXP_VALUE","VARCHAR2"
+"STAND","RESULT","TOL_PCT","NUMBER"
+"STAND","RESULT","STATUS","VARCHAR2"
+"STAND","RESULT","RUN_ID","NUMBER"
+"STAND","RESULT","RUN_DTIME","DATE"
+"STAND","RESULT","SEQ","NUMBER"
+## partkeys
+## text
+
+Plan hash value: 3150054132
+
+----------------------------------------------------------------------------
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |
+----------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |        |   119 |   478K|     3   (0)| 00:00:01 |
+|   1 |  TABLE ACCESS FULL| RESULT |   119 |   478K|     3   (0)| 00:00:01 |
+----------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$1 / "R"@"SEL$1"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      FULL(@"SEL$1" "R"@"SEL$1")
+      OUTLINE_LEAF(@"SEL$1")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - "R"."RUN_ID"[NUMBER,22], "R"."RUN_DTIME"[DATE,7],
+       "R"."SEQ"[NUMBER,22], "R"."CHECK_ID"[VARCHAR2,60],
+       "R"."METRIC"[VARCHAR2,60], "R"."ACT_VALUE"[VARCHAR2,4000],
+       "R"."EXP_VALUE"[VARCHAR2,4000], "R"."TOL_PCT"[NUMBER,22],
+       "R"."STATUS"[VARCHAR2,5]
+
+Note
+-----
+   - dynamic statistics used: dynamic sampling (level=2)
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER) [FINAL]
+

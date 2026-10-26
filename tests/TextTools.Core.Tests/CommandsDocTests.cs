@@ -55,7 +55,7 @@ public class CommandsDocTests
                         InsertCommand i => ("(cursor position)", i.Format(ExampleNow)),
                         CopyCommand c => (c.Sample, c.SampleResult),
                         PlanCommand { View: PlanView.IdeWindow } => ("(statement under the cursor)", "the IDE Plan Window with this statement, constants resolved"),
-                        PlanCommand => ("(statement under the cursor)", "an HTML window: Plan tab (DBMS_XPLAN) and Findings tab"),
+                        PlanCommand => ("(statement under the cursor)", "an HTML window: Plan (reading order, step panels), Findings (static rules), Text (DBMS_XPLAN + Copy), Reference"),
                         SettingsCommand => ("(none)", "the settings window of the formatting rules (tabs, checkboxes, before/after preview)"),
                         _ => ("", ""),
                     };

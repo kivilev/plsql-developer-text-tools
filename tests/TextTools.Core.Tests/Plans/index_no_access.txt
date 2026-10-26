@@ -1,0 +1,72 @@
+## sql
+select /*+ index(t terrorist_flb2_i) */ t.birthday from terrorist t where t.first_name = 'X'
+## rows
+"0",,"25358","SELECT STATEMENT",,,,,,,"77246","1158690","25358",,,,
+"1","0","1","INDEX","FULL SCAN","KIVI","TERRORIST_FLB2_I","INDEX","""T""@""SEL$1""","SEL$1","77246","1158690","25358","""T"".""FIRST_NAME""='X'","""T"".""FIRST_NAME""='X'",,
+## map
+## tables
+"KIVI","TERRORIST","5000000","37637","2026-10-17","N","NO","NO"
+## indexes
+"KIVI","TERRORIST_FLB_I","KIVI","TERRORIST","VALID","INVISIBLE","NONUNIQUE","NORMAL","REASON,BIRTHDAY,LAST_NAME,FIRST_NAME"
+"KIVI","TERRORIST_FLB2_I","KIVI","TERRORIST","VALID","VISIBLE","NONUNIQUE","NORMAL","BIRTHDAY,LAST_NAME,FIRST_NAME"
+## columns
+"KIVI","TERRORIST","FIRST_NAME","VARCHAR2"
+"KIVI","TERRORIST","LAST_NAME","VARCHAR2"
+"KIVI","TERRORIST","BIRTHDAY","DATE"
+"KIVI","TERRORIST","REASON","VARCHAR2"
+"KIVI","TERRORIST","CREATED_DTIME","DATE"
+## partkeys
+## text
+
+Plan hash value: 3321057977
+
+-------------------------------------------------------------------------------------
+| Id  | Operation        | Name             | Rows  | Bytes | Cost (%CPU)| Time     |
+-------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT |                  | 77246 |  1131K| 25358   (1)| 00:00:01 |
+|*  1 |  INDEX FULL SCAN | TERRORIST_FLB2_I | 77246 |  1131K| 25358   (1)| 00:00:01 |
+-------------------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$1 / "T"@"SEL$1"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      INDEX(@"SEL$1" "T"@"SEL$1" ("TERRORIST"."BIRTHDAY" "TERRORIST"."LAST_NAME"
+              "TERRORIST"."FIRST_NAME"))
+      OUTLINE_LEAF(@"SEL$1")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   1 - access("T"."FIRST_NAME"='X')
+       filter("T"."FIRST_NAME"='X')
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - "T"."BIRTHDAY"[DATE,7]
+
+Hint Report (identified by operation id / Query Block Name / Object Alias):
+Total hints for statement: 1
+---------------------------------------------------------------------------
+
+   1 -  SEL$1 / "T"@"SEL$1"
+           -  index(t terrorist_flb2_i)
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER) [FINAL]
+

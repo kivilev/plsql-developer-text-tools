@@ -1,0 +1,70 @@
+## sql
+select * from passport_black_list b where b.passport_number = 123456
+## rows
+"0",,"3899","SELECT STATEMENT",,,,,,,"4","80","3899",,,,
+"1","0","1","TABLE ACCESS","FULL","KIVI","PASSPORT_BLACK_LIST","TABLE","""B""@""SEL$1""","SEL$1","4","80","3899",,"TO_NUMBER(""B"".""PASSPORT_NUMBER"")=123456",,
+## map
+## tables
+"KIVI","PASSPORT_BLACK_LIST","4000000","14177","2026-10-17","N","NO","NO"
+## indexes
+"KIVI","PASSPORT_BLACK_LIST_NUM_SER_I","KIVI","PASSPORT_BLACK_LIST","VALID","VISIBLE","NONUNIQUE","NORMAL","PASSPORT_NUMBER,PASSPORT_SERIES"
+## columns
+"KIVI","PASSPORT_BLACK_LIST","PASSPORT_SERIES","VARCHAR2"
+"KIVI","PASSPORT_BLACK_LIST","PASSPORT_NUMBER","VARCHAR2"
+"KIVI","PASSPORT_BLACK_LIST","ADD_DTIME","DATE"
+## partkeys
+## text
+
+Plan hash value: 31789019
+
+-----------------------------------------------------------------------------------------
+| Id  | Operation         | Name                | Rows  | Bytes | Cost (%CPU)| Time     |
+-----------------------------------------------------------------------------------------
+|   0 | SELECT STATEMENT  |                     |     4 |    80 |  3899   (2)| 00:00:01 |
+|*  1 |  TABLE ACCESS FULL| PASSPORT_BLACK_LIST |     4 |    80 |  3899   (2)| 00:00:01 |
+-----------------------------------------------------------------------------------------
+
+Query Block Name / Object Alias (identified by operation id):
+-------------------------------------------------------------
+
+   1 - SEL$1 / "B"@"SEL$1"
+
+Outline Data
+-------------
+
+  /*+
+      BEGIN_OUTLINE_DATA
+      FULL(@"SEL$1" "B"@"SEL$1")
+      OUTLINE_LEAF(@"SEL$1")
+      ALL_ROWS
+      DB_VERSION('23.1.0')
+      OPTIMIZER_FEATURES_ENABLE('19.1.0')
+      IGNORE_OPTIM_EMBEDDED_HINTS
+      END_OUTLINE_DATA
+  */
+
+Predicate Information (identified by operation id):
+---------------------------------------------------
+
+   1 - filter(TO_NUMBER("B"."PASSPORT_NUMBER")=123456)
+
+Column Projection Information (identified by operation id):
+-----------------------------------------------------------
+
+   1 - "B"."PASSPORT_SERIES"[VARCHAR2,80], "B"."PASSPORT_NUMBER"[VARCHAR2,80],
+       "B"."ADD_DTIME"[DATE,7]
+
+SQL Analysis Report (identified by operation id/Query Block Name/Object Alias):
+-------------------------------------------------------------------------------
+
+   1 -  SEL$1 / "B"@"SEL$1"
+           -  The following columns have predicates which preclude their
+              use as keys in index range scan. Consider rewriting the
+              predicates.
+                "PASSPORT_NUMBER"
+
+Query Block Registry:
+---------------------
+
+  SEL$1 (PARSER) [FINAL]
+

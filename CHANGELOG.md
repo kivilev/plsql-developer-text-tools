@@ -8,6 +8,29 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
 
 ## [Unreleased]
 
+### Features
+
+- **SQL Tools → Extended Explain Plan**: an HTML window that explains the plan of the statement under the cursor
+  without AI, from the plan itself and the data dictionary. Running it again refreshes the same window.
+  - **Plan** tab: steps in reading order (children first) with "runs for each row of step N" on the inner side of
+    nested loops and FILTER subqueries, scalar subqueries and hash join build/probe sides; Rows and Cost as log bars;
+    a panel per step: the step in plain words, access/filter predicates, table size and statistics, indexes with the
+    predicate columns underlined. Inactive rows of an adaptive plan are left out (OTHER_XML display map).
+  - **Findings** tab: 19 static rules - conversions and functions on indexed columns, DATE vs TIMESTAMP, joins of
+    different types, linguistic comparison, full scan of a big table for a few rows, index read without an access
+    condition, index rows discarded by the table filter, unusable/invisible index, Cartesian join, full scan or a
+    database link inside nested loops, no partition pruning, FILTER subquery per row, hint errors and unused hints
+    (Hint Report), dynamic sampling (with the statistics from the dictionary), fixed plans, adaptive plans, collections
+    with the default estimate. Each finding says when it may be fine; small tables never raise full scan alarms.
+  - **Text** tab: the raw `DBMS_XPLAN` output (`ADVANCED +ADAPTIVE +HINT_REPORT` by version) with a Copy button.
+  - **Reference** tab and tooltips: what each operation and column means; banners for bind variables, adaptive and
+    fixed plans. Rules and texts are data (`Plan/reference.json` in the DLL). Read-only: EXPLAIN PLAN, DBMS_XPLAN and
+    `ALL_*` views through the IDE's own connection.
+  - **Language**: the report speaks the language of the IDE's translation (Preferences → User Interface → Language):
+    Brazilian, Chinese, French, German, Hungarian, Japanese, Russian, Spanish; English otherwise. The texts are
+    `Plan/reference.<code>.json` laid over `reference.json`; a missing key shows the English text.
+  - The statement is shown above the plan table, not below it.
+
 ## [v0.3.0] - 2026-10-23
 
 ### Features

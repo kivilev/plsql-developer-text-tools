@@ -42,8 +42,10 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
 - **Every user-visible text is localized into all languages of the IDE's translations** (Brazilian, Chinese, French,
   German, Hungarian, Japanese, Russian, Spanish; English is the source), chosen by `IDE_TranslationLanguage`
   (Preferences → Language): menu captions, report and window texts, messages. New text = English key + the same key in
-  every language file (`Menu/captions.<code>.json`, and the like); tests fail when a language lacks one. No English
-  text in code that a user reads.
+  every language file (`Menu/captions.<code>.json`; the Extended Explain Plan report: `Plan/reference.json` +
+  `Plan/reference.<code>.json`, placeholders `{name}` unchanged, Oracle terms and identifiers not translated); tests
+  (`MenuCaptionsTests`, `PlanLocalizationTests`) fail when a language lacks a key or a placeholder differs. No English
+  text in code that a user reads: use `PlanReference.Ui(key, ...)` / `MenuCaptions`. Same for any new window.
 - Menu captions: the English ones (`Commands.All` names, the identity of a command) are ASCII only and have no `[...]`
   (the IDE cuts it out). Displayed captions are translated (`Menu/captions.<code>.json`, UTF-8, no `[`, `]`, `&`, unique
   per submenu) and used only once the IDE reads UTF-8 (`CHARMODE`); otherwise English.

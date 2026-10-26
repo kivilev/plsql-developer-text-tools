@@ -37,6 +37,7 @@ internal static unsafe class FakeIde
         register(1, (nint)(delegate* unmanaged[Cdecl]<int>)&SysVersion);
         register(11, (nint)(delegate* unmanaged[Cdecl]<int>)&IsConnected);
         register(40, (nint)(delegate* unmanaged[Cdecl]<byte*, int>)&SqlExecute);
+        register(41, (nint)(delegate* unmanaged[Cdecl]<int>)&SqlFieldCount);
         register(42, (nint)(delegate* unmanaged[Cdecl]<int>)&SqlEof);
         register(43, (nint)(delegate* unmanaged[Cdecl]<int>)&SqlNext);
         register(44, (nint)(delegate* unmanaged[Cdecl]<int, byte*>)&SqlField);
@@ -131,6 +132,9 @@ internal static unsafe class FakeIde
         _row = 0;
         return Connected ? 0 : 3114; // ORA-03114: not connected
     }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SqlFieldCount() => 1;
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static int SqlEof() => _row >= Rows.Count ? 1 : 0;
