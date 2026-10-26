@@ -15,11 +15,7 @@ CREATE OR REPLACE PACKAGE BODY card_data IS
                'ropugug' VALUE a.message,
                'camopid' VALUE JSON_OBJECT(
                    'foti'       VALUE a.card_number,
-                   'gekonaropo' VALUE DECODE(a.status,
-                                             2,
-                                             TO_CHAR(a.cekora_date,
-                                                     'zu24:el:du ab-du-ohup'),
-                                             NULL)
+                   'gekonaropo' VALUE DECODE(a.status, 2, TO_CHAR(a.cekora_date, 'zu24:el:du ab-du-ohup'), NULL)
                )
            RETURNING CLOB
            ) AS dula_response

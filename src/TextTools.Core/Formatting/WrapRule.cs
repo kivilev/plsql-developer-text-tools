@@ -50,14 +50,24 @@ internal static partial class WrapRule
         var (lines, masked) = LineText.Split(text);
         var inside = LinesInsideLiterals(text);
         var output = new List<string>(lines.Length + 16);
+        var depth = 0; // open parentheses before the line: a line inside an unclosed call is a continuation, cut at 120 only
         for (var n = 0; n < lines.Length; n++)
         {
+            var startsInside = depth > 0;
+            foreach (var c in masked[n])
+            {
+                if (c == '(') depth++;
+                else if (c == ')' && depth > 0) depth--;
+            }
             if (inside.Contains(n))
             {
                 output.Add(lines[n]);
                 continue;
             }
-            foreach (var r in WrapLine(lines[n], masked[n], choices.Margin, true, choices))
+            var pieces = WrapLine(lines[n], masked[n], startsInside ? Recur(choices.Margin) : choices.Margin, true, choices);
+            // When the cut at 120 does not get the line under 120, it is cut at the margin as usual.
+            if (startsInside && pieces.Any(r => r.TrimEnd().Length > Hard)) pieces = WrapLine(lines[n], masked[n], choices.Margin, true, choices);
+            foreach (var r in pieces)
             {
                 if (r.TrimEnd().Length > Hard) output.AddRange(WrapLine(r, LineText.Mask(r), Hard, true, choices));
                 else output.Add(r);
@@ -87,6 +97,9 @@ internal static partial class WrapRule
         }
         return inside;
     }
+
+    /// <summary>The margin for the lines that wrapping itself makes out of a call or a chain: they are cut again only past the hard limit.</summary>
+    private static int Recur(int margin) => Math.Max(margin, Hard);
 
     private static List<string> Expand(IEnumerable<string> parts, string line, int margin, bool splitters, Choices choices, bool onlyLong)
     {
@@ -134,7 +147,7 @@ internal static partial class WrapRule
         // A line that only the closing semicolon pushes past the margin stays as it is.
         if (splitters && effective > margin && HasTopLevelConcat(masked))
         {
-            return WrapConcat(line, masked, margin) is { } concat ? Expand(concat, line, margin, false, choices, onlyLong: true) : [line];
+            return WrapConcat(line, masked, margin) is { } concat ? Expand(concat, line, Recur(margin), false, choices, onlyLong: true) : [line];
         }
 
         var candidates = new List<(int Open, int Close, string Separator)>();
@@ -186,13 +199,17 @@ internal static partial class WrapRule
                 var piece = parts[k] + (last ? "" : separator) + (last ? tail : "");
                 broken.Add((k == 0 ? head : new string(' ', column)) + piece);
             }
-            return Expand(broken, line, margin, true, choices, onlyLong: false);
+            return Expand(broken, line, Recur(margin), true, choices, onlyLong: false);
         }
 
         if (effective <= margin) return [line];
-        if (splitters && (WrapLogical(line, masked, margin) ?? WrapConcat(line, masked, margin)) is { } wrapped)
+        if (splitters && WrapLogical(line, masked, margin) is { } wrappedLogical)
         {
-            return Expand(wrapped, line, margin, false, choices, onlyLong: true);
+            return Expand(wrappedLogical, line, margin, false, choices, onlyLong: true);
+        }
+        if (splitters && WrapConcat(line, masked, margin) is { } wrappedConcat)
+        {
+            return Expand(wrappedConcat, line, Recur(margin), false, choices, onlyLong: true);
         }
         return [line];
     }

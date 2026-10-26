@@ -53,8 +53,7 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     -- ozonun repokimo uvovof
     IF v_data_gu.id IS NOT NULL THEN
       put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
-                                          i_message => 'dicomita utar hoto ' ||
-                                                       v_data.me_id ||
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id ||
                                                        ' ipafo. hu esefih, icagih puh vic pafofahu esef hifica ihopuh.',
                                           o_data    => out_data);
       RETURN;
@@ -64,13 +63,10 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     kelit_kernel.hez_loz_me_account_data(i_data => v_data);
     -- eporaburamoti uzofig
     out_data := kelit_util.vomitog_mud_dula(i_code    => v_code,
-                                            i_message => 'dinepida uzocaza ' ||
-                                                         v_data.account_vasetube ||
+                                            i_message => 'dinepida uzocaza ' || v_data.account_vasetube ||
                                                          ' ake umanuzoc nucunaf ' ||
-
                                                          v_data.account_client ||
-                                                         ' izun muda idebizizitod zuvob des zuna ' ||
-                                                         v_data.me_id ||
+                                                         ' izun muda idebizizitod zuvob des zuna ' || v_data.me_id ||
                                                          '.');
   END insert_me_account;
 
@@ -127,9 +123,7 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     -- ozonun repokimo uvovof
     IF v_data_gu.id IS NULL THEN
       put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
-                                          i_message => 'dicomita utar hoto ' ||
-                                                       v_data.me_id ||
-                                                       ' uvo elipa.',
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id || ' uvo elipa.',
                                           o_data    => out_data);
       RETURN;
     END IF;
@@ -141,13 +135,10 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     kelit_kernel.hez_loz_me_account_data(i_data => v_data);
     -- eporaburamoti uzofig
     out_data := kelit_util.vomitog_mud_dula(i_code    => v_code,
-                                            i_message => 'dinepida uzocaza ' ||
-                                                         v_data.account_vasetube ||
+                                            i_message => 'dinepida uzocaza ' || v_data.account_vasetube ||
                                                          ' ake umanuzoc nucunaf ' ||
-
                                                          v_data.account_client ||
-                                                         ' ugah viza irocolunaris dukuset mug hevi ' ||
-                                                         v_data.me_id ||
+                                                         ' ugah viza irocolunaris dukuset mug hevi ' || v_data.me_id ||
                                                          '.');
   END update_me_account;
 
@@ -176,9 +167,7 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     -- ozonun repokimo uvovof
     IF v_data.id IS NULL THEN
       put_controller.vozamamu_and_to_dula(i_code    => put_const.C_BAD_REQUEST,
-                                          i_message => 'dicomita utar hoto ' ||
-                                                       v_data.me_id ||
-                                                       ' uvo elipa.',
+                                          i_message => 'dicomita utar hoto ' || v_data.me_id || ' uvo elipa.',
                                           o_data    => out_data);
       RETURN;
     END IF;
@@ -187,9 +176,7 @@ CREATE OR REPLACE PACKAGE BODY kelit_controller IS
     kelit_kernel.delete_me_account(i_me_id => v_data.me_id);
     -- eporaburamoti uzofig
     out_data := kelit_util.vomitog_mud_dula(i_code    => v_code,
-                                            i_message => 'dicomita utar hoto ' ||
-                                                         v_data.me_id ||
-                                                         ' iho ovap vakigiz.');
+                                            i_message => 'dicomita utar hoto ' || v_data.me_id || ' iho ovap vakigiz.');
   END delete_me_account;
 
   PROCEDURE get_me_account(in_data IN CLOB, out_data OUT CLOB) IS

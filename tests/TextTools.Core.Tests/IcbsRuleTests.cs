@@ -175,4 +175,19 @@ public class IcbsRuleTests
         Assert.Contains("'Error by checking fromBranch.(' ||" + "\n", result, StringComparison.Ordinal);
         Assert.True(TokenGuard.Same(text, result));
     }
+
+    [Fact]
+    public void AnArgumentLineInsideACallIsCutOnlyPast120AndAShortCallStaysWhole()
+    {
+        const string eol = "\n";
+        var arg = "                                              iTotId  => SUBSTR(zic.cid, 10, 8),";
+        var text = "BEGIN" + eol + "  x := f(a," + eol + arg + eol + "        b);" + eol + "END;" + eol;
+        var result = PostFormatter.Format(text, FormatOptions.None with { WrapLongLines = true });
+        Assert.Contains("SUBSTR(zic.cid, 10, 8),", result, StringComparison.Ordinal); // longer than 76 but inside the call: not cut
+        Assert.DoesNotContain("SUBSTR(zic.cid," + eol, result, StringComparison.Ordinal);
+
+        var nested = "BEGIN" + eol + "  o := NVL(JSON_VALUE(iJson, '$.residentialAddress'), oJClient.post_address, oJClient.other_address_part);" + eol + "END;" + eol;
+        var cut = PostFormatter.Format(nested, FormatOptions.None with { WrapLongLines = true });
+        Assert.Contains("NVL(JSON_VALUE(iJson, '$.residentialAddress'),", cut, StringComparison.Ordinal); // the inner call stays whole
+    }
 }
