@@ -33,8 +33,11 @@ public class RealFilesTests
     public void TheFileGetsTheLayoutOfTheReferenceWithoutChangingATokenAndSettles(string id)
     {
         var input = Read($"file{id}.input.txt");
-        Assert.True(PostFormatter.TryFormat(input, null, out var once), "the token guard objected");
+        // The reference formatter leaves the commas as written; the blank after a comma is our addition on top of it.
+        Assert.True(PostFormatter.TryFormat(input, FormatOptions.Default with { SpaceAfterComma = false }, out var once), "the token guard objected");
         Assert.Equal(NonBlankLines(Read($"file{id}.expected.txt")), NonBlankLines(once));
+        Assert.True(PostFormatter.TryFormat(input, null, out var withBlanks), "the token guard objected (blank after comma)");
+        Assert.Equal(NonBlankLines(once).Count(), NonBlankLines(withBlanks).Count());
         var settled = once;
         for (var pass = 0; pass < 2 && !string.Equals(PostFormatter.Format(settled), settled, StringComparison.Ordinal); pass++) settled = PostFormatter.Format(settled);
         Assert.Equal(settled, PostFormatter.Format(settled));

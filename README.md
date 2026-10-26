@@ -36,7 +36,7 @@ Runs after the IDE's Beautifier and adds what its rules file cannot express: 25+
 - layout of `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON`, subqueries
 - long lines wrapped at the margin: `DECODE` in pairs, `BETWEEN`, `||`, `=>` aligned
 - `IF` conditions on one logical line, short groups in parentheses on one line
-- built-in functions and `%TYPE` in upper case, an optional blank after each comma
+- built-in functions and `%TYPE` in upper case, a blank after each comma (`SUBSTR(x, 1, 3)`)
 - blank lines between subprograms, none before the closing `END`, `EXECUTE IMMEDIATE` layout, no trailing blanks
 - the code never changes: tokens are compared before and after, a rule that touches more than layout is skipped
 

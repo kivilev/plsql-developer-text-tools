@@ -15,7 +15,7 @@ namespace TextTools.Core.Formatting;
 /// <param name="NoBlankLineBeforePackageEnd">R20: no blank line before the closing <c>END</c> at column 0.</param>
 /// <param name="ExecuteImmediateLiteralOnOwnLine">R21: a long or multi-line literal of EXECUTE IMMEDIATE starts on its own line, 2 columns deeper.</param>
 /// <param name="TrimTrailingSpaces">No trailing blanks (except inside a multi-line string literal).</param>
-/// <param name="SpaceAfterComma">A blank after each comma (<c>NVL(1,0)</c> -> <c>NVL(1, 0)</c>); off by default: the ICBS standard keeps the commas as written.</param>
+/// <param name="SpaceAfterComma">A blank after each comma (<c>NVL(1,0)</c> -> <c>NVL(1, 0)</c>); on by default: the bank standard writes <c>SUBSTR(x, 1, 3)</c>.</param>
 /// <param name="TightParentheses">No blanks right inside parentheses.</param>
 /// <param name="SelectIntoOnOneLine">R15 exception: the SELECT list and the INTO list of SELECT ... INTO, each on one line when it fits.</param>
 /// <param name="UpdateSetLayout">R10: <c>SET</c> joined with its first assignment, the <c>=</c> of the SET list aligned.</param>
@@ -44,7 +44,7 @@ public sealed record FormatOptions(
     bool NoBlankLineBeforePackageEnd = true,
     bool ExecuteImmediateLiteralOnOwnLine = true,
     bool TrimTrailingSpaces = true,
-    bool SpaceAfterComma = false,
+    bool SpaceAfterComma = true,
     bool TightParentheses = true,
     bool SelectIntoOnOneLine = true,
     bool UpdateSetLayout = true,

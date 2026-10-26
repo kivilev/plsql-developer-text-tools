@@ -50,6 +50,19 @@ public class SettingBehaviourTests
         Assert.NotEqual(PostFormatter.Format(FormatSample.Text), PostFormatter.Format(FormatSample.Text, profile.ToOptions()));
     }
 
+    /// <summary>
+    /// The default profile is the bank's code standard (cbs-abs-db/_docs/coding-standards.md §5-6 and _tools/ide/formatter/cbs_post.py):
+    /// every rule of the reference formatter is on, margin 76. Off is only what the standard does not ask for:
+    /// a blank line right after the package header ("not needed"). A blank after a comma (<c>SUBSTR(x, 1, 3)</c>) is on, as in its examples.
+    /// </summary>
+    [Fact]
+    public void TheDefaultProfileIsTheBankStandard()
+    {
+        var off = FormatSettings.All.Where(s => s.Kind == SettingKind.Bool && s.Default == 0).Select(s => s.Id).Order(StringComparer.Ordinal);
+        Assert.Equal(["blankLineAfterPackageHeader"], off);
+        Assert.Equal(76, FormatSettings.Find("margin")!.Default);
+    }
+
     [Fact]
     public void TheMarginMovesTheWrapping()
     {

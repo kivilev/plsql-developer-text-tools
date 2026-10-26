@@ -53,7 +53,7 @@ public class IcbsRuleTests
         const string text = "BEGIN\n  v_sql := 'SELECT a,   b\n  FROM t\n  SET\n    x:=1\n  WHERE  nvl(a,0)=1   \n  END;';\n  v_x:=nvl(1,2);\nEND;\n";
         var result = PostFormatter.Format(text);
         Assert.Contains("'SELECT a,   b\n  FROM t\n  SET\n    x:=1\n  WHERE  nvl(a,0)=1   \n  END;'", result, StringComparison.Ordinal);
-        Assert.Contains("v_x := NVL(1,2);", result, StringComparison.Ordinal); // the code around it is still formatted
+        Assert.Contains("v_x := NVL(1, 2);", result, StringComparison.Ordinal); // the code around it is still formatted
     }
 
     [Fact]
@@ -122,12 +122,13 @@ public class IcbsRuleTests
     }
 
     [Fact]
-    public void ABlankAfterTheCommaIsOptionalAndNeverTouchesLiteralsOrComments()
+    public void ABlankAfterTheCommaIsOnByDefaultAndNeverTouchesLiteralsOrComments()
     {
         var text = "BEGIN\n  v := NVL(a,0) + f(x,y,'a,b'); -- c,d\n  g(1,\n    2);\nEND;\n";
         var on = FormatOptions.None with { SpaceAfterComma = true };
         Assert.Equal("BEGIN\n  v := NVL(a, 0) + f(x, y, 'a,b'); -- c,d\n  g(1,\n    2);\nEND;\n", PostFormatter.Format(text, on));
-        Assert.Equal(text, PostFormatter.Format(text));
+        Assert.Equal(text, PostFormatter.Format(text, FormatOptions.None));
+        Assert.Contains("NVL(a, 0)", PostFormatter.Format(text), StringComparison.Ordinal); // on by default: the bank standard
     }
 
     [Fact]

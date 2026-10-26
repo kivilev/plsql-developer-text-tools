@@ -100,7 +100,7 @@ Lines are separated by `⏎` in the examples below.
 
 | Command | Example input | Result |
 |---|---|---|
-| Apply formatting rules | `PROCEDURE p IS ⏎   v_a t.a%type; ⏎ BEGIN ⏎   v_long_name:=nvl(i_x,0); ⏎   v_b:=1; ⏎ END;` | `PROCEDURE p IS ⏎   v_a t.a%TYPE; ⏎ BEGIN ⏎   v_long_name := NVL(i_x,0); ⏎   v_b         := 1; ⏎ END p;` |
+| Apply formatting rules | `PROCEDURE p IS ⏎   v_a t.a%type; ⏎ BEGIN ⏎   v_long_name:=nvl(i_x,0); ⏎   v_b:=1; ⏎ END;` | `PROCEDURE p IS ⏎   v_a t.a%TYPE; ⏎ BEGIN ⏎   v_long_name := NVL(i_x, 0); ⏎   v_b         := 1; ⏎ END p;` |
 
 ### Settings
 
