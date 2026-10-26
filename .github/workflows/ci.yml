@@ -22,14 +22,19 @@ concurrency:
 jobs:
   commit-rules:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    if: github.event_name == 'pull_request'
     steps:
+      # The job always runs (the ruleset needs this check to be reported as success); the naming rules are for people,
+      # Dependabot names its branches and titles itself.
       - uses: actions/checkout@v7.0.1
+        if: github.actor != 'dependabot[bot]'
       - name: PR title
+        if: github.actor != 'dependabot[bot]'
         env:
           TITLE: ${{ github.event.pull_request.title }}
         run: sh scripts/commit-rules.sh title "$TITLE"
       - name: Branch name
+        if: github.actor != 'dependabot[bot]'
         env:
           BRANCH: ${{ github.head_ref }}
         run: sh scripts/commit-rules.sh branch "$BRANCH"
