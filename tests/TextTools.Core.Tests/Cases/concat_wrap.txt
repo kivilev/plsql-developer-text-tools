@@ -1,0 +1,10 @@
+PROCEDURE p IS
+BEGIN
+  v_message := 'Account ' || v_account || ' of the client ' || v_client || ' is closed on ' || v_date;
+END p;
+-----
+PROCEDURE p IS
+BEGIN
+  v_message := 'Account ' || v_account || ' of the client ' || v_client ||
+               ' is closed on ' || v_date;
+END p;

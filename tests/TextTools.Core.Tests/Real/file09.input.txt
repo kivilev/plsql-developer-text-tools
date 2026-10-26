@@ -1,0 +1,104 @@
+CREATE OR REPLACE PACKAGE BODY luka_util IS
+
+  FUNCTION getClientMainCid(iBranch VARCHAR2, iClient VARCHAR2) RETURN VARCHAR2 IS
+    vResult VARCHAR2(20);
+  BEGIN
+    SELECT t.id
+      INTO vResult
+      FROM (SELECT a.*,
+                   ROW_NUMBER() OVER (PARTITION BY branch, client, cid_raz, currency
+                                          ORDER BY id_order) AS ma
+              FROM ACCOUNT a
+             WHERE a.branch   = iBranch
+               AND a.client   = iClient
+               AND a.cid_raz  LIKE '202%'
+               AND a.currency = '000'
+               AND a.state    = 2
+           ) t
+     WHERE ma = 1;
+    RETURN vResult;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN NULL;
+  END;
+  FUNCTION getClientMainCafCid(iBranch VARCHAR2, iClient VARCHAR2) RETURN VARCHAR2 IS
+    vResult VARCHAR2(20);
+  BEGIN
+    SELECT t.id
+      INTO vResult
+      FROM (SELECT a.*,
+                   ROW_NUMBER() OVER (PARTITION BY branch, client, cid_raz, currency
+                                          ORDER BY id_order) AS ma
+              FROM ACCOUNT a
+             WHERE a.branch   = iBranch
+               AND a.client   = iClient
+               AND a.cid_raz  = '16401'
+               AND a.currency = '000'
+               AND a.state    = 2
+           ) t
+     WHERE ma = 1;
+    RETURN vResult;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN NULL;
+  END;
+  FUNCTION getCOG RETURN NUMBER IS
+    vResult NUMBER;
+  BEGIN
+    select s.value
+      INTO vResult
+      from rimegas.fe_const s
+     where s.id = 8002;
+    RETURN vResult;
+  EXCEPTION WHEN OTHERS THEN
+    RETURN 0;
+  END;
+  --
+  PROCEDURE createDulaToMud(iDula    IN     CLOB,
+                            ioCuv    IN OUT luka_card_tuhovularovi%ROWTYPE,
+                            oCode    OUT    NUMBER,
+                            oMessage OUT    VARCHAR2) IS
+  BEGIN
+    ioCuv.Cuv_Number        := JSON_VALUE(iDula, '$.sotimavifofuholeh');
+    ioCuv.Branch            := JSON_VALUE(iDula, '$.vedeso');
+    ioCuv.Client_Id         := JSON_VALUE(iDula, '$.revinafe');
+    ioCuv.Account_Id        := JSON_VALUE(iDula, '$.kizagulos');
+    ioCuv.Mecirul_Code      := JSON_VALUE(iDula, '$.hirunalubac');
+    ioCuv.Ga_Fukula_Name    := JSON_VALUE(iDula, '$.dosotafufatu');
+    ioCuv.Ga_first_Name     := JSON_VALUE(iDula, '$.gokicivakaz');
+    ioCuv.Card_Get_Hesod_Id := JSON_VALUE(iDula, '$.fikahagavapeca');
+    ioCuv.Hetaz             := JSON_VALUE(iDula, '$.gafor');
+    ioCuv.Hetaz_Type        := JSON_VALUE(iDula, '$.mekelemiz');
+    ioCuv.Magesucav_Amount  := JSON_VALUE(iDula, '$.masovemonubahod');
+    --
+    oCode  := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      oCode    := 400;
+      oMessage := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  substr(SQLERRM, 1, 150) || ')';
+  END;
+  FUNCTION createMudToDula(iCuvNumber IN VARCHAR2,
+                           iRequest   IN VARCHAR2) RETURN VARCHAR2 IS
+  
+  BEGIN
+    RETURN JSON_OBJECT('mofifafarevevazul' VALUE iCuvNumber,
+                       'cuhoruvem'         VALUE iRequest,
+                       'lakiga'            VALUE 'bazinik');
+  END createMudToDula;
+  PROCEDURE checkStatusDulaToMud(iDula      IN  CLOB,
+                                 iCuvId     OUT VARCHAR2,
+                                 iRequestId OUT VARCHAR2,
+                                 oCode      OUT NUMBER,
+                                 oMessage   OUT VARCHAR2) IS
+  BEGIN
+    iCuvId     := JSON_VALUE(iDula, '$.sotimavifofuholeh');
+    iRequestId := JSON_VALUE(iDula, '$.sifazelemurifeka');
+    --
+    oCode  := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      oCode    := 400;
+      oMessage := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  substr(SQLERRM, 1, 150) || ')';
+  END;
+END luka_util;
+/

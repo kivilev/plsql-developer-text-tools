@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using TextTools.Core.Sql;
 
 namespace TextTools.Core.Formatting;
@@ -40,18 +41,67 @@ public static class PostFormatter
         return true;
     }
 
-    /// <summary>The rules in the order of the canonical pipeline; no guard (tests of single rules use it).</summary>
+    /// <summary>The rules in the order of the canonical pipeline (cbs_post.post()), each as a guarded step.</summary>
     internal static string Apply(string text, FormatOptions o)
     {
-        if (o.BuiltinFunctionsUpper) text = CaseRules.UpperBuiltinFunctions(text);
-        if (o.ExecuteImmediateLiteralOnOwnLine) text = ExecuteImmediateRule.Apply(text, o.Margin);
-        if (o.AlignAssignments) text = AlignAssignmentsRule.Apply(text);
-        if (o.AttributesUpper) text = CaseRules.UpperAttributes(text);
-        if (o.BlankLineBeforeSubprograms) text = BlankLineRules.BeforeSubprograms(text);
-        if (o.NoBlankLineBeforePackageEnd) text = BlankLineRules.NoBlankBeforePackageEnd(text);
-        if (o.EndWithName) text = EndNameRule.Apply(text);
-        if (o.TrimTrailingSpaces) text = TrimTrailing(text);
-        return text;
+        var steps = new Steps(text);
+        steps.Run(o.TightParentheses, TightParenthesesRule.Apply);
+        steps.Run(o.SpaceAfterComma, SpaceAfterCommaRule.Apply);
+        steps.Run(o.SelectIntoOnOneLine, SelectIntoRule.JoinIntoList);
+        steps.Run(o.UpdateSetLayout, UpdateSetRule.AlignEquals);
+        steps.Run(o.JoinIfConditions, IfConditionRule.Apply);
+        steps.Run(o.JoinOnAlignment, JoinOnRule.Apply);
+        steps.Run(o.ShortParenGroupOnOneLine, t => ParenConditionRule.Apply(t, o.Margin));
+        steps.Run(o.InsertLayout, t => InsertRule.Apply(t, o.Margin));
+        steps.Run(o.HeaderTailsOnOneLine, HeaderTailsRule.Apply);
+        steps.Run(o.SelectColumnsOnePerLine, SelectListRule.SplitLine);
+        steps.Run(o.SelectColumnsOnePerLine, SelectListRule.AfterComment);
+        steps.Run(o.SubqueryLayout, t => SubqueryRule.Apply(t, o.Margin));
+        steps.Run(o.BuiltinFunctionsUpper, CaseRules.UpperBuiltinFunctions);
+        steps.Run(o.TightenAliasPadding, t => SelectListRule.TightenAliasPadding(t));
+        steps.Run(o.SingleBlankBeforeAlias, t => SelectListRule.UnalignAliases(t));
+        steps.Run(o.UpdateSetLayout, UpdateSetRule.JoinBareSet);
+        steps.Run(o.ExecuteImmediateLiteralOnOwnLine, t => ExecuteImmediateRule.Apply(t, o.Margin));
+        steps.Run(o.SelectIntoOnOneLine, t => SelectIntoRule.JoinShort(t, o.Margin));
+        steps.Run(o.AlignAssignments, AlignAssignmentsRule.Apply);
+        steps.Run(o.WrapLongLines, t => WrapRule.Apply(t, new WrapRule.Choices(o.Margin, o.WrapDecodeInPairs, o.WrapBetween, o.AlignNamedArguments)));
+        steps.Run(o.AlignDeclarations, AlignDeclarationsRule.Apply);
+        steps.Run(o.IndentComments, CommentIndentRule.Apply);
+        steps.Run(o.AttributesUpper, CaseRules.UpperAttributes);
+        steps.Run(o.BlankLineBeforeSubprograms || o.BlankLineAfterPackageHeader, t => BlankLineRules.BeforeSubprograms(t, o.BlankLineAfterPackageHeader, o.BlankLineBeforeSubprograms));
+        steps.Run(o.NoBlankLineBeforePackageEnd, BlankLineRules.NoBlankBeforePackageEnd);
+        steps.Run(o.EndWithName, EndNameRule.Apply);
+        steps.Run(o.TrimTrailingSpaces, TrimTrailing);
+        return steps.Text;
+    }
+
+    /// <summary>
+    /// The text as it moves through the rules. A rule whose result would change anything but layout and case (a token, a string
+    /// literal, a comment) is skipped, and so is a rule that fails: one bad rule never costs the other rules, and a literal is never touched.
+    /// </summary>
+    private sealed class Steps(string text)
+    {
+        private readonly string _signature = TokenGuard.Signature(text);
+
+        public string Text { get; private set; } = text;
+
+        public void Run(bool enabled, Func<string, string> rule)
+        {
+            if (!enabled) return;
+            string next;
+            try
+            {
+                next = rule(Text);
+            }
+            catch (Exception e) when (e is ArgumentException or InvalidOperationException or IndexOutOfRangeException or RegexMatchTimeoutException)
+            {
+                return;
+            }
+            if (string.Equals(next, Text, StringComparison.Ordinal)) return;
+            var signature = TokenGuard.Signature(next);
+            if (!string.Equals(signature, _signature, StringComparison.Ordinal)) return;
+            Text = next;
+        }
     }
 
     /// <summary>Drops trailing blanks, except on a line whose end is inside a multi-line string literal.</summary>

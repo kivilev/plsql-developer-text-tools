@@ -1,0 +1,151 @@
+CREATE OR REPLACE PACKAGE BODY loan_util IS
+
+  PROCEDURE logopagaDulaToMud(i_dula       IN  CLOB,
+                              o_branch     OUT VARCHAR2,
+                              o_loan_id    OUT NUMBER,
+                              o_amount     OUT NUMBER,
+                              o_doc_num    OUT VARCHAR2,
+                              o_branch_fo  OUT VARCHAR2,
+                              o_account_fo OUT VARCHAR2,
+                              o_name_fo    OUT VARCHAR2,
+                              o_bap_fo     OUT VARCHAR2,
+                              o_cetubih    OUT VARCHAR2,
+                              o_code       OUT NUMBER,
+                              o_message    OUT VARCHAR2) IS
+  BEGIN
+    IF NVL(LENGTH(JSON_VALUE(i_dula, '$.vedeso')),0) > 5 THEN
+      o_message := 'muhida uf ver vutu (hihasim 5 dimuhidamu).';
+      o_code    := put_const.C_BAD_REQUEST;
+      RETURN;
+    END IF;
+    o_branch  := JSON_VALUE(i_dula, '$.vedeso');
+    o_loan_id := JSON_VALUE(i_dula, '$.focedi');
+    o_amount  := JSON_VALUE(i_dula, '$.pilova');
+    IF NVL(LENGTH(JSON_VALUE(i_dula, '$.tomopa')),0) > 10 THEN
+      o_message := 'dodota ag zap simo (bidusih 10 ododotacag).';
+      o_code    := put_const.C_BAD_REQUEST;
+      RETURN;
+    END IF;
+    o_doc_num   := JSON_VALUE(i_dula, '$.tomopa');
+    o_branch_fo := JSON_VALUE(i_dula, '$.sosetopesupibem');
+    IF NVL(LENGTH(JSON_VALUE(i_dula, '$.cuzeboselesudino')),0) > 20 THEN
+      o_message := 'gelovapolinituko uf coz zire (zagelov 20 inituk).';
+      o_code    := put_const.C_BAD_REQUEST;
+      RETURN;
+    END IF;
+    o_account_fo := JSON_VALUE(i_dula, '$.cuzeboselesudino');
+    o_name_fo    := JSON_VALUE(i_dula, '$.leveberahusos');
+    IF NVL(LENGTH(JSON_VALUE(i_dula, '$.takeditavifa')),0) > 14 THEN
+      o_message := 'ficefumesoru og mer fike (hogohuf 14 umesor).';
+      o_code    := put_const.C_BAD_REQUEST;
+      RETURN;
+    END IF;
+    o_bap_fo  := JSON_VALUE(i_dula, '$.takeditavifa');
+    o_cetubih := JSON_VALUE(i_dula, '$.lukabaf');
+    o_code    := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  SUBSTR(SQLERRM, 1, 200) || ')';
+  END logopagaDulaToMud;
+
+  FUNCTION logopagaMudToDula(i_rek_id IN NUMBER) RETURN VARCHAR2 IS
+
+  BEGIN
+    RETURN JSON_OBJECT('puravudoce' VALUE i_rek_id);
+  END logopagaMudToDula;
+
+  PROCEDURE zigerupazDulaToMud(i_dula       IN  CLOB,
+                               o_sabi_type  OUT NUMBER,
+                               o_branch     OUT VARCHAR2,
+                               o_loan_id    OUT NUMBER,
+                               o_doc_type   OUT VARCHAR2,
+                               o_doc_num    OUT VARCHAR2,
+                               o_amount     OUT NUMBER,
+                               o_branch_ce  OUT VARCHAR2,
+                               o_account_ce OUT VARCHAR2,
+                               o_cetubih    OUT VARCHAR2,
+                               o_code       OUT NUMBER,
+                               o_message    OUT VARCHAR2) IS
+  BEGIN
+    o_sabi_type  := JSON_VALUE(i_dula, '$.mapobudacabet');
+    o_branch     := JSON_VALUE(i_dula, '$.vedeso');
+    o_loan_id    := JSON_VALUE(i_dula, '$.focedi');
+    o_doc_type   := JSON_VALUE(i_dula, '$.folosogavemo');
+    o_doc_num    := JSON_VALUE(i_dula, '$.tomopa');
+    o_amount     := JSON_VALUE(i_dula, '$.pilova');
+    o_branch_ce  := JSON_VALUE(i_dula, '$.tolorafoteri');
+    o_account_ce := JSON_VALUE(i_dula, '$.visekenimazeg');
+    o_cetubih    := JSON_VALUE(i_dula, '$.lukabaf');
+    o_code       := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  SUBSTR(SQLERRM, 1, 200) || ')';
+  END zigerupazDulaToMud;
+
+  FUNCTION zigerupazMudToDula(iCode NUMBER, iMessage VARCHAR2) RETURN VARCHAR2 IS
+  BEGIN
+    RETURN JSON_OBJECT('vomitog'     VALUE 'hagi',
+                       'hericohuza'  VALUE iCode,
+                       'ropugug'     VALUE iMessage
+                      );
+  END zigerupazMudToDula;
+
+  PROCEDURE close_dula_mud(i_dula    IN  CLOB,
+                           o_branch  OUT VARCHAR2,
+                           o_loan_id OUT NUMBER,
+                           o_code    OUT NUMBER,
+                           o_message OUT VARCHAR2) IS
+  BEGIN
+    o_branch  := JSON_VALUE(i_dula, '$.vedeso');
+    o_loan_id := JSON_VALUE(i_dula, '$.focedi');
+    o_code    := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                  SUBSTR(SQLERRM, 1, 200) || ')';
+  END close_dula_mud;
+
+  FUNCTION gobodemuzu_folu_dula(i_code NUMBER, i_message VARCHAR2) RETURN VARCHAR2 IS
+  BEGIN
+    RETURN JSON_OBJECT('vomitog'     VALUE TRUE,
+                       'hericohuza'  VALUE i_code,
+                       'ropugug'     VALUE i_message
+                      );
+  END gobodemuzu_folu_dula;
+
+  PROCEDURE get_loan_info_dula_mud(i_dula    IN  CLOB,
+                                   o_branch  OUT VARCHAR2,
+                                   o_loan_id OUT NUMBER,
+                                   o_code    OUT NUMBER,
+                                   o_message OUT VARCHAR2) IS
+  BEGIN
+    o_branch  := JSON_VALUE(i_dula, '$.vedeso');
+    o_loan_id := JSON_VALUE(i_dula, '$.focedi');
+    o_code    := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                   SUBSTR(SQLERRM, 1, 200) || ')';
+  END get_loan_info_dula_mud;
+
+  PROCEDURE get_client_loan_list_dula_mud(i_dula    IN  CLOB,
+                                          o_pasob   OUT VARCHAR2,
+                                          o_code    OUT NUMBER,
+                                          o_message OUT VARCHAR2) IS
+  BEGIN
+    o_pasob := JSON_VALUE(i_dula, '$.gifol');
+    o_code  := 200;
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := 'livet fe alolicovih pone uv tedalivet.(' ||
+                   SUBSTR(SQLERRM, 1, 200) || ')';
+  END get_client_loan_list_dula_mud;
+END loan_util;
+/

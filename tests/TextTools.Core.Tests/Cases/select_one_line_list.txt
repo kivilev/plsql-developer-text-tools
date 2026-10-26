@@ -1,0 +1,17 @@
+BEGIN
+  OPEN c FOR
+    SELECT a.id, a.branch, c.name client_name
+      FROM account a
+      JOIN client c
+        ON c.branch = a.branch;
+END;
+-----
+BEGIN
+  OPEN c FOR
+    SELECT a.id,
+           a.branch,
+           c.name client_name
+      FROM account a
+      JOIN client c
+        ON c.branch = a.branch;
+END;

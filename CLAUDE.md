@@ -44,6 +44,13 @@ scripts/commit-rules.sh    commit / PR title / branch rules (hook + CI)
   (Preferences → Language): menu captions, report and window texts, messages. New text = English key + the same key in
   every language file (`Menu/captions.<code>.json`, and the like); tests fail when a language lacks one. No English
   text in code that a user reads.
+- **A new formatting setting (`FormatSettings.All`) always comes with unit tests.** The catalog theories
+  (`SettingBehaviourTests`, `RulesFileTests`, `FormatSettingsTests`) cover every setting automatically: it must work on
+  its own, change the preview sample, be exported and imported through the `.ttr` rules file and the JSON store, and have
+  its text in all languages. Also write a test of the rule itself (a case in `Cases/*.txt` or a test in `IcbsRuleTests`,
+  including "switched off = text untouched"). A Number setting gets its own test and an entry in
+  `EveryNumberSettingHasATestOfItsOwn`; a setting that only acts under another one (like the wrap options under
+  "wrap long lines") is listed as such in `ASwitchWorksOnItsOwn`. No test = no PR.
 - Menu captions: the English ones (`Commands.All` names, the identity of a command) are ASCII only and have no `[...]`
   (the IDE cuts it out). Displayed captions are translated (`Menu/captions.<code>.json`, UTF-8, no `[`, `]`, `&`, unique
   per submenu) and used only once the IDE reads UTF-8 (`CHARMODE`); otherwise English.

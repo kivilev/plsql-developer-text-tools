@@ -1,0 +1,21 @@
+PROCEDURE get_branch(i_client IN NUMBER) IS
+BEGIN
+  SELECT c.branch_code_of_the_client,
+         c.registration_number_of_the_client,
+         c.name_of_the_client_in_the_local_language
+    INTO o_branch_code_of_the_client,
+         o_registration_number,
+         o_client_name
+    FROM client c
+   WHERE c.id = i_client;
+END get_branch;
+-----
+PROCEDURE get_branch(i_client IN NUMBER) IS
+BEGIN
+  SELECT c.branch_code_of_the_client,
+         c.registration_number_of_the_client,
+         c.name_of_the_client_in_the_local_language
+    INTO o_branch_code_of_the_client, o_registration_number, o_client_name
+    FROM client c
+   WHERE c.id = i_client;
+END get_branch;

@@ -1,0 +1,11 @@
+BEGIN
+  v_a := nvl(t.sign, 0) + abs(t.amount) + my_pkg.nvl(1);
+  v_b := to_char(sysdate, 'DD.MM.YYYY');
+  SELECT SIGN(a.x), a.sign INTO v_c, v_d FROM t a;
+END;
+-----
+BEGIN
+  v_a := NVL(t.sign, 0) + ABS(t.amount) + my_pkg.nvl(1);
+  v_b := TO_CHAR(sysdate, 'DD.MM.YYYY');
+  SELECT SIGN(a.x), a.sign INTO v_c, v_d FROM t a;
+END;

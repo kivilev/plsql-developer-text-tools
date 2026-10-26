@@ -1,0 +1,12 @@
+BEGIN
+insert into deposit_access (dep_id,
+branch,
+descrip) values (i_dep_id, i_branch, i_descrip);
+END;
+-----
+BEGIN
+INSERT INTO deposit_access
+  (dep_id, branch, descrip)
+VALUES
+  (i_dep_id, i_branch, i_descrip);
+END;

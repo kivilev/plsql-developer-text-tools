@@ -7,11 +7,9 @@
 
 <h1 align="center">Text Tools for PL/SQL Developer</h1>
 
-<p align="center">
-  Convert the selected text in <a href="https://www.allroundautomations.com/products/pl-sql-developer/">PL/SQL Developer</a>:
-  identifier case, SQL quoting, <code>IN</code> lists over 1000 values, Base64/HEX,
-  Oracle date literals and Java/.NET date masks. A native 64-bit plug-in, no runtime to install.
-</p>
+<p align="center">Fixes what PL/SQL Developer's Beautifier leaves undone, makes a query from a package run on its own, and removes small text chores. A native 64-bit plug-in, nothing to install but one DLL.</p>
+
+<p align="center"><b>English</b> &middot; <a href="docs/readme/README.ru.md">Русский</a> &middot; <a href="docs/readme/README.uz.md">Oʻzbekcha</a> &middot; <a href="docs/readme/README.es.md">Español</a> &middot; <a href="docs/readme/README.pt.md">Português</a> &middot; <a href="docs/readme/README.zh.md">中文</a> &middot; <a href="docs/readme/README.ja.md">日本語</a> &middot; <a href="docs/readme/README.hi.md">हिन्दी</a></p>
 
 <p align="center">
   <a href="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/kivilev/plsql-developer-text-tools/actions/workflows/ci.yml/badge.svg?branch=master"></a>
@@ -24,110 +22,89 @@
   <img alt=".NET 10 Native AOT" src="https://img.shields.io/badge/.NET%2010-Native%20AOT-512BD4?logo=dotnet">
 </p>
 
-<p align="center"><img src="docs/assets/demo.gif" alt="Demo: values to IN (...), identifier case, current time from the database, date to TO_DATE" width="880"></p>
+<p align="center"><img src="docs/assets/demo.gif" alt="Demo" width="880"></p>
 
-## Features
+## What it solves
 
-Three submenus under **Plug-Ins**. Every command works on the selection (or the whole text when nothing is selected),
-shows an example in the status bar and never changes the text when the input is invalid.
-The full list with examples: [docs/commands.md](docs/commands.md).
+### 1. Extended Beautifier
 
-**SQL Tools → Copy SQL with constants resolved.** Put the cursor in a query inside a package, procedure or block
-(or select it) and get a statement that runs on its own in a SQL Window or Explain Plan: PL/SQL constants become their
-values (`status = c_new` → `status = 'NEW' /*c_new*/`), variables and parameters become bind variables (`:p_id`),
-`INTO` / `BULK COLLECT INTO` and `RETURNING ... INTO` are removed. Constants are found like PL/SQL does: enclosing
-blocks, the package body, its specification, `pkg.c_x` from package specifications in the same editor; when the IDE is
-connected, other packages' specifications are read from the database (`ALL_SOURCE`, synonyms followed). A constant whose
-value is still unknown becomes a bind variable named like it (`pkg.c_x` → `:c_x`). The editor is not changed; the
-result goes to the clipboard.
+*Format Tools*
 
-**SQL Tools → Explain Plan with constants.** The same statement, explained in the IDE's own Plan Window (bind F5 to it
-in Key Configuration).
+Runs after the IDE's Beautifier and adds what its rules file cannot express: 25+ options, each one a checkbox, with a live preview. Rules can be exported to a file for the team (matching settings of the Beautifier's `.br` file can be imported).
 
-**Format Tools → Apply formatting rules.** Run the IDE's Beautifier first, then this command on the selection or the
-whole text: it adds what the Beautifier's rules file cannot express (`END name;`, `:=` in columns, built-in functions
-and `%TYPE` in upper case, blank lines between subprograms, `EXECUTE IMMEDIATE` layout). Pure text work inside the DLL;
-the tokens are verified before and after, so the code itself never changes. **Format Tools → Settings** opens a window
-with a checkbox per rule and a before/after preview; the choice is saved in `%APPDATA%\TextTools\format-rules.json`.
+- `END name;`, `:=` in columns, aligned declarations, comments at the indent of their code
+- layout of `INSERT`, `SELECT`, `SELECT ... INTO`, `UPDATE ... SET`, `JOIN ... ON`, subqueries
+- long lines wrapped at the margin: `DECODE` in pairs, `BETWEEN`, `||`, `=>` aligned
+- `IF` conditions on one logical line, short groups in parentheses on one line
+- built-in functions and `%TYPE` in upper case, a blank after each comma (`SUBSTR(x, 1, 3)`)
+- blank lines between subprograms, none before the closing `END`, `EXECUTE IMMEDIATE` layout, no trailing blanks
+- the code never changes: tokens are compared before and after, a rule that touches more than layout is skipped
 
-| String Tools | Date Tools |
-|---|---|
-| **Case**: `first_name` → camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic supported) | **Now**: insert the current `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601 or Unix epoch — from `SYSTIMESTAMP` when connected |
-| **SQL**: escape / unescape quotes, `q'[...]'`, a list (lines or `1 2 3`, `a, b`) → `IN (...)` beyond 1000 values (no ORA-01795), lines → `'a' \|\| chr(10) \|\| 'b'` | **Convert**: epoch (s/ms/µs/ns) → `TIMESTAMP`, date → epoch, `13.10.2026 14:30` → `TO_DATE('2026-10-13 14:30:00', 'YYYY-MM-DD HH24:MI:SS')` or a `DATE`/`TIMESTAMP` literal |
-| **Encode**: Base64, URL, HEX (UTF-8, as `UTL_RAW.CAST_TO_RAW`) | **Masks**: `yyyy-MM-dd'T'HH:mm:ss.SSSXXX` ↔ `YYYY-MM-DD"T"HH24:MI:SS.FF3TZH:TZM` (Java and .NET), `PT1H30M` → `INTERVAL '1:30' HOUR TO MINUTE` |
-| **Lines**: sort, reverse, remove duplicates / empty lines / trailing spaces, align by `:=` and `=>` | |
+<p align="center"><img src="docs/assets/format.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/settings-code.png" alt="" width="700"></p>
+<p align="center"><img src="docs/assets/settings-sql.png" alt="" width="700"></p>
+<p align="center"><img src="docs/assets/settings-wrapping.png" alt="" width="700"></p>
+
+### 2. Copy a query with constants resolved
+
+*SQL Tools*
+
+Put the cursor in a query inside a package, procedure or block and get a statement that runs on its own in a SQL Window or Explain Plan.
+
+- PL/SQL constants become their values: `status = c_new` → `status = 'NEW' /*c_new*/`
+- variables and parameters become bind variables (`:i_customer`), `INTO`, `BULK COLLECT INTO` and `RETURNING ... INTO` are removed
+- constants are found like PL/SQL does: block, package body, specification; other packages are read from the database when connected
+- **Explain Plan with constants**: the same statement in the IDE's Plan Window
+
+<p align="center"><img src="docs/assets/copy-sql.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/copy-sql-binds.png" alt="" width="880"></p>
+
+### 3. String utilities
+
+*String Tools*
+
+Everything you retype by hand, in one click, on the selection or the whole text.
+
+- **List → `IN (...)`** from lines, `1 2 3`, `a, b` or Excel; more than 1000 values do not hit ORA-01795
+- **Case**: camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic)
+- **Quotes**: escape / unescape, `q'[...]'`, lines → `'a' || chr(10) || 'b'`
+- **Encode**: Base64, URL, HEX
+- **Lines**: sort, reverse, remove duplicates and empty lines, trim, align by `:=` and `=>`
+
+<p align="center"><img src="docs/assets/in-list-big.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/string-case.png" alt="" width="480"></p>
+<p align="center"><img src="docs/assets/string-quotes-encode.png" alt="" width="480"></p>
+
+### 4. Date utilities
+
+*Date Tools*
+
+The current time and every date format you keep looking up.
+
+- **Now**: `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601, Unix epoch (from `SYSTIMESTAMP` when connected)
+- **Convert**: epoch ↔ `TIMESTAMP`, `13.10.2026 14:30` → `TO_DATE(...)` or a `DATE` / `TIMESTAMP` literal
+- **Masks**: Java and .NET `yyyy-MM-dd HH:mm` ↔ Oracle `YYYY-MM-DD HH24:MI`, `PT1H30M` → `INTERVAL`
+
+<p align="center"><img src="docs/assets/date-now.png" alt="" width="880"></p>
+<p align="center"><img src="docs/assets/date-convert.png" alt="" width="880"></p>
+
+All commands with examples: [commands.md](docs/commands.md)
 
 ## Install
 
 1. Download `PlsqlDevTextTools.dll` from the [latest release](https://github.com/kivilev/plsql-developer-text-tools/releases/latest).
-2. Close PL/SQL Developer.
-3. Copy `PlsqlDevTextTools.dll` into `<PL/SQL Developer>\PlugIns` (for example `C:\Program Files\PLSQL Developer 16\PlugIns`;
-   Windows asks for administrator rights there).
-4. Start PL/SQL Developer. If **Plug-Ins → String Tools / Date Tools** is missing, enable *Text Tools for PL/SQL Developer*
-   in **Configure → Plug-Ins** and restart.
+2. Close PL/SQL Developer, copy the DLL into `<PL/SQL Developer>\PlugIns` (administrator rights), start the IDE.
+3. If the menu is missing: **Configure → Plug-Ins**, enable *Text Tools*, restart.
 
-Downloaded the zip instead? Unpack it and run `Unblock-File PlsqlDevTextTools.dll` in PowerShell before copying.
-Checksums are in `SHA256SUMS.txt` next to every release.
+PL/SQL Developer 12–17 x64, tested in CI on every version. No .NET needed, no network access.
+Hotkeys: **Configure → Preferences → User Interface → Key Configuration**, filter `Text Tools`.
 
-**Upgrade**: close the IDE, replace `PlsqlDevTextTools.dll`, start the IDE. **Uninstall**: close the IDE, delete `PlsqlDevTextTools.dll`.
+---
 
-## Keyboard shortcuts
+Questions: [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions) · Bugs: [issues](https://github.com/kivilev/plsql-developer-text-tools/issues/new/choose) · Code: [CONTRIBUTING](CONTRIBUTING.md) · Changes: [CHANGELOG](CHANGELOG.md)
 
-Any command can get a hotkey: **Configure → Preferences → User Interface → Key Configuration**, type `Text Tools` in the
-filter, select a command (`Plug-Ins / Text Tools / String Tools / snake_case`), press the keys (e.g. `Ctrl+Shift+U`),
-**OK**. Command names do not change between versions (a rename would be listed under **Breaking** in the changelog),
-so your shortcuts survive upgrades.
+**Denis Kivilev**: backend developer since 2005, Oracle Certified Professional, founder of the [Backend PRO](https://backend-pro.ru) school.
 
+**License:** [MIT](LICENSE) © 2026 Denis Kivilev
 
-| PL/SQL Developer | Status |
-|---|---|
-| 12, 13, 14, 15, 16, 17 x64 | tested on every interop change: CI installs each version and runs the plug-in self test inside it (`real-ide` workflow) |
-| 32-bit editions (11 and older) | not supported |
-
-A report that it works (or not) on your version is welcome in [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
-
-## FAQ
-
-**Do I need .NET?** No. The DLL is compiled with .NET Native AOT and has no runtime dependency.
-
-**Why only 64-bit?** PL/SQL Developer 16 is 64-bit only, and 32-bit plug-ins need a separate build. Ask in Discussions if you need it.
-
-**What happens without a selection?** Text commands apply to the whole editor text; "Now" commands insert at the cursor.
-
-**Can it break my script?** Invalid input (an unrecognized date, bad Base64, an ambiguous `01/02/2026`) never changes the text:
-the status bar explains why. The plug-in is fuzz-tested and checked in a host emulator for crashes and memory leaks.
-
-**My antivirus complains.** The DLL is not code-signed yet. Compare its SHA-256 with `SHA256SUMS.txt`, check the build
-provenance (`gh attestation verify PlsqlDevTextTools.dll -R kivilev/plsql-developer-text-tools`) and report a false positive to the vendor.
-
-**Does it send anything anywhere?** No network access. When connected it runs one query, `SYSTIMESTAMP` from `dual`, for the "Now" commands.
-
-## Build from source
-
-Requirements: Windows x64, .NET 10 SDK, Visual Studio 2022 Build Tools with the C++ workload.
-
-```powershell
-powershell -File scripts/verify.ps1      # format, analyzers, tests, coverage, Native AOT publish, host emulator
-```
-
-The DLL: `src/TextTools.Plugin/bin/Release/net10.0/win-x64/publish/PlsqlDevTextTools.dll`.
-
-## Contributing
-
-Questions and ideas: [Discussions](https://github.com/kivilev/plsql-developer-text-tools/discussions).
-Bugs and feature requests: [issues](https://github.com/kivilev/plsql-developer-text-tools/issues/new/choose).
-Code: see [CONTRIBUTING.md](CONTRIBUTING.md). Changes: [CHANGELOG.md](CHANGELOG.md).
-
-## Author
-
-**Denis Kivilev**: backend developer since 2005, Oracle Certified Professional (Advanced PL/SQL Developer, SQL Expert),
-founder of the [Backend PRO](https://backend-pro.ru) online school.
-Courses for Oracle developers (in Russian): [Oracle PL/SQL Master](https://backend-pro.ru/master-plsql),
-Oracle SQL performance tuning and more in the [catalog](https://backend-pro.ru/courses).
-
-## License
-
-[MIT](LICENSE) © 2026 Denis Kivilev
-
-PL/SQL Developer is a trademark of Allround Automations. Oracle and PL/SQL are trademarks of Oracle Corporation.
-This project is not affiliated with or endorsed by either company.
+<sub>PL/SQL Developer is a trademark of Allround Automations; Oracle and PL/SQL are trademarks of Oracle Corporation. Not affiliated with either.</sub>

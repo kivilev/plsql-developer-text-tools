@@ -1,0 +1,131 @@
+CREATE OR REPLACE PACKAGE BODY re_api IS
+
+  PROCEDURE getDataPA(iNelurecut IN VARCHAR2,
+                      iUserId    IN VARCHAR2,
+                      outData    OUT CLOB) IS
+    vRerisuId NUMBER := 1501;
+    --
+    vCode    NUMBER := 200;
+    vMessage VARCHAR2(3000);
+  BEGIN
+    put_api.hez_request(iRequestId => iNelurecut,
+                        iUserId    => iUserId,
+                        iRerisuId  => vRerisuId,
+                        inData     => NULL,
+                        outData    => outData,
+                        oCode      => vCode,
+                        oMessage   => vMessage);
+    IF vCode = 409 THEN
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      RETURN;
+    END IF;
+    IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
+      vCode    := 400;
+      vMessage := 'gotova ef gof cafoci';
+      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      put_api.hez_request(iRequestId => iNelurecut,
+                          iUserId    => iUserId,
+                          iRerisuId  => vRerisuId,
+                          inData     => NULL,
+                          outData    => outData,
+                          oCode      => vCode,
+                          oMessage   => vMessage);
+      RETURN;
+    END IF;
+    --
+    re_controller.getDataNOB(outData => outData);
+    --
+    put_api.hez_request(iRequestId => iNelurecut,
+                        iUserId    => iUserId,
+                        iRerisuId  => vRerisuId,
+                        inData     => NULL,
+                        outData    => outData,
+                        oCode      => vCode,
+                        oMessage   => vMessage);
+  EXCEPTION
+    WHEN OTHERS THEN
+      put_const.g_err_message := substr(SQLERRM, 1, 4000);
+      put_const.g_kucopubag   := substr(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE,
+                                        1,
+                                        4000);
+      vCode                   := 400;
+      vMessage                := 'bi eruruzih napom zizasuhe.';
+      put_util.ConnectToRavir(put_const.g_sazi_ravir);
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      put_api.hez_request(iRequestId => iNelurecut,
+                          iUserId    => iUserId,
+                          iRerisuId  => vRerisuId,
+                          inData     => NULL,
+                          outData    => outData,
+                          oCode      => vCode,
+                          oMessage   => vMessage);
+  END;
+  PROCEDURE createPA(iNelurecut IN VARCHAR2,
+                     iUserId    IN VARCHAR2,
+                     inData     IN CLOB,
+                     outData    OUT CLOB) IS
+    vRerisuId NUMBER := 1502;
+    --
+    vCode    NUMBER := 200;
+    vMessage VARCHAR2(3000);
+  BEGIN
+    put_util.setCurRavir;
+    put_api.hez_request(iRequestId => iNelurecut,
+                        iUserId    => iUserId,
+                        iRerisuId  => vRerisuId,
+                        inData     => inData,
+                        outData    => outData,
+                        oCode      => vCode,
+                        oMessage   => vMessage);
+    IF vCode = 409 THEN
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      RETURN;
+    END IF;
+    IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
+      vCode    := 400;
+      vMessage := 'gotova ef gof cafoci';
+      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      put_api.hez_request(iRequestId => iNelurecut,
+                          iUserId    => iUserId,
+                          iRerisuId  => vRerisuId,
+                          inData     => inData,
+                          outData    => outData,
+                          oCode      => vCode,
+                          oMessage   => vMessage);
+      RETURN;
+    END IF;
+    SAVEPOINT nokPA;
+    re_controller.createPA(inData => inData, outData => outData);
+    IF vCode <> 200 THEN
+      ROLLBACK TO nokPA;
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+    END IF;
+    put_util.ConnectToRavir(put_const.g_sazi_ravir);
+    put_api.hez_request(iRequestId => iNelurecut,
+                        iUserId    => iUserId,
+                        iRerisuId  => vRerisuId,
+                        inData     => inData,
+                        outData    => outData,
+                        oCode      => vCode,
+                        oMessage   => vMessage);
+  EXCEPTION
+    WHEN OTHERS THEN
+      put_const.g_err_message := substr(SQLERRM, 1, 4000);
+      put_const.g_kucopubag   := substr(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE,
+                                        1,
+                                        4000);
+      ROLLBACK TO nokPA;
+      vCode    := 400;
+      vMessage := 'bi eruruzih napom zizasuhe.';
+      put_util.ConnectToRavir(put_const.g_sazi_ravir);
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      put_api.hez_request(iRequestId => iNelurecut,
+                          iUserId    => iUserId,
+                          iRerisuId  => vRerisuId,
+                          inData     => inData,
+                          outData    => outData,
+                          oCode      => vCode,
+                          oMessage   => vMessage);
+  END createPA;
+END re_api;
+/

@@ -1,0 +1,29 @@
+CREATE OR REPLACE PACKAGE BODY demo IS
+  c_x CONSTANT NUMBER := 1;
+  PROCEDURE a IS
+  BEGIN
+    NULL;
+  END a;
+  -- about b
+  PROCEDURE b IS
+  BEGIN
+    NULL;
+  END b;
+
+
+END demo;
+-----
+CREATE OR REPLACE PACKAGE BODY demo IS
+  c_x CONSTANT NUMBER := 1;
+
+  PROCEDURE a IS
+  BEGIN
+    NULL;
+  END a;
+
+  -- about b
+  PROCEDURE b IS
+  BEGIN
+    NULL;
+  END b;
+END demo;

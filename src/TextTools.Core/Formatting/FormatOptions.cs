@@ -11,9 +11,29 @@ namespace TextTools.Core.Formatting;
 /// <param name="EndWithName">R07: <c>END;</c> of a named subprogram or package gets its name (<c>END open_account;</c>).</param>
 /// <param name="AlignAssignments">R08: <c>:=</c> aligned in a group of consecutive assignments.</param>
 /// <param name="BlankLineBeforeSubprograms">R19: a blank line before each PROCEDURE/FUNCTION (and the comment above it).</param>
+/// <param name="BlankLineAfterPackageHeader">A blank line between <c>CREATE ... PACKAGE BODY x IS</c> and the first subprogram; off by default (the ICBS standard has none).</param>
 /// <param name="NoBlankLineBeforePackageEnd">R20: no blank line before the closing <c>END</c> at column 0.</param>
 /// <param name="ExecuteImmediateLiteralOnOwnLine">R21: a long or multi-line literal of EXECUTE IMMEDIATE starts on its own line, 2 columns deeper.</param>
 /// <param name="TrimTrailingSpaces">No trailing blanks (except inside a multi-line string literal).</param>
+/// <param name="SpaceAfterComma">A blank after each comma (<c>NVL(1,0)</c> -> <c>NVL(1, 0)</c>); on by default: the bank standard writes <c>SUBSTR(x, 1, 3)</c>.</param>
+/// <param name="TightParentheses">No blanks right inside parentheses.</param>
+/// <param name="SelectIntoOnOneLine">R15 exception: the SELECT list and the INTO list of SELECT ... INTO, each on one line when it fits.</param>
+/// <param name="UpdateSetLayout">R10: <c>SET</c> joined with its first assignment, the <c>=</c> of the SET list aligned.</param>
+/// <param name="JoinIfConditions">R11: an IF / ELSIF condition broken over lines is one line again (then wrapped by the margin).</param>
+/// <param name="JoinOnAlignment">R12 under JOIN: <c>ON</c> / <c>AND</c> / <c>OR</c> right-aligned to the JOIN keyword.</param>
+/// <param name="ShortParenGroupOnOneLine">R14: a parenthesised condition that fits stays on one line.</param>
+/// <param name="InsertLayout">R13: INSERT with the column list and the VALUES list in parentheses on their own lines.</param>
+/// <param name="HeaderTailsOnOneLine">R18 tail: RESULT_CACHE, AUTHID ..., IS of a subprogram header on the line of the header.</param>
+/// <param name="SelectColumnsOnePerLine">R15: one select column per line; the first column after a comment indented like the others.</param>
+/// <param name="SubqueryLayout">A subquery in parentheses on one line when it fits, else right after the parenthesis.</param>
+/// <param name="TightenAliasPadding">Aligned aliases that push a select list line past 120 characters get one blank instead (the code standard's line limit).</param>
+/// <param name="SingleBlankBeforeAlias">The aliases of a select list get one blank before them instead of the column the Beautifier aligns them in.</param>
+/// <param name="WrapLongLines">R02: a line past the margin is broken at the outermost call or condition that covers it.</param>
+/// <param name="WrapDecodeInPairs">A long DECODE breaks in pairs "condition, value".</param>
+/// <param name="WrapBetween">A long <c>x BETWEEN a AND b</c> breaks before AND.</param>
+/// <param name="AlignNamedArguments">R09: the <c>=&gt;</c> of named arguments in a broken call are aligned.</param>
+/// <param name="AlignDeclarations">Declarations of a declaration section aligned in groups.</param>
+/// <param name="IndentComments">A comment line takes the indent of the code it belongs to.</param>
 public sealed record FormatOptions(
     int Margin = 76,
     bool BuiltinFunctionsUpper = true,
@@ -21,10 +41,39 @@ public sealed record FormatOptions(
     bool EndWithName = true,
     bool AlignAssignments = true,
     bool BlankLineBeforeSubprograms = true,
+    bool BlankLineAfterPackageHeader = false,
     bool NoBlankLineBeforePackageEnd = true,
     bool ExecuteImmediateLiteralOnOwnLine = true,
-    bool TrimTrailingSpaces = true)
+    bool TrimTrailingSpaces = true,
+    bool SpaceAfterComma = true,
+    bool TightParentheses = true,
+    bool SelectIntoOnOneLine = true,
+    bool UpdateSetLayout = true,
+    bool JoinIfConditions = true,
+    bool JoinOnAlignment = true,
+    bool ShortParenGroupOnOneLine = true,
+    bool InsertLayout = true,
+    bool HeaderTailsOnOneLine = true,
+    bool SelectColumnsOnePerLine = true,
+    bool SubqueryLayout = true,
+    bool TightenAliasPadding = true,
+    bool SingleBlankBeforeAlias = false,
+    bool WrapLongLines = true,
+    bool WrapDecodeInPairs = true,
+    bool WrapBetween = true,
+    bool AlignNamedArguments = true,
+    bool AlignDeclarations = true,
+    bool IndentComments = true)
 {
     /// <summary>Every rule on, margin 76.</summary>
     public static FormatOptions Default { get; } = new();
+
+    /// <summary>Every rule off: the text stays as it is.</summary>
+    public static FormatOptions None { get; } = new(
+        Margin: 76, BuiltinFunctionsUpper: false, AttributesUpper: false, EndWithName: false, AlignAssignments: false,
+        BlankLineBeforeSubprograms: false, BlankLineAfterPackageHeader: false, NoBlankLineBeforePackageEnd: false, ExecuteImmediateLiteralOnOwnLine: false, TrimTrailingSpaces: false,
+        SpaceAfterComma: false, TightParentheses: false, SelectIntoOnOneLine: false, UpdateSetLayout: false, JoinIfConditions: false, JoinOnAlignment: false,
+        ShortParenGroupOnOneLine: false, InsertLayout: false, HeaderTailsOnOneLine: false, SelectColumnsOnePerLine: false, SubqueryLayout: false,
+        TightenAliasPadding: false, SingleBlankBeforeAlias: false, WrapLongLines: false, WrapDecodeInPairs: false, WrapBetween: false, AlignNamedArguments: false,
+        AlignDeclarations: false, IndentComments: false);
 }

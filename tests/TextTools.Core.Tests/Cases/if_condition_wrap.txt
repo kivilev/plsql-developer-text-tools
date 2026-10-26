@@ -1,0 +1,21 @@
+PROCEDURE p IS
+BEGIN
+  IF v_account.state = account_const.c_state_active AND v_account.currency = i_currency OR i_currency IS NULL THEN
+    NULL;
+  END IF;
+  IF v_a = 1
+     AND v_b = 2 THEN
+    NULL;
+  END IF;
+END p;
+-----
+PROCEDURE p IS
+BEGIN
+  IF v_account.state = account_const.c_state_active AND
+     v_account.currency = i_currency OR i_currency IS NULL THEN
+    NULL;
+  END IF;
+  IF v_a = 1 AND v_b = 2 THEN
+    NULL;
+  END IF;
+END p;

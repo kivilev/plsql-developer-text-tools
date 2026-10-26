@@ -1,0 +1,12 @@
+BEGIN
+  INSERT INTO t (a, b) VALUES (1, (SELECT MAX(x) FROM y));
+  INSERT INTO t (a, b) VALUES (1, 2); -- note
+END;
+-----
+BEGIN
+  INSERT INTO t (a, b) VALUES (1, (SELECT MAX(x) FROM y));
+  INSERT INTO t
+    (a, b)
+  VALUES
+    (1, 2); -- note
+END;

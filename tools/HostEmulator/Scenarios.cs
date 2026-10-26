@@ -46,9 +46,9 @@ internal static class Scenarios
             Thread.Sleep(Math.Min(hold, 700));
             if (int.TryParse(Environment.GetEnvironmentVariable("SETTINGS_TAB"), CultureInfo.InvariantCulture, out var tab) && window != 0)
             {
-                // Click the header of tab N (0-based) of the tab control: headers are about 33, 73, 122, 185 px from its left edge.
+                // Click the header of tab N (0-based) of the tab control: headers are about 33, 73, 122, 185, 240, 302 px from its left edge.
                 var tabs = FindWindowExW(window, 0, "SysTabControl32", null);
-                int[] centers = [33, 73, 122, 185];
+                int[] centers = [33, 73, 122, 185, 240, 302];
                 var point = (nint)((12 << 16) | centers[Math.Clamp(tab, 0, centers.Length - 1)]);
                 _ = PostMessageW(tabs, 0x201, 1, point); // WM_LBUTTONDOWN
                 _ = PostMessageW(tabs, 0x202, 0, point); // WM_LBUTTONUP
@@ -182,7 +182,7 @@ internal static class Scenarios
         Check(host.AboutText.Contains("Author", StringComparison.Ordinal), "About text");
         Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools")
               && host.Menu.ContainsKey("MENUITEM=SQL Tools") && host.Menu.ContainsKey("MENUITEM=Format Tools"), "four submenus");
-        Check(FakeIde.ToolButtons.Count == 3 && FakeIde.ToolButtons.All(b =>
+        Check(FakeIde.ToolButtons.Count == 4 && FakeIde.ToolButtons.All(b =>
                 host.Menu.TryGetValue("MENUITEM=" + b.Name, out var i) && i == b.Index
                 && File.Exists(b.File) && File.ReadAllBytes(b.File).AsSpan(1, 3).SequenceEqual("PNG"u8)),
             "ribbon buttons get PNG images at their menu indices");

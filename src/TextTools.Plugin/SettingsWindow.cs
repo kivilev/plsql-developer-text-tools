@@ -20,16 +20,17 @@ internal static unsafe partial class SettingsWindow
     private const int IdSave = 1;
     private const int IdClose = 2;
     private const int IdDefault = 3;
+    private const int IdExport = 4;
+    private const int IdImport = 5;
     private const int IdTab = 100;
     private const int IdSetting = 200;
     private const int IdPreview = 400;
-    private const uint SsCenter = 1;
 
     // Window styles and messages (winuser.h).
     private const uint WsChild = 0x40000000, WsVisible = 0x10000000, WsTabStop = 0x10000, WsCaption = 0x00C00000, WsSysMenu = 0x80000;
     private const uint WsClipSiblings = 0x04000000, WsClipChildren = 0x02000000, WsVScroll = 0x200000, WsHScroll = 0x100000, WsBorder = 0x800000;
     private const uint WsThickFrame = 0x40000, WsMaximizeBox = 0x10000, WsExDlgModalFrame = 1;
-    private const uint BsPushButton = 0, BsDefPushButton = 1, BsAutoCheckBox = 3, SsEtchedHorz = 0x10;
+    private const uint BsPushButton = 0, BsDefPushButton = 1, BsAutoCheckBox = 3;
     private const uint EsNumber = 0x2000;
     private const uint WmDestroy = 0x2, WmSize = 0x5, WmClose = 0x10, WmGetMinMaxInfo = 0x24, WmSetFont = 0x30, WmCommand = 0x111, WmNotify = 0x4E;
     private const uint BmGetCheck = 0xF0, BmSetCheck = 0xF1, TcmGetCurSel = 0x130B, TcmInsertItemW = 0x133E;
@@ -46,27 +47,10 @@ internal static unsafe partial class SettingsWindow
     private const int TabHeaderHeight = 28;
     private const int ButtonHeight = 28;
     private const int ButtonWidth = 110;
+    private const int MinColumnWidth = 480;
+    private static int _shownTab;
 
-    /// <summary>The sample the preview formats: it shows every rule at work.</summary>
-    private const string Sample =
-        "CREATE OR REPLACE PACKAGE BODY demo_api IS\n" +
-        "  -- Opens an account (nvl and %type in a comment stay as they are)\n" +
-        "  PROCEDURE open_account(i_id IN NUMBER) IS\n" +
-        "    v_acc account%rowtype;\n" +
-        "    v_long_name_x NUMBER;   \n" +
-        "  BEGIN\n" +
-        "    v_acc.id:=nvl(i_id,0);\n" +
-        "    v_long_name_x:=substr(v_acc.name,1,10);\n" +
-        "    EXECUTE IMMEDIATE 'update account set state = 1 where id = :1 and branch = :2' USING i_id;\n" +
-        "  END;\n" +
-        "  FUNCTION is_ok RETURN BOOLEAN IS\n" +
-        "  BEGIN\n" +
-        "    RETURN TRUE;\n" +
-        "  END;\n" +
-        "\n" +
-        "END;";
-
-    private static nint _hwnd, _tab, _group, _previewLabel, _view, _save, _default, _close, _uiFont;
+    private static nint _hwnd, _tab, _view, _save, _default, _export, _import, _close, _uiFont;
     private static int _dpi = 96;
     private static bool _updating;
     private static UiTexts _texts = UiTexts.English;
@@ -162,8 +146,6 @@ internal static unsafe partial class SettingsWindow
                 SendMessageW(_tab, TcmInsertItemW, i, (nint)(&item));
             }
         }
-        // A line under the settings of the tab; they sit on the window colour (a themed tab page would be paler).
-        _group = Child("STATIC", "", SsEtchedHorz, 0);
 
         var tabs = FormatSettings.Tabs.ToList();
         var rowOfTab = new int[tabs.Count];
@@ -187,11 +169,12 @@ internal static unsafe partial class SettingsWindow
             SettingControls[setting.Id] = control;
         }
 
-        _previewLabel = Child("STATIC", _texts.Text("preview.title"), SsCenter, 0);
         _view = CreateCodeView(_hwnd, IdPreview, _dpi);
 
         _save = Child("BUTTON", _texts.Text("button.save"), WsTabStop | BsDefPushButton, IdSave);
         _default = Child("BUTTON", _texts.Text("button.default"), WsTabStop | BsPushButton, IdDefault);
+        _export = Child("BUTTON", _texts.Text("button.export"), WsTabStop | BsPushButton, IdExport);
+        _import = Child("BUTTON", _texts.Text("button.import"), WsTabStop | BsPushButton, IdImport);
         _close = Child("BUTTON", _texts.Text("button.close"), WsTabStop | BsPushButton, IdClose);
         ShowTab(0);
     }
@@ -209,38 +192,50 @@ internal static unsafe partial class SettingsWindow
         if (!GetClientRect(_hwnd, out var client)) return;
         int width = client.Right, height = client.Bottom;
         var gap = S(Gap);
-        var rows = Math.Max(1, Placements.Count == 0 ? 1 : Placements.Max(p => p.Row) + 1);
+        // The settings of the shown tab fill columns, so that the preview keeps the room.
+        var count = Math.Max(1, Placements.Where(p => p.Tab == _shownTab).Select(p => p.Row + 1).DefaultIfEmpty(1).Max());
+        var columns = Math.Clamp((width - 2 * gap) / S(MinColumnWidth), 1, 3);
+        var rows = (count + columns - 1) / columns;
+        var columnWidth = (width - 2 * gap - S(16)) / columns;
         var tabHeight = S(TabHeaderHeight);
         var groupHeight = S(20) + rows * S(RowHeight);
         var groupTop = gap + tabHeight - S(2);
 
         MoveWindow(_tab, gap, gap, width - 2 * gap, tabHeight, 1);
-        MoveWindow(_group, gap, groupTop + groupHeight, width - 2 * gap, 2, 1); // a line under the settings
         foreach (var p in Placements)
         {
-            var y = groupTop + S(24) + p.Row * S(RowHeight);
-            var x = gap + S(16);
-            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(220), S(20), 1);
-            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(228), y, S(70), S(22), 1);
-            else MoveWindow(p.Window, x, y, width - 2 * gap - S(40), S(22), 1);
+            var y = groupTop + S(24) + p.Row % rows * S(RowHeight);
+            var x = gap + S(16) + p.Row / rows * columnWidth;
+            if (p.IsLabel) MoveWindow(p.Window, x, y + S(3), S(160), S(20), 1);
+            else if (IsNumberBox(p.Window)) MoveWindow(p.Window, x + S(168), y, S(70), S(22), 1);
+            else MoveWindow(p.Window, x, y, columnWidth - S(12), S(22), 1);
         }
 
         var previewTop = groupTop + groupHeight + gap;
         var buttonsTop = height - gap - S(ButtonHeight);
-        var viewTop = previewTop + S(20);
+        var viewTop = previewTop;
         var viewHeight = Math.Max(S(40), buttonsTop - gap - viewTop);
-        MoveWindow(_previewLabel, gap, previewTop, width - 2 * gap, S(18), 1);
         MoveWindow(_view, gap, viewTop, width - 2 * gap, viewHeight, 1);
 
         MoveWindow(_save, gap, buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_default, gap + S(ButtonWidth) + S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        MoveWindow(_export, width - gap - 3 * S(ButtonWidth) - 2 * S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        MoveWindow(_import, width - gap - 2 * S(ButtonWidth) - S(8), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
         MoveWindow(_close, width - gap - S(ButtonWidth), buttonsTop, S(ButtonWidth), S(ButtonHeight), 1);
+        // The view keeps its old picture when it only moves: repaint it and the window around it, or ghosts of the old layout stay.
+        if (_view != 0)
+        {
+            UpdateScrollbars(_view);
+            InvalidateRect(_view, 0, 1);
+        }
+        InvalidateRect(_hwnd, 0, 1);
     }
 
     private static bool IsNumberBox(nint window) => SettingControls.Any(c => c.Value == window && FormatSettings.Find(c.Key)?.Kind == SettingKind.Number);
 
     private static void ShowTab(int tab)
     {
+        _shownTab = tab;
         foreach (var p in Placements) ShowWindow(p.Window, p.Tab == tab ? SwShow : SwHide);
     }
 
@@ -274,11 +269,15 @@ internal static unsafe partial class SettingsWindow
         }
     }
 
-    private static void UpdatePreview()
+    private static void UpdatePreview(bool revealChange = false)
     {
         var options = _profile.ToOptions();
-        SetCodeViewText(_view, PostFormatter.Format(Sample, options), options.Margin);
+        SetCodeViewText(_view, PostFormatter.Format(FormatSample.Text, options), options.Margin, revealChange);
+        // The parts of line wrapping do nothing while wrapping is off: grey them out.
+        foreach (var id in WrapParts) EnableWindow(SettingControls[id], options.WrapLongLines ? 1 : 0);
     }
+
+    private static readonly string[] WrapParts = ["wrapDecodeInPairs", "wrapBetween", "alignNamedArguments"];
 
     private static void OnCommand(int id, int notification)
     {
@@ -286,6 +285,12 @@ internal static unsafe partial class SettingsWindow
         {
             case IdClose:
                 DestroyWindow(_hwnd);
+                break;
+            case IdExport:
+                ExportRules();
+                break;
+            case IdImport:
+                ImportRules();
                 break;
             case IdDefault:
                 _profile = new FormatProfile();
@@ -299,7 +304,7 @@ internal static unsafe partial class SettingsWindow
                 break;
             case >= IdSetting and < IdPreview when !_updating && (notification == 0 || notification == EnChange): // a click or a typed number
                 ReadControlsIntoProfile();
-                UpdatePreview();
+                UpdatePreview(revealChange: true);
                 break;
         }
     }
@@ -316,8 +321,9 @@ internal static unsafe partial class SettingsWindow
                     return 0;
                 case WmNotify when lParam != 0 && ((nint*)lParam)[0] == _tab && *(int*)(lParam + 16) == TcnSelChange:
                     ShowTab((int)SendMessageW(_tab, TcmGetCurSel, 0, 0));
+                    Layout();
                     return 0;
-                case WmSize when wParam != SizeMinimized && _group != 0:
+                case WmSize when wParam != SizeMinimized && _view != 0:
                     Layout();
                     return 0;
                 case WmGetMinMaxInfo when lParam != 0:

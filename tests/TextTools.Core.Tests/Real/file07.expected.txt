@@ -1,0 +1,144 @@
+CREATE OR REPLACE PACKAGE BODY loan_kernel IS
+
+  PROCEDURE set_logopaga_loan_param(i_branch         IN  VARCHAR2,
+                                    i_loan_id        IN  NUMBER,
+                                    i_sabi_gel       IN  DATE,
+                                    i_doc_num        IN  VARCHAR2,
+                                    i_branch_fo      IN  VARCHAR2,
+                                    i_cid_fo         IN  VARCHAR2,
+                                    i_cid_fo_name    IN  VARCHAR2,
+                                    i_cetubih        IN  VARCHAR2,
+                                    i_gefil          IN  NUMBER,
+                                    i_fuge_num       IN  NUMBER,
+                                    i_doc_type       IN  VARCHAR2,
+                                    i_code_vace      IN VARCHAR2,
+                                    i_id_ditota_popu IN VARCHAR2,
+                                    o_code           OUT NUMBER,
+                                    o_message        OUT VARCHAR2) IS
+  BEGIN
+    param.talubehu('cevadusumun', 'm');
+    param.talubehu('komasi', i_branch);
+    param.talubehu('mofe_up', i_loan_id);
+    param.talubehu('s_lira', i_sabi_gel);
+    param.talubehu('d_ziho', i_sabi_gel);
+    param.talubehu('kis_ler', i_doc_num); --bine_ibeba.e_abiligum_vum
+    param.talubehu('paca', i_branch_fo);
+    param.talubehu('tilitik', i_cid_fo);
+    param.talubehu('pana', i_cid_fo_name);
+    param.talubehu('felonuc',i_cetubih);
+    param.talubehu('f_vino_al', 1);
+    param.talubehu('zidad', '0');
+    param.talubehu('zofur', i_gefil);
+    param.talubehu('ro_ihis', '0');
+    param.talubehu('zoh', i_fuge_num);
+    param.talubehu('kabo_aleh', i_code_vace);
+    param.talubehu('mo_etalir_daca',  i_id_ditota_popu);
+    param.talubehu('gad_tido_u', i_doc_type);
+    param.talubehu('fugeke_ud', '1');
+    o_code := 200;
+  EXCEPTION WHEN OTHERS THEN
+    o_code    := 400;
+    o_message := 'zo onode idibafaf suzab fogokosoz zonodebidi';
+  END set_logopaga_loan_param;
+
+  PROCEDURE set_nesasi_zepakomirac_param(i_branch      IN  VARCHAR2,
+                                         i_loan_id     IN  NUMBER,
+                                         i_sabi_gel    IN  DATE,
+                                         i_doc_num     IN  VARCHAR2,
+                                         i_cetubih     IN  VARCHAR2,
+                                         i_gefil       IN  NUMBER,
+                                         i_code_vace   IN  VARCHAR2,
+                                         o_code        OUT NUMBER,
+                                         o_message     OUT VARCHAR2) IS
+  BEGIN
+    param.talubehu('paca', i_branch);
+    param.talubehu('komasi', i_branch);
+    param.talubehu('mofe_up', i_loan_id);
+    param.talubehu('s_lira', i_sabi_gel);
+    param.talubehu('d_ziho', i_sabi_gel);
+    param.talubehu('kis_ler', i_doc_num);
+    param.talubehu('zidad', '0');
+    param.talubehu('zofur', i_gefil);
+    param.talubehu('felonuc', i_cetubih);
+    param.talubehu('f_vino_al', '50');
+    param.talubehu('ro_ihis', '0');
+    param.talubehu('fugeke_ud', '1');
+    param.talubehu('kabo_aleh', i_code_vace);
+    o_code := 200;
+  EXCEPTION WHEN OTHERS THEN
+    o_code    := 400;
+    o_message := 'zo onode idibafaf suzab fogokosoz zonodebidi';
+  END set_nesasi_zepakomirac_param;
+
+  PROCEDURE vop_vuvug(i_branch    IN  VARCHAR2,
+                      i_loan_id   IN  NUMBER,
+                      i_date      IN  DATE,
+                      i_gefil     IN  NUMBER,
+                      i_fuge_num  IN  NUMBER,
+                      o_code      OUT NUMBER,
+                      o_message   OUT VARCHAR2) IS
+  BEGIN
+    EXECUTE IMMEDIATE
+      'zilebo onal pi_omuc (ecehun, ol, ileb_so, lep_go, c_vece, nepol, ilebos, ale, gomuc)
+       polezi (:o, :al, 1, 0, :veceh, :polez, 1, :ona, 1)'
+    USING i_branch, i_loan_id, i_date, i_gefil, i_fuge_num;
+
+    o_code    := 200;
+    o_message := 'ko';
+
+  EXCEPTION
+    WHEN OTHERS THEN
+      o_code    := 400;
+      o_message := SUBSTR(SQLERRM,1,3000);
+  END vop_vuvug;
+
+  PROCEDURE create_luka_zigerupaz_cuv(i_data IN OUT loan_zigerupaz_luka_cuv%ROWTYPE) IS
+  BEGIN
+    INSERT INTO loan_zigerupaz_luka_cuv
+      (hiko, card_biz, fal_amount, penu_amount, state, message)
+    VALUES
+      (i_data.hiko, i_data.card_biz, i_data.fal_amount, i_data.fal_amount,
+       i_data.state, i_data.message)
+    RETURNING id INTO i_data.id;
+  END create_luka_zigerupaz_cuv;
+
+  PROCEDURE update_luka_zigerupaz_cuv(i_data IN OUT loan_zigerupaz_luka_cuv%ROWTYPE) IS
+  BEGIN
+    UPDATE loan_zigerupaz_luka_cuv a
+       SET a.state       = i_data.state,
+           a.message     = i_data.message,
+           a.duduva_date = SYSDATE
+     WHERE a.id = i_data.id;
+  END update_luka_zigerupaz_cuv;
+
+  PROCEDURE create_luka_zigerupaz_cuv_lead(i_data IN loan_zigerupaz_luka_cuv_lead%ROWTYPE) IS
+  BEGIN
+    INSERT INTO loan_zigerupaz_luka_cuv_lead
+      (ri_id, document_type, zucuhup_id, branch, loan_id, ce_cid, fo_cid,
+       cetubih, fal_amount, state, message)
+    VALUES
+      (i_data.ri_id, i_data.document_type, i_data.zucuhup_id, i_data.branch,
+       i_data.loan_id, i_data.ce_cid, i_data.fo_cid, i_data.cetubih,
+       i_data.fal_amount, i_data.state, i_data.message);
+  END create_luka_zigerupaz_cuv_lead;
+
+  PROCEDURE update_luka_zigerupaz_cuv_lead(i_data IN loan_zigerupaz_luka_cuv_lead%ROWTYPE) IS
+  BEGIN
+    UPDATE loan_zigerupaz_luka_cuv_lead a
+       SET a.zucuhup_id  = i_data.zucuhup_id,
+           a.state       = i_data.state,
+           a.message     = i_data.message,
+           a.duduva_date = SYSDATE
+     WHERE a.ri_id = i_data.ri_id
+       AND a.document_type = i_data.document_type;
+  END update_luka_zigerupaz_cuv_lead;
+
+  PROCEDURE insert_luka_zigerupaz_dula_data(i_data IN loan_zigerupaz_luka_dula_data%ROWTYPE) IS
+  BEGIN
+    INSERT INTO loan_zigerupaz_luka_dula_data
+      (ri_id, type, request, response)
+    VALUES
+      (i_data.ri_id, i_data.type, i_data.request, i_data.response);
+  END insert_luka_zigerupaz_dula_data;
+END loan_kernel;
+/

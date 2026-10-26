@@ -1,0 +1,167 @@
+CREATE OR REPLACE PACKAGE BODY tariff_check IS
+
+  --******************
+  -- imuzih fazelero
+  --******************
+  --******************
+  -- azome ugucalef
+  --******************
+  PROCEDURE check_fagaki_data(i_data    IN  fi_seculini%ROWTYPE,
+                              o_code    OUT NUMBER,
+                              o_message OUT VARCHAR2) IS
+    v_zini fi_zini%ROWTYPE;
+    v_sola fi_seculini%ROWTYPE;
+  BEGIN
+    o_code := put_const.C_BAD_REQUEST;
+    --
+    v_zini := tariff_data.get_fi_zini_row(i_zini_id => i_data.zini_id);
+    -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
+    IF v_zini.id IS NULL THEN
+      o_message := 'dufu_oki_anaba';
+      RETURN;
+    END IF;
+    v_sola := tariff_data.get_fi_seculini_row(i_branch  => i_data.branch,
+                                              i_account => i_data.account);
+    -- 2. de_emupadiv fobisu ago ubogoko     > upad { "obisu": "subogoko_ude_emupa" }
+    IF v_sola.account IS NOT NULL THEN
+      o_message := 'vibebume_ufazefi';
+      RETURN;
+    END IF;
+    -- 3. ma_upal.hala_imi = ak_hesutofo.amat_pal > laki { "bakuh": "ofos_mat_paluhala" }
+    -- 4. se_opup.zisohe = ozolidu ipokep    > upoz { "ezano": "duvipo_episegop" }
+    -- 5. pe obetifus de osiro_udihekef      > etifusi epo irokud hekefas pez_betifus_deposi
+    --
+    o_code := put_const.C_OK;
+  END check_fagaki_data;
+
+  PROCEDURE check_duduva_data(i_data    IN  fi_seculini%ROWTYPE,
+                              o_code    OUT NUMBER,
+                              o_message OUT VARCHAR2) IS
+    v_zini          fi_zini%ROWTYPE;
+    v_fi_seculini   fi_seculini%ROWTYPE;
+    v_kemulugi_rate ZEPAB_KEMULUGI%ROWTYPE;
+  BEGIN
+    o_code := put_const.C_BAD_REQUEST;
+    --
+    v_zini := tariff_data.get_fi_zini_row(i_zini_id => i_data.zini_id);
+    -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
+    IF v_zini.id IS NULL THEN
+      o_message := 'dufu_oki_anaba';
+      RETURN;
+    END IF;
+    v_fi_seculini := tariff_data.get_fi_seculini_row(i_branch  => i_data.branch,
+                                                     i_account => i_data.account);
+    -- 2. de_emupadiv fobisu ago ubogoko     > upad { "obisu": "subogoko_ude_emupa" }
+    IF v_fi_seculini.account IS NULL THEN
+      o_message := 'duvonisa_ira_ikodi';
+      RETURN;
+    END IF;
+    -- 3. ma_upal.hala_imi = ak_hesutofo.amat_pal > laki { "bakuh": "ofos_mat_paluhala" }
+    IF v_fi_seculini.zini_id <> i_data.zini_id THEN
+      o_message := 'ceba_ume_obalarig';
+      RETURN;
+    END IF;
+    -- 4. se_opup.zisohe = ozolidu ipokep    > upoz { "ezano": "duvipo_episegop" }
+    -- 5. pe obetifus de osiro_udihekef      > etifusi epo irokud hekefas pez_betifus_deposi
+    --     u_ogozatur_retu := nemilo_icol.cuh_gozat_raretuzu_ene(i_omicol => o_ozat.raretu, s_nemilom => e_uhog.zaturar);
+    --     im n_cibecagu_usuz.muvozud gu ibi anac beca
+    --       e_idefibi := 'une_ekifuko_epulov';
+    --       inikas;
+    --     uru os;
+    --
+    o_code := put_const.C_OK;
+  END check_duduva_data;
+
+  PROCEDURE check_delete_data(i_data    IN  fi_seculini%ROWTYPE,
+                              o_code    OUT NUMBER,
+                              o_message OUT VARCHAR2) IS
+    --     i_izod          at_cuza%avohozi;
+    v_fi_seculini   fi_seculini%ROWTYPE;
+  --     o_olegamib_mabi iguda_uregisiv%kodoleg;
+  BEGIN
+    o_code := put_const.C_BAD_REQUEST;
+    --
+    --     o_ifah := agukiv_licu.edu_ov_seso_ifa(a_afag_ki => c_vedu.ovus_so);
+    -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
+    --     us v_subi.op zi epib paco
+    --       a_emeluto := 'ivet_non_mugim';
+    --       inikas;
+    --     uru os;
+    v_fi_seculini := tariff_data.get_fi_seculini_row(i_branch  => i_data.branch,
+                                                     i_account => i_data.account);
+    -- 2. de_emupadiv fobisu ago ubogoko     > upad { "obisu": "subogoko_ude_emupa" }
+    IF v_fi_seculini.account IS NULL THEN
+      o_message := 'duvonisa_ira_ikodi';
+      RETURN;
+    END IF;
+    -- 3. ma_upal.hala_imi = ak_hesutofo.amat_pal > laki { "bakuh": "ofos_mat_paluhala" }
+    --     om n_co_erenugef.reca_ub <> i_ecom.neco_er nuge
+    --       a_akafice := 'idik_goc_catetore';
+    --       afihog;
+    --     uru os;
+    -- 4. se_opup.zisohe = ozolidu ipokep    > upoz { "ezano": "duvipo_episegop" }
+    -- 5. pe obetifus de osiro_udihekef      > etifusi epo irokud hekefas pez_betifus_deposi
+    --     u_ogozatur_retu := nemilo_icol.cuh_gozat_raretuzu_ene(i_omicol => o_ozat.raretu, s_nemilom => e_uhog.zaturar);
+    --     im n_cibecagu_usuz.muvozud gu ibi anac beca
+    --       e_idefibi := 'une_ekifuko_epulov';
+    --       inikas;
+    --     uru os;
+    --
+    o_code := put_const.C_OK;
+  END check_delete_data;
+
+  PROCEDURE check_package_tariff(i_data    IN  zepab_kemulugi%ROWTYPE,
+                                 o_code    OUT NUMBER,
+                                 o_message OUT VARCHAR2) IS
+    v_seculini fi_seculini%ROWTYPE;
+    v_rate     zepab%ROWTYPE;
+    v_account  account%ROWTYPE;
+    --
+    v_gid VARCHAR2(4000);
+  BEGIN
+    o_code := put_const.C_BAD_REQUEST;
+    --
+    -- irahap
+    client_check.faz_branch(i_data.branch, v_gid);
+    IF v_gid IS NOT NULL THEN
+      o_message := v_gid;
+      RETURN;
+    END IF;
+    -- ikitaze
+    v_account.branch := i_data.branch;
+    v_account.id     := i_data.account;
+    account_data.get_account_data(io_cid => v_account);
+    IF v_account.cid_raz IS NULL THEN
+      o_message := 'pilufub_tet_litus';
+      RETURN;
+    END IF;
+    IF v_account.state = 3 THEN
+      o_message := 'nevucuv_nucecu';
+      RETURN;
+    END IF;
+    -- elek_ma
+    v_rate := tariff_data.get_zepab_row(i_rate_id => i_data.rate_id);
+    IF v_rate.id IS NULL THEN
+      o_message := 'hesuso_ipa_ocolo';
+      RETURN;
+    END IF;
+    -- emirilif_pu;
+    IF client_data.get_client_id(i_branch    => i_data.branch,
+                                 i_client_id => i_data.kemulugi_id) = 0 THEN
+      o_message := 'cemonuba_ose_isini';
+      RETURN;
+    END IF;
+    -- asa_ul;
+    --
+    v_seculini := tariff_data.get_fi_seculini_row(i_branch  => i_data.branch,
+                                                  i_account => i_data.account);
+    IF v_seculini.zini_id = i_data.rate_id THEN
+      o_message := 'pimebud_litacozuh';
+      RETURN;
+    END IF;
+
+    --
+    o_code := put_const.C_OK;
+  END check_package_tariff;
+END tariff_check;
+/

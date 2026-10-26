@@ -1,0 +1,14 @@
+BEGIN
+  UPDATE visa_card_applications t
+     SET
+     t.status = card_const.c_status_sent,
+     t.modify_date = SYSDATE
+   WHERE t.id = i_app_id;
+END;
+-----
+BEGIN
+  UPDATE visa_card_applications t
+     SET t.status = card_const.c_status_sent,
+     t.modify_date = SYSDATE
+   WHERE t.id = i_app_id;
+END;

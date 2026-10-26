@@ -18,8 +18,8 @@ internal static partial class BlankLineRules
     [GeneratedRegex(@"^END\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
     private static partial Regex ClosingEnd();
 
-    /// <summary>R19: a blank line before each PROCEDURE/FUNCTION and before the comment block above it; not right after IS/AS or CREATE ... .</summary>
-    public static string BeforeSubprograms(string text)
+    /// <summary>R19: a blank line before each PROCEDURE/FUNCTION and before the comment block above it; not right after IS/AS; right after the header CREATE ... IS only with <paramref name="afterHeader"/>.</summary>
+    public static string BeforeSubprograms(string text, bool afterHeader = false, bool beforeEach = true)
     {
         var lines = text.Split('\n');
         var masked = PlsqlLexer.Mask(text).Split('\n');
@@ -32,8 +32,8 @@ internal static partial class BlankLineRules
                 while (k > 0 && CommentOnly().IsMatch(output[k - 1])) k--;
                 var previous = k > 0 ? output[k - 1] : "";
                 var maskedPrevious = PlsqlLexer.Mask(previous).Trim();
-                if (k > 0 && previous.Trim().Length > 0 && !EndsWithIsOrAs().IsMatch(maskedPrevious)
-                    && !maskedPrevious.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase))
+                var header = maskedPrevious.StartsWith("CREATE", StringComparison.OrdinalIgnoreCase);
+                if (k > 0 && previous.Trim().Length > 0 && (header ? afterHeader && EndsWithIsOrAs().IsMatch(maskedPrevious) : beforeEach && !EndsWithIsOrAs().IsMatch(maskedPrevious)))
                 {
                     output.Insert(k, "");
                 }

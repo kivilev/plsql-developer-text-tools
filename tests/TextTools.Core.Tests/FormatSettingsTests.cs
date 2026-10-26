@@ -19,7 +19,7 @@ public class FormatSettingsTests
     {
         Assert.Equal(FormatSettings.All.Count, FormatSettings.All.Select(s => s.Id).Distinct(StringComparer.Ordinal).Count());
         Assert.All(FormatSettings.All, s => Assert.InRange(s.Default, s.Min, s.Max));
-        Assert.Equal(["general", "case", "code", "blank"], FormatSettings.Tabs);
+        Assert.Equal(["general", "case", "code", "sql", "wrapping", "blank"], FormatSettings.Tabs);
     }
 
     [Fact]
@@ -33,7 +33,7 @@ public class FormatSettingsTests
         foreach (var setting in FormatSettings.All.Where(s => s.Kind == SettingKind.Bool))
         {
             var profile = new FormatProfile();
-            profile.Set(setting.Id, 0);
+            profile.Set(setting.Id, 1 - setting.Default);
             Assert.NotEqual(baseline, profile.ToOptions());
         }
         var margin = new FormatProfile();
@@ -155,5 +155,18 @@ public class FormatSettingsTests
         Assert.Equal("Save", texts.Text("button.save"));
         Assert.Equal("no.such.key", texts.Text("no.such.key"));
         Assert.Same(UiTexts.For("Russian"), UiTexts.For("Russian.lang"));
+    }
+
+    [Fact]
+    public void EverySwitchChangesThePreviewSample()
+    {
+        var baseline = PostFormatter.Format(FormatSample.Text);
+        Assert.NotEqual(FormatSample.Text, baseline);
+        foreach (var setting in FormatSettings.All.Where(s => s.Kind == SettingKind.Bool))
+        {
+            var profile = new FormatProfile();
+            profile.Set(setting.Id, 1 - setting.Default);
+            Assert.True(!string.Equals(baseline, PostFormatter.Format(FormatSample.Text, profile.ToOptions()), StringComparison.Ordinal), setting.Id);
+        }
     }
 }
