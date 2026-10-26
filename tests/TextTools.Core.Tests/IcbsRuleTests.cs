@@ -224,7 +224,7 @@ public class IcbsRuleTests
         var text = "BEGIN" + eol + "  SELECT JSON_OBJECT('a' VALUE 1, 'inner' VALUE JSON_OBJECT('b' VALUE 2, 'c' VALUE 3)) INTO v FROM dual;" + eol + "END;" + eol;
         var result = PostFormatter.Format(text, FormatOptions.None with { SelectColumnsOnePerLine = true });
         Assert.Contains("'inner' VALUE JSON_OBJECT(" + eol, result, StringComparison.Ordinal);
-        Assert.Contains(eol + "                       'b' VALUE 2," + eol, result, StringComparison.Ordinal);
+        Assert.Contains(eol + "                           'b' VALUE 2," + eol, result, StringComparison.Ordinal);
         Assert.True(TokenGuard.Same(text, result));
         Assert.Equal(result, PostFormatter.Format(result, FormatOptions.None with { SelectColumnsOnePerLine = true }));
     }
