@@ -94,3 +94,17 @@ Lines are separated by `⏎` in the examples below.
 | Copy SQL with constants resolved | `declare ⏎   c_new constant varchar2(3) := 'NEW'; ⏎   l_cnt number; ⏎ begin ⏎   select count(*) into l_cnt from orders where status = c_new; ⏎ end;` | `select count(*) from orders where status = 'NEW' /*c_new*/` |
 | Explain Plan with constants | (statement under the cursor) | `the IDE Plan Window with this statement, constants resolved` |
 | Extended Explain Plan | (statement under the cursor) | `an HTML window: Plan (reading order, step panels), Findings (static rules), Text (DBMS_XPLAN + Copy), Reference` |
+
+## Format Tools
+
+### Rules
+
+| Command | Example input | Result |
+|---|---|---|
+| Apply formatting rules | `PROCEDURE p IS ⏎   v_a t.a%type; ⏎ BEGIN ⏎   v_long_name:=nvl(i_x,0); ⏎   v_b:=1; ⏎ END;` | `PROCEDURE p IS ⏎   v_a t.a%TYPE; ⏎ BEGIN ⏎   v_long_name := NVL(i_x,0); ⏎   v_b         := 1; ⏎ END p;` |
+
+### Settings
+
+| Command | Example input | Result |
+|---|---|---|
+| Settings | (none) | `the settings window of the formatting rules (tabs, checkboxes, before/after preview)` |

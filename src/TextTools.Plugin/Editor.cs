@@ -10,6 +10,12 @@ internal static class Editor
 {
     public static void Apply(Command cmd)
     {
+        if (cmd is SettingsCommand)
+        {
+            // A window of its own: needs no editor and changes no text.
+            SettingsWindow.Show(Ide.AppHandle);
+            return;
+        }
         if (!Ide.WindowHasEditor(false))
         {
             Status("no editor in the current window");

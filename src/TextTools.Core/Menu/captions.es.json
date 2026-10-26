@@ -44,5 +44,8 @@
   "ISO duration -> INTERVAL": "Duración ISO -> INTERVAL",
   "Copy SQL with constants resolved": "Copiar SQL con constantes resueltas",
   "Explain Plan with constants": "Explain Plan con constantes",
-  "Extended Explain Plan": "Explain Plan extendido"
+  "Extended Explain Plan": "Explain Plan extendido",
+  "Format Tools": "Formato",
+  "Apply formatting rules": "Aplicar reglas de formato",
+  "Settings": "Configuración"
 }

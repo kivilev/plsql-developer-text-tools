@@ -51,6 +51,7 @@ internal static unsafe partial class Exports
                 "String Tools: case, quoting, IN lists, encodings, lines.\r\n" +
                 "Date Tools: now values, date and epoch conversion, date masks, intervals.\r\n" +
                 "SQL Tools: copy a SQL statement from PL/SQL with its constants resolved.\r\n" +
+                "Format Tools: formatting rules applied after the IDE Beautifier.\r\n" +
                 "Author: Denis Kivilev");
         }
         catch
@@ -64,6 +65,9 @@ internal static unsafe partial class Exports
     {
         // Without this the interface passes ANSI text and Cyrillic in the editor gets mangled.
         Ide.Utf8 = Ide.PlugInSetting(_pluginId, "CHARMODE", "UTF8");
+
+        // The saved formatting profile is what the menu command runs with.
+        FormatSettingsStore.Apply(FormatSettingsStore.Load());
 
         // The menu is (re)built here because the IDE may activate the plug-in before asking for menu items;
         // the indices are the same either way.

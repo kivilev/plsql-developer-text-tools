@@ -47,6 +47,12 @@ order with "runs for each row of step N", each step in plain words with its pred
 **Findings** from 19 static rules (conversions on indexed columns, full scans inside nested loops, broken partition
 pruning, unused hints, missing statistics, ...) each with "why it may be fine", and the raw `DBMS_XPLAN` text to copy.
 
+**Format Tools → Apply formatting rules.** Run the IDE's Beautifier first, then this command on the selection or the
+whole text: it adds what the Beautifier's rules file cannot express (`END name;`, `:=` in columns, built-in functions
+and `%TYPE` in upper case, blank lines between subprograms, `EXECUTE IMMEDIATE` layout). Pure text work inside the DLL;
+the tokens are verified before and after, so the code itself never changes. **Format Tools → Settings** opens a window
+with a checkbox per rule and a before/after preview; the choice is saved in `%APPDATA%\TextTools\format-rules.json`.
+
 | String Tools | Date Tools |
 |---|---|
 | **Case**: `first_name` → camelCase, PascalCase, snake_case, UPPER_SNAKE_CASE, kebab-case (`$`, `#`, Cyrillic supported) | **Now**: insert the current `DATE`, `TIMESTAMP`, `TIMESTAMP WITH TIME ZONE`, `TO_DATE(...)`, ISO 8601 or Unix epoch — from `SYSTIMESTAMP` when connected |

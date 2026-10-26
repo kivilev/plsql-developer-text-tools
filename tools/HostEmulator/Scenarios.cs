@@ -22,10 +22,153 @@ internal static class Scenarios
             case "unload": Unload(host, dll); break;
             case "stress": Stress(host); break;
             case "selftest": SelfTest(host); break;
+            case "settings": SettingsWindow(host); break;
             default: throw new ArgumentException($"unknown mode {mode}", nameof(mode));
         }
         return _failures == 0;
     }
+
+    /// <summary>
+    /// Not part of "all" (it needs a desktop): clicks Format Tools -> Settings, which opens the modal settings window and runs its own
+    /// message loop, finds the window from another thread, keeps it for SETTINGS_HOLD_MS (to look at it) and closes it.
+    /// </summary>
+    private static void SettingsWindow(PluginHost host)
+    {
+        var hold = int.Parse(Environment.GetEnvironmentVariable("SETTINGS_HOLD_MS") ?? "300", CultureInfo.InvariantCulture);
+        nint window = 0;
+        var closer = new Thread(() =>
+        {
+            for (var i = 0; i < 100 && window == 0; i++)
+            {
+                window = FindWindowW("TextToolsFormatSettings", null);
+                if (window == 0) Thread.Sleep(50);
+            }
+            Thread.Sleep(Math.Min(hold, 700));
+            if (int.TryParse(Environment.GetEnvironmentVariable("SETTINGS_TAB"), CultureInfo.InvariantCulture, out var tab) && window != 0)
+            {
+                // Click the header of tab N (0-based) of the tab control: headers are about 33, 73, 122, 185 px from its left edge.
+                var tabs = FindWindowExW(window, 0, "SysTabControl32", null);
+                int[] centers = [33, 73, 122, 185];
+                var point = (nint)((12 << 16) | centers[Math.Clamp(tab, 0, centers.Length - 1)]);
+                _ = PostMessageW(tabs, 0x201, 1, point); // WM_LBUTTONDOWN
+                _ = PostMessageW(tabs, 0x202, 0, point); // WM_LBUTTONUP
+                Thread.Sleep(400);
+            }
+            if (int.TryParse(Environment.GetEnvironmentVariable("SETTINGS_CLICK"), CultureInfo.InvariantCulture, out var control) && window != 0)
+            {
+                _ = SendMessageW(GetDlgItem(window, control), 0xF5, 0, 0); // BM_CLICK on the control with this id (a checkbox)
+                Thread.Sleep(400);
+            }
+            if (Environment.GetEnvironmentVariable("SETTINGS_SHOT") is { Length: > 0 } shot && window != 0) WindowToBmp(window, shot);
+            Thread.Sleep(Math.Max(0, hold - 700));
+            if (window != 0 && PostMessageW(window, 0x10, 0, 0) == 0) window = 0; // WM_CLOSE; no window if it could not be closed
+        });
+        closer.Start();
+        host.Click(host.Menu["SUBITEM=Settings"]);
+        closer.Join();
+        Check(window != 0, "Format Tools -> Settings: the modal settings window opens");
+        Check(FindWindowW("TextToolsFormatSettings", null) == 0, "the window closes and the click returns to the IDE");
+    }
+
+    /// <summary>Writes the window as a 32-bit BMP (SETTINGS_SHOT=path): the way to look at the window without a person at the screen.</summary>
+    private static unsafe void WindowToBmp(nint window, string path)
+    {
+        GetWindowRect(window, out var rect);
+        int width = rect.Right - rect.Left, height = rect.Bottom - rect.Top;
+        var screen = GetDC(0);
+        var dc = CreateCompatibleDC(screen);
+        var bitmap = CreateCompatibleBitmap(screen, width, height);
+        SelectObject(dc, bitmap);
+        PrintWindow(window, dc, 2); // PW_RENDERFULLCONTENT
+        var header = new BitmapInfoHeader { Size = 40, Width = width, Height = height, Planes = 1, BitCount = 32 };
+        var pixels = new byte[width * height * 4];
+        fixed (byte* p = pixels) _ = GetDIBits(dc, bitmap, 0, (uint)height, p, ref header, 0);
+        using var file = new BinaryWriter(File.Create(path));
+        file.Write((ushort)0x4D42);
+        file.Write(14 + 40 + pixels.Length);
+        file.Write(0);
+        file.Write(14 + 40);
+        file.Write(40);
+        file.Write(width);
+        file.Write(height);
+        file.Write((ushort)1);
+        file.Write((ushort)32);
+        file.Write(new byte[24]);
+        file.Write(pixels);
+        DeleteObject(bitmap);
+        DeleteDC(dc);
+        _ = ReleaseDC(0, screen);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct BitmapInfoHeader
+    {
+        public uint Size;
+        public int Width;
+        public int Height;
+        public ushort Planes;
+        public ushort BitCount;
+        public uint Compression;
+        public uint SizeImage;
+        public int XPelsPerMeter;
+        public int YPelsPerMeter;
+        public uint ColorUsed;
+        public uint ColorImportant;
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(nint window, out Rect rect);
+
+    [DllImport("user32.dll")]
+    private static extern nint GetDC(nint window);
+
+    [DllImport("user32.dll")]
+    private static extern int ReleaseDC(nint window, nint dc);
+
+    [DllImport("user32.dll")]
+    private static extern bool PrintWindow(nint window, nint dc, uint flags);
+
+    [DllImport("gdi32.dll")]
+    private static extern nint CreateCompatibleDC(nint dc);
+
+    [DllImport("gdi32.dll")]
+    private static extern nint CreateCompatibleBitmap(nint dc, int width, int height);
+
+    [DllImport("gdi32.dll")]
+    private static extern nint SelectObject(nint dc, nint obj);
+
+    [DllImport("gdi32.dll")]
+    private static extern unsafe int GetDIBits(nint dc, nint bitmap, uint start, uint lines, byte* bits, ref BitmapInfoHeader info, uint usage);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteObject(nint obj);
+
+    [DllImport("gdi32.dll")]
+    private static extern bool DeleteDC(nint dc);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern nint FindWindowW(string className, string? windowName);
+
+    [DllImport("user32.dll")]
+    private static extern nint GetDlgItem(nint window, int id);
+
+    [DllImport("user32.dll")]
+    private static extern nint SendMessageW(nint window, uint message, nint wParam, nint lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern nint FindWindowExW(nint parent, nint after, string className, string? windowName);
+
+    [DllImport("user32.dll")]
+    private static extern int PostMessageW(nint window, uint message, nint wParam, nint lParam);
 
     private static void Check(bool condition, string what)
     {
@@ -38,7 +181,7 @@ internal static class Scenarios
         Check(string.Equals(host.Identity, "Text Tools for PL/SQL Developer", StringComparison.Ordinal), "IdentifyPlugIn returns the product name");
         Check(host.AboutText.Contains("Author", StringComparison.Ordinal), "About text");
         Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools")
-              && host.Menu.ContainsKey("MENUITEM=SQL Tools"), "three submenus");
+              && host.Menu.ContainsKey("MENUITEM=SQL Tools") && host.Menu.ContainsKey("MENUITEM=Format Tools"), "four submenus");
         Check(FakeIde.ToolButtons.Count == 3 && FakeIde.ToolButtons.All(b =>
                 host.Menu.TryGetValue("MENUITEM=" + b.Name, out var i) && i == b.Index
                 && File.Exists(b.File) && File.ReadAllBytes(b.File).AsSpan(1, 3).SequenceEqual("PNG"u8)),
@@ -48,7 +191,7 @@ internal static class Scenarios
         Check(copyPopups.Select(p => p.ObjectType).Order(StringComparer.Ordinal).SequenceEqual(["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"], StringComparer.Ordinal)
               && copyPopups.All(p => string.Equals(p.Name, "Copy SQL with constants resolved", StringComparison.Ordinal)),
             "Copy SQL is a top-level item of the editor context menu in Program, SQL and Test windows");
-        Check(FakeIde.PopupItems.Count == 11 * 3
+        Check(FakeIde.PopupItems.Count == 10 * 3
               && FakeIde.PopupItems.All(p => host.Menu.TryGetValue("SUBITEM=" + p.Name, out var i) && i == p.Index)
               && FakeIde.PopupItems.Any(p => string.Equals(p.Name, "List -> IN (...)", StringComparison.Ordinal)),
             "a short flat list of everyday commands in the context menu, each at its menu index");
@@ -168,11 +311,7 @@ internal static class Scenarios
         Console.WriteLine($"  {json.Split('\n').FirstOrDefault()}");
         Check(json.Contains("\"failed\":0,", StringComparison.Ordinal) && FakeIde.CreatedWindows.Count > 0 && FakeIde.CreatedWindows[0].Type == 1,
             "TEXTTOOLS_SELFTEST: after AfterStart the timer runs every command in a new SQL Window, all passed, JSON written");
-        var html = FakeIde.HtmlWindows.FirstOrDefault();
-        Check(html.Url is not null && string.Equals(html.Id, "TextTools.ExtendedPlan", StringComparison.Ordinal) && File.Exists(html.Url)
-              && File.ReadAllText(html.Url).Contains("Not connected to a database", StringComparison.Ordinal)
-              && FakeIde.HtmlWindows.Count == 1,
-            "Extended Explain Plan: one HTML window (refreshed, not reopened) explaining there is no connection");
+        Check(FakeIde.HtmlWindows.Count == 0, "Extended Explain Plan is not in the menu yet: the self test opens no HTML window");
         foreach (var line in json.Split('\n').Where(l => l.Contains("\"ok\":false", StringComparison.Ordinal)).Take(10))
         {
             Console.WriteLine($"    {line}");

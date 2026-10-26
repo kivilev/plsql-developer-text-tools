@@ -16,7 +16,7 @@ public class MenuTests
         var captions = Build(1600).Select(x => x.Caption).ToList();
 
         Assert.Equal($"GROUP={Menu.Title}", captions[0]);
-        Assert.Equal(["MENUITEM=String Tools", "MENUITEM=Date Tools", "MENUITEM=SQL Tools"], captions.Where(c => c.StartsWith("MENUITEM=", StringComparison.Ordinal)));
+        Assert.Equal(["MENUITEM=String Tools", "MENUITEM=Date Tools", "MENUITEM=SQL Tools", "MENUITEM=Format Tools"], captions.Where(c => c.StartsWith("MENUITEM=", StringComparison.Ordinal)));
         Assert.Equal(Commands.All.Count, captions.Count(c => c.StartsWith("SUBITEM=", StringComparison.Ordinal) && !string.Equals(c, "SUBITEM=-", StringComparison.Ordinal)));
     }
 

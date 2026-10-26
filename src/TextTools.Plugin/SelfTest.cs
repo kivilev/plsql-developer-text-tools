@@ -104,6 +104,7 @@ internal static unsafe partial class SelfTest
                 InsertCommand i => Insert(i),
                 CopyCommand c => Copy(c),
                 PlanCommand p => Plan(p),
+                SettingsCommand => new Check(cmd.Name, true, "opens a window: not run by the self test"),
                 _ => new Check(cmd.Name, false, "unknown command type"),
             }));
         }

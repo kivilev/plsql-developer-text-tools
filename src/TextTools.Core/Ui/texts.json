@@ -1,0 +1,21 @@
+{
+  "settings.title": "Format Tools Settings",
+  "settings.saved": "Format Tools settings saved",
+  "tab.general": "General",
+  "tab.case": "Case",
+  "tab.code": "Code",
+  "tab.blank": "Blank lines",
+  "setting.margin": "Right margin",
+  "setting.builtinFunctionsUpper": "Built-in functions in upper case (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... in upper case",
+  "setting.endWithName": "END with the name of the subprogram or package (END name;)",
+  "setting.alignAssignments": "Align := in groups of assignments",
+  "setting.executeImmediateLiteralOnOwnLine": "Long EXECUTE IMMEDIATE literal on its own line",
+  "setting.blankLineBeforeSubprograms": "Blank line before each PROCEDURE and FUNCTION",
+  "setting.noBlankLineBeforePackageEnd": "Remove blank lines before the closing END of a package",
+  "setting.trimTrailingSpaces": "Remove trailing spaces",
+  "button.save": "Save",
+  "button.default": "Default",
+  "button.close": "Close",
+  "preview.title": "Preview"
+}

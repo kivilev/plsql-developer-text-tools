@@ -44,5 +44,8 @@
   "ISO duration -> INTERVAL": "ISO időtartam -> INTERVAL",
   "Copy SQL with constants resolved": "SQL másolása feloldott konstansokkal",
   "Explain Plan with constants": "Explain Plan konstansokkal",
-  "Extended Explain Plan": "Bővített Explain Plan"
+  "Extended Explain Plan": "Bővített Explain Plan",
+  "Format Tools": "Formázás",
+  "Apply formatting rules": "Formázási szabályok alkalmazása",
+  "Settings": "Beállítások"
 }

@@ -56,6 +56,7 @@ public class CommandsDocTests
                         CopyCommand c => (c.Sample, c.SampleResult),
                         PlanCommand { View: PlanView.IdeWindow } => ("(statement under the cursor)", "the IDE Plan Window with this statement, constants resolved"),
                         PlanCommand => ("(statement under the cursor)", "an HTML window: Plan (reading order, step panels), Findings (static rules), Text (DBMS_XPLAN + Copy), Reference"),
+                        SettingsCommand => ("(none)", "the settings window of the formatting rules (tabs, checkboxes, before/after preview)"),
                         _ => ("", ""),
                     };
                     sb.Append(CultureInfo.InvariantCulture, $"| {Cell(cmd.Name, code: false)} | {Cell(input, code: cmd is TransformCommand or CopyCommand)} | {Cell(output, code: true)} |\n");

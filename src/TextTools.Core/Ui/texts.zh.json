@@ -1,0 +1,21 @@
+{
+  "settings.title": "格式化工具设置",
+  "settings.saved": "格式化工具设置已保存",
+  "tab.general": "常规",
+  "tab.case": "大小写",
+  "tab.code": "代码",
+  "tab.blank": "空行",
+  "setting.margin": "右边距",
+  "setting.builtinFunctionsUpper": "内置函数使用大写 (NVL, SUBSTR, ...)",
+  "setting.attributesUpper": "%TYPE, %ROWTYPE, %FOUND ... 使用大写",
+  "setting.endWithName": "END 后带子程序或包的名称 (END name;)",
+  "setting.alignAssignments": "按赋值组对齐 :=",
+  "setting.executeImmediateLiteralOnOwnLine": "较长的 EXECUTE IMMEDIATE 字面量单独成行",
+  "setting.blankLineBeforeSubprograms": "每个 PROCEDURE 和 FUNCTION 前加空行",
+  "setting.noBlankLineBeforePackageEnd": "删除包结尾 END 之前的空行",
+  "setting.trimTrailingSpaces": "删除行尾空格",
+  "button.save": "保存",
+  "button.default": "默认",
+  "button.close": "关闭",
+  "preview.title": "预览"
+}
