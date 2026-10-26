@@ -74,6 +74,7 @@ public static class Commands
     [
         "Copy SQL with constants resolved",
         "Explain Plan with constants",
+        "Extended Explain Plan",
         "List -> IN (...)",
         "Escape quotes ( ' -> '' )",
         "Unescape quotes ( '' -> ' )",
