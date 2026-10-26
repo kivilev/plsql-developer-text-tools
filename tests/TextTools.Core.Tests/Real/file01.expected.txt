@@ -35,7 +35,9 @@ CREATE OR REPLACE PACKAGE BODY card_util IS
   FUNCTION close_card_mud_to_dula(i_hiko IN VARCHAR2) RETURN VARCHAR2 IS
 
   BEGIN
-    RETURN JSON_OBJECT('hiko' VALUE i_hiko);
+    RETURN JSON_OBJECT(
+             'hiko' VALUE i_hiko
+           );
   END close_card_mud_to_dula;
 
   FUNCTION create_hiko_32 RETURN VARCHAR2 IS

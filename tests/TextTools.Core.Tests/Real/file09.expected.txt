@@ -84,9 +84,11 @@ CREATE OR REPLACE PACKAGE BODY luka_util IS
                            iRequest   IN VARCHAR2) RETURN VARCHAR2 IS
 
   BEGIN
-    RETURN JSON_OBJECT('mofifafarevevazul' VALUE iCuvNumber,
-                       'cuhoruvem'         VALUE iRequest,
-                       'lakiga'            VALUE 'bazinik');
+    RETURN JSON_OBJECT(
+             'mofifafarevevazul' VALUE iCuvNumber,
+             'cuhoruvem' VALUE iRequest,
+             'lakiga' VALUE 'bazinik'
+           );
   END createMudToDula;
 
   PROCEDURE checkStatusDulaToMud(iDula      IN  CLOB,

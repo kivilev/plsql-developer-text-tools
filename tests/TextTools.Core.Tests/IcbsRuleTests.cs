@@ -190,4 +190,30 @@ public class IcbsRuleTests
         var cut = PostFormatter.Format(nested, FormatOptions.None with { WrapLongLines = true });
         Assert.Contains("NVL(JSON_VALUE(iJson, '$.residentialAddress'),", cut, StringComparison.Ordinal); // the inner call stays whole
     }
+
+    [Fact]
+    public void ACallTheBeautifierBrokeIsJoinedWhenItFitsTheMargin()
+    {
+        const string eol = "\n";
+        var text = "BEGIN" + eol + "  card_controller.close_card_async(in_data  => inData," + eol + "                                   out_data => outData);" + eol + "END;" + eol;
+        var result = PostFormatter.Format(text, FormatOptions.None with { WrapLongLines = true });
+        Assert.Contains("  card_controller.close_card_async(in_data => inData, out_data => outData);" + eol, result, StringComparison.Ordinal);
+        Assert.Equal(text, PostFormatter.Format(text, FormatOptions.None)); // the rule off: untouched
+
+        var comment = "BEGIN" + eol + "  p(a, -- first" + eol + "    b);" + eol + "END;" + eol;
+        Assert.Equal(comment, PostFormatter.Format(comment, FormatOptions.None with { WrapLongLines = true })); // a comment stops the join
+    }
+
+    [Fact]
+    public void JsonObjectPairsGoOnTheirOwnLinesUnderTheCall()
+    {
+        const string eol = "\n";
+        var text = "BEGIN" + eol + "  SELECT JSON_OBJECT('branch' VALUE c.branch, 'name' VALUE c.name RETURNING CLOB) INTO v FROM client c;" + eol + "END;" + eol;
+        var result = PostFormatter.Format(text, FormatOptions.None with { SelectColumnsOnePerLine = true });
+        Assert.Contains("SELECT JSON_OBJECT(" + eol + "           'branch' VALUE c.branch," + eol + "           'name' VALUE c.name" + eol + "         RETURNING CLOB) INTO v FROM client c;", result, StringComparison.Ordinal);
+        Assert.True(TokenGuard.Same(text, result));
+        Assert.Equal(result, PostFormatter.Format(result, FormatOptions.None with { SelectColumnsOnePerLine = true })); // laid out: left alone
+        var inline = "BEGIN" + eol + "  SELECT JSON_OBJECT(KEY 'a' IS x) INTO v FROM t;" + eol + "END;" + eol;
+        Assert.Equal(inline, PostFormatter.Format(inline, FormatOptions.None with { SelectColumnsOnePerLine = true })); // KEY ... IS stays
+    }
 }
