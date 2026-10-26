@@ -182,7 +182,7 @@ internal static class Scenarios
         Check(host.AboutText.Contains("Author", StringComparison.Ordinal), "About text");
         Check(host.Menu.ContainsKey("MENUITEM=String Tools") && host.Menu.ContainsKey("MENUITEM=Date Tools")
               && host.Menu.ContainsKey("MENUITEM=SQL Tools") && host.Menu.ContainsKey("MENUITEM=Format Tools"), "four submenus");
-        Check(FakeIde.ToolButtons.Count == 3 && FakeIde.ToolButtons.All(b =>
+        Check(FakeIde.ToolButtons.Count == 4 && FakeIde.ToolButtons.All(b =>
                 host.Menu.TryGetValue("MENUITEM=" + b.Name, out var i) && i == b.Index
                 && File.Exists(b.File) && File.ReadAllBytes(b.File).AsSpan(1, 3).SequenceEqual("PNG"u8)),
             "ribbon buttons get PNG images at their menu indices");
