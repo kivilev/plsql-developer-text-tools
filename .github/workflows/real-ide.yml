@@ -60,13 +60,13 @@ jobs:
     name: PL/SQL Developer ${{ matrix.version }}
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: plugin-dll
           path: plugin
       - name: Cache the installer
         id: msi
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/${{ matrix.msi }}
           key: plsqldev-${{ matrix.msi }}
@@ -77,7 +77,7 @@ jobs:
       # Without an Oracle client the IDE opens a modal "Oracle Client Wizard" on the first start.
       - name: Cache Oracle Instant Client
         id: oci
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ runner.temp }}/instantclient-basiclite-windows.zip
           # The URL is Oracle's rolling "latest" link: the cache freezes one version on purpose (stable runs);
