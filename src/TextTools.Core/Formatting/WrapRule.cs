@@ -103,6 +103,8 @@ internal static partial class WrapRule
     {
         var effective = line.TrimEnd().Length;
         if (line.Contains('\t', StringComparison.Ordinal)) return [line];
+        // A line that only its closing semicolon pushes past the margin stays as it is (not at the hard limit).
+        if (margin != Hard && effective == margin + 1 && masked.TrimEnd().EndsWith(';')) return [line];
 
         var stack = new Stack<int>();
         var pairs = new List<(int Open, int Close)>();

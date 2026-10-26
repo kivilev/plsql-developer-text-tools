@@ -8,7 +8,7 @@ namespace TextTools.Core.Tests;
 /// result of the reference formatter for each. The post-pass must agree with the reference, never change a token, settle, and
 /// survive every setting being switched off on its own. (file04: the reference leaves a lower-case <c>end;</c> without the name, the
 /// plug-in names it too, so that expected file is the plug-in result, checked by hand. file08: the reference splits <c>SUBSTR(SQLERRM, 1, 200)</c>
-/// into one argument per line after a long <c>||</c> chain, against section 5 of the code standard; the plug-in breaks at the operator instead.)
+/// into one argument per line after a long <c>||</c> chain, against section 5 of the code standard; the plug-in breaks at the operator instead. file11: a line that only its closing semicolon pushes past the margin stays on one line, as the reference now does.)
 /// </summary>
 public class RealFilesTests
 {

@@ -22,8 +22,7 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
     IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
       vCode    := 400;
       vMessage := 'gotova ef gof cafoci';
-      outData  := put_util.errorToDula(iCode    => vCode,
-                                       iMessage => vMessage);
+      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
       put_api.hez_request(iRequestId => iNelurecut,
                           iUserId    => iUserId,
                           iRerisuId  => vRerisuId,
@@ -86,8 +85,7 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
     IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
       vCode    := 400;
       vMessage := 'gotova ef gof cafoci';
-      outData  := put_util.errorToDula(iCode    => vCode,
-                                       iMessage => vMessage);
+      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
       put_api.hez_request(iRequestId => iNelurecut,
                           iUserId    => iUserId,
                           iRerisuId  => vRerisuId,
