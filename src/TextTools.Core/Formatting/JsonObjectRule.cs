@@ -27,7 +27,19 @@ internal static partial class JsonObjectRule
     [GeneratedRegex(@"^(?<item>.*?)\s+(?<clause>RETURNING\s+\w+(?:\s*\(\s*\d+\s*\))?)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Singleline, Limits.RegexTimeoutMs)]
     private static partial Regex TrailingReturning();
 
+    /// <summary>A pass lays out the outermost calls; the calls inside their pairs are laid out by the next pass (nesting is a few levels deep).</summary>
     public static string Apply(string text)
+    {
+        for (var pass = 0; pass < 6; pass++)
+        {
+            var next = LayOut(text);
+            if (string.Equals(next, text, StringComparison.Ordinal)) break;
+            text = next;
+        }
+        return text;
+    }
+
+    private static string LayOut(string text)
     {
         var masked = PlsqlLexer.Mask(text);
         var edits = new List<(int Start, int End, string Replacement)>();
