@@ -19,7 +19,7 @@
 
     <Authors>Denis Kivilev</Authors>
     <Product>Text Tools for PL/SQL Developer</Product>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <Copyright>Copyright (c) 2026 Denis Kivilev</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>

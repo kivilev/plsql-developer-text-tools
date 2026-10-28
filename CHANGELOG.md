@@ -8,19 +8,38 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
 
 ## [Unreleased]
 
+## [v0.4.0] - 2026-10-28
+
 ### Features
 
-- **Format Tools**: 17 more layout rules (settings tabs "SQL" and "Wrapping", each one a switch, all on by default):
-  INSERT / SELECT / SELECT ... INTO / UPDATE SET / JOIN ... ON / subquery layouts, IF conditions on one logical line,
-  wrapping of lines past the margin (DECODE in pairs, BETWEEN, `||`, named arguments with `=>` aligned), aligned
-  declarations, comment indent, subprogram header tails on one line. The tokens, string literals and comments are
-  still verified before and after; a rule whose result would change any of them is skipped on its own.
-- **Format Tools** (developer command): in a Command Window `plugin PlsqlDevTextTools format <input folder> <Beautifier output folder> <result folder>`
-  runs every package, type and body file of a folder through the IDE's Beautifier and then through the Text Tools rules, and
-  writes both results; it is how the whole formatting is compared with another formatter on the same files.
-- **Format Tools**: a select list whose aligned aliases would push a line past 120 characters gets one blank before the
-  aliases (the code standard's line limit); a long `||` chain is broken at the operator instead of inside a call; a blank
-  after each comma is on by default (`SUBSTR(x, 1, 3)`); settings can be exported to and imported from a `.ttr` file.
+- **Format Tools** follows the bank's code standard out of the box (right margin 76, lines up to 120): the defaults of the
+  settings are the standard's, and 17 more layout rules join the post-pass after the Beautifier, each one a switch in
+  the settings window (new tabs "SQL" and "Wrapping"): INSERT / SELECT / SELECT ... INTO / UPDATE SET / JOIN ... ON /
+  subquery layouts, IF conditions on one logical line, wrapping of lines past the margin (DECODE in pairs, BETWEEN,
+  `||` chains, named arguments with `=>` aligned), aligned declarations, comment indent, subprogram header tails on one
+  line, a blank after each comma (`SUBSTR(x, 1, 3)`), and an optional blank line after the package header.
+- **Format Tools** joins a call that the Beautifier broke over several lines when it fits the margin, lays out
+  `JSON_OBJECT(... VALUE ...)` with the pairs one per line (nested calls too), breaks a long `||` chain at the operator
+  and never inside a call, keeps a line that only its closing semicolon pushes past the margin on one line, and cuts the
+  arguments of a multi-line call only past 120 characters. Aligned aliases that would push a line past 120 characters
+  get one blank before them.
+- **Format Tools -> Settings**: the settings are laid out in columns, the preview shows the effect of every option, the
+  wrapping options are greyed out while wrapping is off. New buttons **Export...** and **Import...** save the rules to a
+  `.ttr` file (`Key=Value` like the Beautifier's `.br`) and load them; importing a Beautifier `.br` takes the keys both
+  have (right margin, aligned declarations, aligned assignments). A new ribbon button icon for Format Tools.
+- **Format Tools** (developer command): in a Command Window `plugin PlsqlDevTextTools format <input folder> <Beautifier
+  output folder> <result folder>` runs every package, type and body file of a folder through the IDE's Beautifier and
+  then through the Text Tools rules and writes both results; it is how the whole formatting is compared with another
+  formatter on the same files.
+- The README is rewritten (what it solves, four feature sections with screenshots, a new demo) and translated into
+  Russian, Uzbek, Spanish, Portuguese, Chinese, Japanese and Hindi.
+
+### Fixes
+
+- A select list with a column alignment that reached past 120 characters, a `SUBSTR(SQLERRM, 1, 150)` split argument by
+  argument inside a long `||` chain, and `IN  CLOB` parameter lists squeezed to one blank are laid out as the standard
+  says. The tokens, string literals and comments are still verified before and after; a rule whose result would change
+  any of them is skipped on its own.
 
 ## [v0.3.0] - 2026-10-23
 
