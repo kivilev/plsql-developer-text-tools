@@ -8,6 +8,25 @@ A section is drafted with `sh scripts/release-notes.sh <previous tag> <version>`
 
 ## [Unreleased]
 
+## [v0.5.0] - 2026-11-12
+
+### Features
+
+- **SQL Tools -> Copy SELECT * FROM object** (also in the editor's context menu, under Explain Plan with constants):
+  put the cursor on a table or view name and get `select * from <name>` on the clipboard. The schema, a quoted name and
+  a `@dblink` are taken along (`hr.employees`, `"Mixed Case"`, `emp@remote`); on a keyword, a literal, a bind variable
+  or empty space the status bar says so and the clipboard is left alone.
+  ([PR #54](https://github.com/kivilev/plsql-developer-text-tools/pull/54))
+
+### Fixes
+
+- **Copy SQL with constants resolved**, **Explain Plan with constants** and **Date Tools -> Now** use the connection of
+  the current window: a window that keeps its own connection after the main one was switched to another user reads
+  package specifications, the database time and the plan as that window's user, and the Plan Window opens on that
+  connection. If the IDE cannot open a session for it, the status bar says so.
+  ([#33](https://github.com/kivilev/plsql-developer-text-tools/issues/33),
+  [PR #56](https://github.com/kivilev/plsql-developer-text-tools/pull/56))
+
 ## [v0.4.0] - 2026-10-28
 
 ### Features
