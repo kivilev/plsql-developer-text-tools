@@ -45,16 +45,25 @@ public static class PostFormatter
     internal static string Apply(string text, FormatOptions o)
     {
         var steps = new Steps(text);
-        steps.Run(o.WrapLongLines, t => JoinCallsRule.Apply(t, o.Margin));
+        // With short arguments kept up to 120 every broken call is joined first; the wrap rule breaks it again where it must.
+        steps.Run(o.WrapLongLines, t => JoinCallsRule.Apply(t, o.Margin, o.KeepShortArguments));
         steps.Run(o.SelectColumnsOnePerLine, JsonObjectRule.Apply);
         steps.Run(o.TightParentheses, TightParenthesesRule.Apply);
         steps.Run(o.SpaceAfterComma, SpaceAfterCommaRule.Apply);
+        steps.Run(o.BulkCollectOnOneLine, SelectIntoRule.JoinBulkCollect);
+        steps.Run(o.TightUnaryMinus, UnaryMinusRule.Apply);
         steps.Run(o.SelectIntoOnOneLine, SelectIntoRule.JoinIntoList);
         steps.Run(o.UpdateSetLayout, UpdateSetRule.AlignEquals);
         steps.Run(o.JoinIfConditions, IfConditionRule.Apply);
+        steps.Run(o.ConditionPerLine, IfConditionRule.JoinBooleanExpressions);
         steps.Run(o.JoinOnAlignment, JoinOnRule.Apply);
+        steps.Run(o.JsonTableLayout, JsonTableRule.Apply);
+        steps.Run(o.JsonArrayaggLayout, JsonObjectRule.NestInArrayagg);
         steps.Run(o.ShortParenGroupOnOneLine, t => ParenConditionRule.Apply(t, o.Margin));
+        steps.Run(o.CaseLayout, CaseLayoutRule.JoinShort);
+        steps.Run(o.CaseLayout, t => CaseLayoutRule.Relayout(t, o.Margin));
         steps.Run(o.InsertLayout, t => InsertRule.Apply(t, o.Margin));
+        steps.Run(o.TypeFieldsLayout, TypeFieldsRule.Apply);
         steps.Run(o.HeaderTailsOnOneLine, HeaderTailsRule.Apply);
         steps.Run(o.SelectColumnsOnePerLine, SelectListRule.SplitLine);
         steps.Run(o.SelectColumnsOnePerLine, SelectListRule.AfterComment);
@@ -62,16 +71,29 @@ public static class PostFormatter
         steps.Run(o.BuiltinFunctionsUpper, CaseRules.UpperBuiltinFunctions);
         steps.Run(o.TightenAliasPadding, t => SelectListRule.TightenAliasPadding(t));
         steps.Run(o.SingleBlankBeforeAlias, t => SelectListRule.UnalignAliases(t));
+        steps.Run(o.TableAliasSingleSpace, TableAliasRule.Apply);
+        steps.Run(o.TableAliasSingleSpace, TableAliasRule.OnAfterSubquery);
         steps.Run(o.UpdateSetLayout, UpdateSetRule.JoinBareSet);
         steps.Run(o.ExecuteImmediateLiteralOnOwnLine, t => ExecuteImmediateRule.Apply(t, o.Margin));
-        steps.Run(o.SelectIntoOnOneLine, t => SelectIntoRule.JoinShort(t, o.Margin));
+        steps.Run(o.SelectIntoOnOneLine && !o.SelectListFill, t => SelectIntoRule.JoinShort(t, o.Margin));
+        steps.Run(o.SelectListFill, t => SelectListRule.Fill(t, o.Margin));
+        steps.Run(o.SelectListFill, t => SelectListRule.FillViewColumns(t, o.Margin));
         steps.Run(o.AlignAssignments, AlignAssignmentsRule.Apply);
-        steps.Run(o.WrapLongLines, t => WrapRule.Apply(t, new WrapRule.Choices(o.Margin, o.WrapDecodeInPairs, o.WrapBetween, o.AlignNamedArguments)));
+        steps.Run(o.AssignmentSingleSpace && !o.AlignAssignments, AlignAssignmentsRule.SingleSpace);
+        steps.Run(o.WrapLongLines, t => WrapRule.Apply(t, new WrapRule.Choices(
+            o.Margin, o.WrapDecodeInPairs, o.WrapBetween, o.AlignNamedArguments, o.ConditionPerLine, o.FillLiteralArguments, o.WrapInLists, o.KeepShortArguments, o.WrapArithmetic)));
+        steps.Run(o.ConditionPerLine, IfConditionRule.ThenOnOwnLine);
+        steps.Run(o.JsonArrayaggLayout, JsonObjectRule.JoinFormatJson);
+        steps.Run(o.CaseLayout, CaseLayoutRule.ExpandLong);
         steps.Run(o.AlignDeclarations, AlignDeclarationsRule.Apply);
         steps.Run(o.IndentComments, CommentIndentRule.Apply);
+        steps.Run(o.OneSpaceBeforeComment, CommentSpaceRule.Apply);
+        steps.Run(o.LowerCapitalNames, NameCaseRule.LowerCapitalNames);
+        steps.Run(o.UpperContextKeywords, NameCaseRule.UpperContextKeywords);
         steps.Run(o.AttributesUpper, CaseRules.UpperAttributes);
         steps.Run(o.BlankLineBeforeSubprograms || o.BlankLineAfterPackageHeader, t => BlankLineRules.BeforeSubprograms(t, o.BlankLineAfterPackageHeader, o.BlankLineBeforeSubprograms));
         steps.Run(o.NoBlankLineBeforePackageEnd, BlankLineRules.NoBlankBeforePackageEnd);
+        steps.Run(o.NoBlankAtBlockEdges, BlankLineRules.NoBlankAtBlockEdges);
         steps.Run(o.EndWithName, EndNameRule.Apply);
         steps.Run(o.TrimTrailingSpaces, TrimTrailing);
         return steps.Text;

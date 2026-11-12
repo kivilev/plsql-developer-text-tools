@@ -100,6 +100,103 @@ internal static partial class JsonObjectRule
         return result.ToString();
     }
 
+    [GeneratedRegex(@"\bJSON_ARRAYAGG\((?<call>JSON_OBJECT)\($", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex NestedInArrayagg();
+
+    [GeneratedRegex(@"^(?<indent>\s*)FORMAT\s+JSON\b(?<rest>.*)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex FormatJsonLine();
+
+    /// <summary>
+    /// <c>JSON_ARRAYAGG(JSON_OBJECT(</c> at a line end: <c>JSON_OBJECT(</c> goes on the next line two columns right of
+    /// <c>JSON_ARRAYAGG</c>, its pairs and its closing parenthesis move left with it.
+    /// </summary>
+    public static string NestInArrayagg(string text)
+    {
+        if (!text.Contains("JSON_ARRAYAGG", StringComparison.OrdinalIgnoreCase)) return text;
+        var lines = text.Split('\n').ToList();
+        var masked = PlsqlLexer.Mask(text).Split('\n'); // masked again only after a change
+        var i = 0;
+        while (i < lines.Count)
+        {
+            var m = NestedInArrayagg().Match(masked[i].TrimEnd());
+            if (!m.Success)
+            {
+                i++;
+                continue;
+            }
+            var column = m.Index + 2;
+            var old = m.Groups["call"].Index;
+            int depth = 0, end = -1;
+            for (var j = i; j < lines.Count && end < 0; j++)
+            {
+                for (var k = j == i ? old + "JSON_OBJECT".Length : 0; k < masked[j].Length; k++)
+                {
+                    if (masked[j][k] == '(')
+                    {
+                        depth++;
+                    }
+                    else if (masked[j][k] == ')' && --depth == 0)
+                    {
+                        end = j;
+                        break;
+                    }
+                }
+            }
+            var delta = old - column;
+            if (end < 0 || delta <= 0 || Enumerable.Range(i + 1, end - i).Any(j => lines[j].Trim().Length > 0 && LineText.Indent(lines[j]) < delta))
+            {
+                i++;
+                continue;
+            }
+            var body = lines.Skip(i + 1).Take(end - i).Select(l => l.Trim().Length > 0 ? l[delta..] : l).ToList();
+            var replacement = new List<string> { lines[i][..old].TrimEnd(), new string(' ', column) + lines[i][old..].Trim() };
+            replacement.AddRange(body);
+            lines.RemoveRange(i, end - i + 1);
+            lines.InsertRange(i, replacement);
+            masked = PlsqlLexer.Mask(string.Join('\n', lines)).Split('\n');
+            i += 2;
+        }
+        return string.Join('\n', lines);
+    }
+
+    /// <summary>FORMAT JSON on a line of its own goes to the end of the value it formats (<c>'k' VALUE x FORMAT JSON,</c>) when that line stays within 120.</summary>
+    public static string JoinFormatJson(string text)
+    {
+        var (lines, masked) = LineText.Split(text);
+        var output = new List<string>(lines.Length);
+        var maskedOut = new List<string>(lines.Length);
+        for (var n = 0; n < lines.Length; n++)
+        {
+            var l = lines[n];
+            var m = masked[n];
+            var f = FormatJsonLine().Match(m);
+            if (f.Success && output.Count > 0 && maskedOut[^1].Trim().Length > 0 && maskedOut[^1].TrimEnd().Length == output[^1].TrimEnd().Length)
+            {
+                var restStart = f.Length - f.Groups["rest"].Length;
+                var rest = l[restStart..].Trim();
+                var fj = l[f.Groups["indent"].Length..restStart].Trim();
+                var joined = output[^1].TrimEnd().Length + 1 + fj.Length + (rest.StartsWith(',') ? rest.Length : 0);
+                if (joined <= 120)
+                {
+                    if (rest.StartsWith(','))
+                    {
+                        output[^1] = output[^1].TrimEnd() + " " + fj + rest;
+                        maskedOut[^1] = output[^1];
+                        continue;
+                    }
+                    output[^1] = output[^1].TrimEnd() + " " + fj;
+                    maskedOut[^1] = output[^1];
+                    if (rest.Length == 0) continue;
+                    l = f.Groups["indent"].Value + rest;
+                    m = l;
+                }
+            }
+            output.Add(l);
+            maskedOut.Add(m);
+        }
+        return string.Join('\n', output);
+    }
+
     private static string Squash(string text, string masked, int start, int end) =>
         LineText.Squash(text[start..end], masked[start..end]);
 

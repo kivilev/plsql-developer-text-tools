@@ -20,9 +20,9 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
       RETURN;
     END IF;
     IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
-      vCode    := 400;
+      vCode := 400;
       vMessage := 'gotova ef gof cafoci';
-      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
       put_api.hez_request(iRequestId => iNelurecut,
                           iUserId    => iUserId,
                           iRerisuId  => vRerisuId,
@@ -45,10 +45,8 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
   EXCEPTION
     WHEN OTHERS THEN
       put_const.g_err_message := SUBSTR(SQLERRM, 1, 4000);
-      put_const.g_kucopubag   := SUBSTR(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE,
-                                        1,
-                                        4000);
-      vCode    := 400;
+      put_const.g_kucopubag := SUBSTR(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE, 1, 4000);
+      vCode := 400;
       vMessage := 'bi eruruzih napom zizasuhe.';
       put_util.ConnectToRavir(put_const.g_sazi_ravir);
       outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
@@ -83,9 +81,9 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
       RETURN;
     END IF;
     IF NOT put_util.fazRerisuKakiha(iRerisuId => vRerisuId) THEN
-      vCode    := 400;
+      vCode := 400;
       vMessage := 'gotova ef gof cafoci';
-      outData  := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
+      outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);
       put_api.hez_request(iRequestId => iNelurecut,
                           iUserId    => iUserId,
                           iRerisuId  => vRerisuId,
@@ -112,11 +110,9 @@ CREATE OR REPLACE PACKAGE BODY re_api IS
   EXCEPTION
     WHEN OTHERS THEN
       put_const.g_err_message := SUBSTR(SQLERRM, 1, 4000);
-      put_const.g_kucopubag   := SUBSTR(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE,
-                                        1,
-                                        4000);
+      put_const.g_kucopubag := SUBSTR(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE, 1, 4000);
       ROLLBACK TO nokPA;
-      vCode    := 400;
+      vCode := 400;
       vMessage := 'bi eruruzih napom zizasuhe.';
       put_util.ConnectToRavir(put_const.g_sazi_ravir);
       outData := put_util.errorToDula(iCode => vCode, iMessage => vMessage);

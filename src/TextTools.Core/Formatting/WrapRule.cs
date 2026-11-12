@@ -42,8 +42,43 @@ internal static partial class WrapRule
     [GeneratedRegex(@"^(?<lead>\s*(?:[A-Za-z_][\w$#.()]*\s*:=\s*|" + Ident + @"\s*=>\s*|(?:RETURN|IF|ELSIF|WHEN)\s+)?)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
     private static partial Regex ConcatLead();
 
+    [GeneratedRegex(@"^(?<indent>\s*)(?:(?<keyword>IF|ELSIF|WHILE|WHEN|EXIT\s+WHEN|RETURN)\s+|[A-Za-z_][\w$#.()]*\s*:=\s*)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex LogicalHead();
+
+    [GeneratedRegex(@"\s(?:THEN|LOOP)\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex Closer();
+
+    [GeneratedRegex(@"^(?:NULL|TRUE|FALSE|[-+]?\d+(?:\.\d+)?|'(?:[^']|'')*')$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex Literal();
+
+    // A positional argument without an expression in it: a (dotted) name, a number or a literal, or a call of such arguments.
+    private const string SimplePiece = @"(?:[-+]?[\w$#.]+|'[^']*')";
+
+    [GeneratedRegex(@"^(?:" + SimplePiece + @"|[\w$#.]+\((?:" + SimplePiece + @"(?:, " + SimplePiece + @")*)?\))$", RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex SimpleArgument();
+
+    [GeneratedRegex(@"\bIN\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex InBefore();
+
+    [GeneratedRegex(@"(?:[-+*/(,=<>|]|\b(?:AND|OR|NOT|THEN|ELSE|WHEN|RETURN|IN))$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex OperatorBefore();
+
+    [GeneratedRegex(@"^\s*" + Ident + @"\s*=>", RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex NamedStart();
+
     /// <summary>What the pass may do (the settings behind it).</summary>
-    internal readonly record struct Choices(int Margin, bool DecodeInPairs, bool BreakBetween, bool AlignNamedArguments);
+    /// <param name="Margin">The right margin.</param>
+    /// <param name="DecodeInPairs">A long DECODE breaks in pairs.</param>
+    /// <param name="BreakBetween">A long BETWEEN breaks before its AND.</param>
+    /// <param name="AlignNamedArguments">The <c>=&gt;</c> of a broken call are aligned.</param>
+    /// <param name="ConditionPerLine">A long condition: one per line, AND / OR first; THEN / LOOP on its own line.</param>
+    /// <param name="FillLiterals">A call of literals only is filled up to the margin.</param>
+    /// <param name="WrapInLists">A long <c>IN (...)</c> list breaks like an argument list.</param>
+    /// <param name="KeepShortArguments">Short positional arguments stay on the line up to 120; a short tail of a broken call stays together.</param>
+    /// <param name="WrapArithmetic">A long <c>a + b - c</c> breaks after its operators.</param>
+    internal readonly record struct Choices(
+        int Margin, bool DecodeInPairs, bool BreakBetween, bool AlignNamedArguments,
+        bool ConditionPerLine = false, bool FillLiterals = false, bool WrapInLists = false, bool KeepShortArguments = false, bool WrapArithmetic = false);
 
     public static string Apply(string text, Choices choices)
     {
@@ -133,7 +168,12 @@ internal static partial class WrapRule
             }
         }
 
-        if (splitters && effective > margin && IfStart().IsMatch(masked) && WrapLogical(line, masked, margin) is { } logical)
+        if (choices.ConditionPerLine && splitters && effective > margin && LogicalHead().IsMatch(masked) && WrapConditions(line, masked) is { } conditions)
+        {
+            // One condition per line: a condition is split further only past the hard limit.
+            return Expand(conditions, line, Hard, false, choices, onlyLong: true);
+        }
+        if (!choices.ConditionPerLine && splitters && effective > margin && IfStart().IsMatch(masked) && WrapLogical(line, masked, margin) is { } logical)
         {
             return Expand(logical, line, margin, false, choices, onlyLong: true);
         }
@@ -149,18 +189,23 @@ internal static partial class WrapRule
         {
             return WrapConcat(line, masked, margin) is { } concat ? Expand(concat, line, Recur(margin), false, choices, onlyLong: true) : [line];
         }
+        if (choices.WrapArithmetic && splitters && effective > margin && WrapArith(line, masked) is { } arith)
+        {
+            return Expand(arith, line, Recur(margin), false, choices, onlyLong: true);
+        }
 
         var candidates = new List<(int Open, int Close, string Separator)>();
         foreach (var (open, close) in pairs.OrderBy(p => p.Open))
         {
             if (candidates.Any(c => c.Open < open && close < c.Close)) continue;
             var isCall = open > 0 && PlsqlLexer.IsIdentifierPart(masked[open - 1]);
-            if (isCall) candidates.Add((open, close, ","));
-            else if (LogicalCuts(masked, open + 1, close).Count > 0) candidates.Add((open, close, ""));
+            var inList = choices.WrapInLists && InBefore().IsMatch(masked[..open]);
+            if (isCall || inList) candidates.Add((open, close, ","));
+            else if (GroupCuts(masked, open + 1, close, choices).Count > 0) candidates.Add((open, close, ""));
         }
         foreach (var (open, close, separator) in candidates)
         {
-            var cuts = separator.Length > 0 ? LineText.SplitTop(masked, open + 1, close) : LogicalCuts(masked, open + 1, close);
+            var cuts = separator.Length > 0 ? LineText.SplitTop(masked, open + 1, close) : GroupCuts(masked, open + 1, close, choices);
             if (cuts.Count == 0) continue;
             var first = open + 1;
             while (first < close && line[first] == ' ') first++;
@@ -178,10 +223,30 @@ internal static partial class WrapRule
             var tail = line[close..];
             var column = first;
             var function = WordBeforeParenthesis().Match(masked[..open]);
-            if (choices.DecodeInPairs && separator.Length > 0 && function.Success
-                && function.Groups["name"].Value.Equals("DECODE", StringComparison.OrdinalIgnoreCase) && parts.Count >= 3)
+            var isDecode = function.Success && function.Groups["name"].Value.Equals("DECODE", StringComparison.OrdinalIgnoreCase);
+            var isInList = InBefore().IsMatch(masked[..open]);
+            var allLiterals = parts.TrueForAll(p => Literal().IsMatch(p));
+            // SUBSTR(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE, 1, 4000): short positional arguments stay on the line up to 120.
+            if (choices.KeepShortArguments && separator.Length > 0 && effective <= Hard && !isInList && !allLiterals
+                && parts.TrueForAll(p => SimpleArgument().IsMatch(p)))
+            {
+                continue;
+            }
+            if (choices.FillLiterals && separator.Length > 0 && allLiterals && !isDecode)
+            {
+                return FillArguments(head, column, parts, tail, Math.Min(margin, choices.Margin));
+            }
+            if (choices.DecodeInPairs && separator.Length > 0 && isDecode && parts.Count >= 3)
             {
                 parts = DecodePairs(parts, column, margin);
+            }
+            else if (choices.KeepShortArguments && separator.Length > 0 && parts.Count >= 3 && !parts.Exists(p => NamedStart().IsMatch(p)))
+            {
+                // SUBSTR(long expression, 1, 2000): the short arguments after a long one stay together on one line.
+                var k = parts.Count;
+                while (k > 1 && SimpleArgument().IsMatch(parts[k - 1])) k--;
+                var joined = string.Join(", ", parts.Skip(k));
+                if (parts.Count - k >= 2 && column + joined.Length + tail.TrimEnd().Length <= margin) parts = [.. parts.Take(k), joined];
             }
             if (choices.AlignNamedArguments && separator.Length > 0)
             {
@@ -203,7 +268,11 @@ internal static partial class WrapRule
         }
 
         if (effective <= margin) return [line];
-        if (splitters && WrapLogical(line, masked, margin) is { } wrappedLogical)
+        if (choices.ConditionPerLine)
+        {
+            if (splitters && WrapConditions(line, masked) is { } perLine) return Expand(perLine, line, Hard, false, choices, onlyLong: true);
+        }
+        else if (splitters && WrapLogical(line, masked, margin) is { } wrappedLogical)
         {
             return Expand(wrappedLogical, line, margin, false, choices, onlyLong: true);
         }
@@ -211,7 +280,121 @@ internal static partial class WrapRule
         {
             return Expand(wrappedConcat, line, Recur(margin), false, choices, onlyLong: true);
         }
+        if (choices.WrapArithmetic && splitters && WrapArith(line, masked) is { } wrappedArith)
+        {
+            return Expand(wrappedArith, line, Hard, false, choices, onlyLong: true);
+        }
         return [line];
+    }
+
+    /// <summary>A literal-only argument list filled up to the margin, the continuation under the first argument.</summary>
+    private static List<string> FillArguments(string head, int column, List<string> parts, string tail, int margin)
+    {
+        var rows = new List<string>();
+        var current = new System.Text.StringBuilder(head);
+        for (var k = 0; k < parts.Count; k++)
+        {
+            var piece = parts[k] + (k == parts.Count - 1 ? tail : ",");
+            if (k == 0)
+            {
+                current.Append(piece);
+            }
+            else if (current.Length + 1 + piece.TrimEnd().Length > margin)
+            {
+                rows.Add(current.ToString());
+                current.Clear().Append(' ', column).Append(piece);
+            }
+            else
+            {
+                current.Append(' ').Append(piece);
+            }
+        }
+        rows.Add(current.ToString());
+        return rows;
+    }
+
+    /// <summary>The cuts of a parenthesised group: AND / OR (before them with one condition per line, else after), then + / -.</summary>
+    private static List<int> GroupCuts(string masked, int start, int end, Choices choices)
+    {
+        var cuts = LogicalCuts(masked, start, end, choices.ConditionPerLine);
+        return cuts.Count > 0 || !choices.WrapArithmetic ? cuts : ArithCuts(masked, start, end);
+    }
+
+    /// <summary>
+    /// IF a AND b ... THEN, RETURN a OR b, x := a AND b: one condition per line, AND / OR first, the continuation under the
+    /// first condition; THEN / LOOP of a broken IF, ELSIF, WHILE, WHEN goes on its own line under the keyword.
+    /// </summary>
+    private static List<string>? WrapConditions(string line, string masked)
+    {
+        var head = LogicalHead().Match(masked);
+        if (!head.Success) return null;
+        var start = head.Length;
+        var end = masked.TrimEnd().Length;
+        if (start >= end) return null;
+        var closer = head.Groups["keyword"].Success ? Closer().Match(masked[..end]) : Match.Empty;
+        var stop = closer.Success ? closer.Index : end;
+        if (stop <= start) return null;
+        var cuts = LogicalCuts(masked, start, stop, before: true);
+        if (cuts.Count == 0) return null;
+        var pieces = new List<string>();
+        var previous = start;
+        foreach (var c in cuts)
+        {
+            pieces.Add(line[previous..c].Trim());
+            previous = c;
+        }
+        pieces.Add(line[previous..stop].Trim());
+        var output = new List<string> { line[..start].TrimEnd() + " " + pieces[0] };
+        output.AddRange(pieces.Skip(1).Select(p => new string(' ', start) + p));
+        if (closer.Success) output.Add(head.Groups["indent"].Value + line[closer.Index..end].Trim());
+        else output[^1] += line[stop..].TrimEnd();
+        return output;
+    }
+
+    /// <summary>Positions just after each binary + / - outside parentheses in <c>masked[start..end)</c>.</summary>
+    private static List<int> ArithCuts(string masked, int start, int end)
+    {
+        var depth = 0;
+        var cuts = new List<int>();
+        for (var i = start; i < end; i++)
+        {
+            var c = masked[i];
+            if (c == '(')
+            {
+                depth++;
+            }
+            else if (c == ')')
+            {
+                depth--;
+            }
+            else if (depth == 0 && c is '+' or '-' && i > 0 && masked[i - 1] == ' ' && i + 1 < masked.Length && masked[i + 1] == ' ')
+            {
+                var before = masked[start..i].TrimEnd();
+                if (before.Length > 0 && !OperatorBefore().IsMatch(before)) cuts.Add(i + 1);
+            }
+        }
+        return cuts;
+    }
+
+    /// <summary>a + b - c too long: a break after + / -, the continuation under the first operand.</summary>
+    private static List<string>? WrapArith(string line, string masked)
+    {
+        var lead = ConcatLead().Match(masked);
+        var start = lead.Success ? lead.Groups["lead"].Length : 0;
+        var cuts = ArithCuts(masked, start, masked.Length);
+        if (cuts.Count == 0) return null;
+        var pieces = new List<string>();
+        var previous = start;
+        foreach (var c in cuts)
+        {
+            pieces.Add(line[previous..c].Trim());
+            previous = c;
+        }
+        pieces.Add(line[previous..].Trim());
+        if (pieces.Exists(p => p.Length == 0)) return null;
+        var output = new List<string> { line[..start] + pieces[0] };
+        output.AddRange(pieces.Skip(1).Select(p => new string(' ', start) + p));
+        return output;
     }
 
     /// <summary>DECODE(expr, c1, v1, c2, v2, default): the expression, then pairs "condition, value" on one line when they fit, else each on its own.</summary>
@@ -230,8 +413,8 @@ internal static partial class WrapRule
         return merged;
     }
 
-    /// <summary>Positions just after each AND / OR at depth 0 in <c>masked[start..end)</c> (the AND of BETWEEN is not a cut).</summary>
-    private static List<int> LogicalCuts(string masked, int start, int end)
+    /// <summary>Positions of each AND / OR at depth 0 in <c>masked[start..end)</c> (the AND of BETWEEN is not a cut): just after it, or just before it.</summary>
+    private static List<int> LogicalCuts(string masked, int start, int end, bool before = false)
     {
         var depth = 0;
         var cuts = new List<int>();
@@ -251,7 +434,7 @@ internal static partial class WrapRule
             {
                 if (string.Equals(token, "BETWEEN", StringComparison.Ordinal)) between = true;
                 else if (string.Equals(token, "AND", StringComparison.Ordinal) && between) between = false;
-                else cuts.Add(start + m.Index + m.Length);
+                else cuts.Add(start + m.Index + (before ? 0 : m.Length));
             }
         }
         return cuts;

@@ -5,10 +5,10 @@ PROCEDURE close_account(i_branch  IN VARCHAR2,
   v_acc account%ROWTYPE;
 BEGIN
   v_acc.branch := i_branch;
-  v_acc.id     := i_acc_id;
+  v_acc.id := i_acc_id;
   account_data.get_account_data(io_acc => v_acc);
   IF v_acc.state <> account_const.c_state_active THEN
-    o_code    := cbs_const.c_unprocessable;
+    o_code := cbs_const.c_unprocessable;
     o_message := 'Account is not active';
     RETURN;
   END IF;
@@ -16,7 +16,7 @@ BEGIN
   o_code := cbs_const.c_ok;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    o_code    := cbs_const.c_not_found;
+    o_code := cbs_const.c_not_found;
     o_message := 'Account not found';
 END close_account;
 -----
@@ -27,10 +27,10 @@ PROCEDURE close_account(i_branch  IN VARCHAR2,
   v_acc account%ROWTYPE;
 BEGIN
   v_acc.branch := i_branch;
-  v_acc.id     := i_acc_id;
+  v_acc.id := i_acc_id;
   account_data.get_account_data(io_acc => v_acc);
   IF v_acc.state <> account_const.c_state_active THEN
-    o_code    := cbs_const.c_unprocessable;
+    o_code := cbs_const.c_unprocessable;
     o_message := 'Account is not active';
     RETURN;
   END IF;
@@ -38,6 +38,6 @@ BEGIN
   o_code := cbs_const.c_ok;
 EXCEPTION
   WHEN NO_DATA_FOUND THEN
-    o_code    := cbs_const.c_not_found;
+    o_code := cbs_const.c_not_found;
     o_message := 'Account not found';
 END close_account;

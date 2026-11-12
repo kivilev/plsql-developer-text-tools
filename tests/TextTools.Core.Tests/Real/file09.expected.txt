@@ -8,7 +8,7 @@ CREATE OR REPLACE PACKAGE BODY luka_util IS
       FROM (SELECT a.*,
                    ROW_NUMBER() OVER (PARTITION BY branch, client, cid_raz, currency
                                           ORDER BY id_order) AS ma
-              FROM ACCOUNT a
+              FROM account a
              WHERE a.branch   = iBranch
                AND a.client   = iClient
                AND a.cid_raz  LIKE '202%'
@@ -29,7 +29,7 @@ CREATE OR REPLACE PACKAGE BODY luka_util IS
       FROM (SELECT a.*,
                    ROW_NUMBER() OVER (PARTITION BY branch, client, cid_raz, currency
                                           ORDER BY id_order) AS ma
-              FROM ACCOUNT a
+              FROM account a
              WHERE a.branch   = iBranch
                AND a.client   = iClient
                AND a.cid_raz  = '16401'
@@ -60,22 +60,22 @@ CREATE OR REPLACE PACKAGE BODY luka_util IS
                             oCode    OUT    NUMBER,
                             oMessage OUT    VARCHAR2) IS
   BEGIN
-    ioCuv.Cuv_Number        := JSON_VALUE(iDula, '$.sotimavifofuholeh');
-    ioCuv.Branch            := JSON_VALUE(iDula, '$.vedeso');
-    ioCuv.Client_Id         := JSON_VALUE(iDula, '$.revinafe');
-    ioCuv.Account_Id        := JSON_VALUE(iDula, '$.kizagulos');
-    ioCuv.Mecirul_Code      := JSON_VALUE(iDula, '$.hirunalubac');
-    ioCuv.Ga_Fukula_Name    := JSON_VALUE(iDula, '$.dosotafufatu');
-    ioCuv.Ga_first_Name     := JSON_VALUE(iDula, '$.gokicivakaz');
+    ioCuv.Cuv_Number := JSON_VALUE(iDula, '$.sotimavifofuholeh');
+    ioCuv.Branch := JSON_VALUE(iDula, '$.vedeso');
+    ioCuv.Client_Id := JSON_VALUE(iDula, '$.revinafe');
+    ioCuv.Account_Id := JSON_VALUE(iDula, '$.kizagulos');
+    ioCuv.Mecirul_Code := JSON_VALUE(iDula, '$.hirunalubac');
+    ioCuv.Ga_Fukula_Name := JSON_VALUE(iDula, '$.dosotafufatu');
+    ioCuv.Ga_first_Name := JSON_VALUE(iDula, '$.gokicivakaz');
     ioCuv.Card_Get_Hesod_Id := JSON_VALUE(iDula, '$.fikahagavapeca');
-    ioCuv.Hetaz             := JSON_VALUE(iDula, '$.gafor');
-    ioCuv.Hetaz_Type        := JSON_VALUE(iDula, '$.mekelemiz');
-    ioCuv.Magesucav_Amount  := JSON_VALUE(iDula, '$.masovemonubahod');
+    ioCuv.Hetaz := JSON_VALUE(iDula, '$.gafor');
+    ioCuv.Hetaz_Type := JSON_VALUE(iDula, '$.mekelemiz');
+    ioCuv.Magesucav_Amount := JSON_VALUE(iDula, '$.masovemonubahod');
     --
     oCode := 200;
   EXCEPTION
     WHEN OTHERS THEN
-      oCode    := 400;
+      oCode := 400;
       oMessage := 'livet fe alolicovih pone uv tedalivet.(' ||
                   SUBSTR(SQLERRM, 1, 150) || ')';
   END createDulaToMud;
@@ -97,13 +97,13 @@ CREATE OR REPLACE PACKAGE BODY luka_util IS
                                  oCode      OUT NUMBER,
                                  oMessage   OUT VARCHAR2) IS
   BEGIN
-    iCuvId     := JSON_VALUE(iDula, '$.sotimavifofuholeh');
+    iCuvId := JSON_VALUE(iDula, '$.sotimavifofuholeh');
     iRequestId := JSON_VALUE(iDula, '$.sifazelemurifeka');
     --
     oCode := 200;
   EXCEPTION
     WHEN OTHERS THEN
-      oCode    := 400;
+      oCode := 400;
       oMessage := 'livet fe alolicovih pone uv tedalivet.(' ||
                   SUBSTR(SQLERRM, 1, 150) || ')';
   END checkStatusDulaToMud;

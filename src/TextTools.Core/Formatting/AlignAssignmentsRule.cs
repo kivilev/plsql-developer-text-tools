@@ -50,4 +50,17 @@ internal static partial class AlignAssignmentsRule
         }
         return string.Join('\n', output);
     }
+
+    /// <summary><c>x := value</c>: one space on each side of <c>:=</c>, never aligned with the neighbouring lines.</summary>
+    public static string SingleSpace(string text)
+    {
+        var lines = text.Split('\n');
+        var masked = PlsqlLexer.Mask(text).Split('\n');
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var m = Assignment().Match(masked[i]);
+            if (m.Success) lines[i] = m.Groups["indent"].Value + m.Groups["name"].Value + " := " + lines[i][m.Groups["rest"].Index..];
+        }
+        return string.Join('\n', lines);
+    }
 }

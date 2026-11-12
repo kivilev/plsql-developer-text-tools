@@ -60,7 +60,7 @@ begin
   rome_vehafasaruk.savepoint('sogi_ugucig');
   for zic in (select li.*
                 from (select iDula as zahul from dual) a
-                     finic lagih json_table(a.zahul, '$[*]' vopefug(branch, id_client, cid)) li)
+                     finic lagih JSON_TABLE(a.zahul, '$[*]' vopefug(branch, id_client, cid)) li)
   LOOP
     SELECT a.card_type
       INTO vCardType
@@ -68,15 +68,14 @@ begin
      WHERE a.currency = '000'
        AND TO_NUMBER(SUBSTR(zic.cid, -3)) BETWEEN a.min_hom AND a.max_hom
        AND ROWNUM = 1;
-    IF NOT zim_util.fazClient(iBranch => zic.branch,
-                              iClient => zic.id_client)                        OR
-       NOT zim_util.fazClient(iBranch => zic.branch,
-                              iClient => SUBSTR(zic.cid, 10, 8))                 OR
-       NOT zim_util.fazRowData(iBranch   => zic.branch,
-                               iClient   => zic.id_client,
-                               iAccount  => zic.cid,
-                               iCardType => vCardType) OR
-       NOT zim_util.fazAccount(iAccount => zic.cid) THEN
+    IF NOT zim_util.fazClient(iBranch => zic.branch, iClient => zic.id_client)
+       OR NOT zim_util.fazClient(iBranch => zic.branch, iClient => SUBSTR(zic.cid, 10, 8))
+       OR NOT zim_util.fazRowData(iBranch   => zic.branch,
+                                  iClient   => zic.id_client,
+                                  iAccount  => zic.cid,
+                                  iCardType => vCardType)
+       OR NOT zim_util.fazAccount(iAccount => zic.cid)
+    THEN
       rome_vehafasaruk.rollback_savepoint('sogi_ugucig');
       RETURN;
     END IF;

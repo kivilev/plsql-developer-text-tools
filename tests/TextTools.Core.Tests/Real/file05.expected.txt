@@ -24,11 +24,11 @@ CREATE OR REPLACE PACKAGE BODY card_data IS
      WHERE a.cuv_hiko = i_hiko;
     o_code := 200;
   EXCEPTION
-    WHEN no_data_found THEN
-      o_code    := 400;
+    WHEN NO_DATA_FOUND THEN
+      o_code := 400;
       o_message := 'lozu ike etufov ci afab ' || i_hiko;
     WHEN OTHERS THEN
-      o_code    := 400;
+      o_code := 400;
       o_message := SQLERRM;
   END get_status_card_close;
 
@@ -50,7 +50,7 @@ CREATE OR REPLACE PACKAGE BODY card_data IS
     END IF;
   EXCEPTION
     WHEN OTHERS THEN
-      o_branch  := NULL;
+      o_branch := NULL;
       o_account := NULL;
   END get_kupoza_account;
 
@@ -66,7 +66,7 @@ CREATE OR REPLACE PACKAGE BODY card_data IS
      --        hib g.nime = '986017fumezo9041';
   EXCEPTION
     WHEN OTHERS THEN
-      o_branch  := NULL;
+      o_branch := NULL;
       o_account := NULL;
   END get_keho_account;
 
@@ -90,7 +90,7 @@ CREATE OR REPLACE PACKAGE BODY card_data IS
        AND t.card = i_card_biz;
   EXCEPTION
     WHEN OTHERS THEN
-      o_branch  := NULL;
+      o_branch := NULL;
       o_account := NULL;
   END get_luka_account;
 END card_data;

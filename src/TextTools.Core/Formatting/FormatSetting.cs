@@ -40,15 +40,22 @@ public static class FormatSettings
 
         new("builtinFunctionsUpper", "case", SettingKind.Bool, 1, Sources: Src(("ICBS", "R04"))),
         new("attributesUpper", "case", SettingKind.Bool, 1, Sources: Src(("ICBS", "R06"))),
+        new("lowerCapitalNames", "case", SettingKind.Bool, 1),
+        new("upperContextKeywords", "case", SettingKind.Bool, 1),
 
         new("endWithName", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R07"))),
-        new("alignAssignments", "code", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignAssignmentGroups"), ("SQLDev", "alignAssignments"), ("DataGrip", "Align assignments"), ("ICBS", "R08"))),
+        new("assignmentSingleSpace", "code", SettingKind.Bool, 1),
+        new("alignAssignments", "code", SettingKind.Bool, 0, Sources: Src(("PLSQLDev", "AlignAssignmentGroups"), ("SQLDev", "alignAssignments"), ("DataGrip", "Align assignments"), ("ICBS", "R08"))),
         new("executeImmediateLiteralOnOwnLine", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R21"))),
         new("alignDeclarations", "code", SettingKind.Bool, 1, Sources: Src(("PLSQLDev", "AlignDeclarationGroups"), ("SQLDev", "alignDeclarations"))),
         new("indentComments", "code", SettingKind.Bool, 1),
         new("headerTailsOnOneLine", "code", SettingKind.Bool, 1, Sources: Src(("ICBS", "R18"))),
         new("tightParentheses", "code", SettingKind.Bool, 1),
         new("spaceAfterComma", "code", SettingKind.Bool, 1, Sources: Src(("DataGrip", "Spaces > Other > After comma"))),
+        new("tightUnaryMinus", "code", SettingKind.Bool, 1),
+        new("oneSpaceBeforeComment", "code", SettingKind.Bool, 1),
+        new("caseLayout", "code", SettingKind.Bool, 1),
+        new("typeFieldsLayout", "code", SettingKind.Bool, 1),
 
         new("insertLayout", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R13"))),
         new("selectColumnsOnePerLine", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R15"))),
@@ -57,6 +64,11 @@ public static class FormatSettings
         new("joinOnAlignment", "sql", SettingKind.Bool, 1, Sources: Src(("ICBS", "R12"))),
         new("subqueryLayout", "sql", SettingKind.Bool, 1),
         new("alignAliases", "sql", SettingKind.Bool, 1, Sources: Src(("SQLDev", "alignColumnAliases"), ("DataGrip", "Align column aliases"))),
+        new("selectListFill", "sql", SettingKind.Bool, 1),
+        new("tableAliasSingleSpace", "sql", SettingKind.Bool, 1),
+        new("bulkCollectOnOneLine", "sql", SettingKind.Bool, 1),
+        new("jsonArrayaggLayout", "sql", SettingKind.Bool, 1),
+        new("jsonTableLayout", "sql", SettingKind.Bool, 1),
 
         new("wrapLongLines", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R02"))),
         new("wrapDecodeInPairs", "wrapping", SettingKind.Bool, 1),
@@ -64,10 +76,16 @@ public static class FormatSettings
         new("alignNamedArguments", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R09"))),
         new("joinIfConditions", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R11"))),
         new("shortParenGroupOnOneLine", "wrapping", SettingKind.Bool, 1, Sources: Src(("ICBS", "R14"))),
+        new("conditionPerLine", "wrapping", SettingKind.Bool, 1),
+        new("fillLiteralArguments", "wrapping", SettingKind.Bool, 1),
+        new("wrapInLists", "wrapping", SettingKind.Bool, 1),
+        new("keepShortArguments", "wrapping", SettingKind.Bool, 1),
+        new("wrapArithmetic", "wrapping", SettingKind.Bool, 1),
 
         new("blankLineBeforeSubprograms", "blank", SettingKind.Bool, 1, Sources: Src(("ICBS", "R19"))),
         new("blankLineAfterPackageHeader", "blank", SettingKind.Bool, 0),
         new("noBlankLineBeforePackageEnd", "blank", SettingKind.Bool, 1, Sources: Src(("ICBS", "R20"))),
+        new("noBlankAtBlockEdges", "blank", SettingKind.Bool, 1),
         new("trimTrailingSpaces", "blank", SettingKind.Bool, 1),
     ];
 
