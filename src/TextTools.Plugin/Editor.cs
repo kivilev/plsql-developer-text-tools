@@ -113,14 +113,15 @@ internal static class Editor
     }
 
     /// <summary>The selection (or the statement under the cursor) with constants resolved, as Copy SQL does it.</summary>
-    private static (CopyResult Result, DatabaseSpecs? Database) Resolve(Func<SqlRequest, ISpecSource?, CopyResult> build)
+    private static (CopyResult Result, DatabaseSpecs? Database, bool SessionFailed) Resolve(Func<SqlRequest, ISpecSource?, CopyResult> build)
     {
         var text = Ide.GetText();
         var selected = Ide.GetSelectedText();
         int x = Ide.GetCursorX(), y = Ide.GetCursorY();
         var start = selected.Length > 0 ? SelectionLocator.Locate(text, selected, x, y) : 0;
-        var database = DatabaseSpecs.IfConnected();
-        return (build(new SqlRequest(text, start, selected.Length, SelectionLocator.ToOffset(text, x, y)), database), database);
+        using var session = WindowSession.Open();
+        var database = DatabaseSpecs.IfConnected(session);
+        return (build(new SqlRequest(text, start, selected.Length, SelectionLocator.ToOffset(text, x, y)), database), database, session.Failed);
     }
 
     /// <summary>
@@ -130,7 +131,7 @@ internal static class Editor
     /// </summary>
     private static void Plan(PlanCommand cmd)
     {
-        var (result, _) = Resolve(ConstantResolver.CopySql);
+        var (result, _, sessionFailed) = Resolve(ConstantResolver.CopySql);
         if (cmd.View == PlanView.IdeWindow)
         {
             if (!Ide.Connected)
@@ -138,8 +139,12 @@ internal static class Editor
                 Status("Explain Plan needs a database connection");
                 return;
             }
-            Ide.CreateWindow(5, result.Text, execute: !Ide.WindowIsRunning); // Plan Window
-            Status($"Explain Plan: {result.Summary}");
+            // A new window starts on the main connection: it gets the connection of this one before it executes.
+            var connection = Ide.OtherWindowConnection();
+            var execute = !Ide.WindowIsRunning;
+            Ide.CreateWindow(5, result.Text, execute: execute && connection < 0); // Plan Window
+            if (connection >= 0 && Ide.SetWindowConnection(connection) && execute) Ide.PerformExecute();
+            Status($"Explain Plan: {result.Summary}{(sessionFailed ? $" ({WindowSession.FailureText})" : "")}");
             return;
         }
         Status(PlanWindow.Show(result.Text) ? $"Extended Explain Plan: {result.Summary}" : "Extended Explain Plan: the IDE could not open the window");
@@ -148,13 +153,13 @@ internal static class Editor
     /// <summary>Puts the result for the selection (or the statement under the cursor) on the clipboard; the editor is not changed.</summary>
     private static void Copy(CopyCommand cmd)
     {
-        var (result, database) = Resolve(cmd.Build);
+        var (result, database, sessionFailed) = Resolve(cmd.Build);
         if (!Clipboard.SetText(Ide.AppHandle, result.Text))
         {
             Status("the clipboard is busy, try again");
             return;
         }
-        Status($"SQL copied: {result.Summary}{DatabaseNote(database, result)}");
+        Status($"SQL copied: {result.Summary}{(sessionFailed ? $" ({WindowSession.FailureText})" : DatabaseNote(database, result))}");
     }
 
     /// <summary>"(not connected ...)" when constants became binds offline; the time of dictionary queries when connected.</summary>
@@ -170,9 +175,9 @@ internal static class Editor
     }
 
     /// <summary>
-    /// Database time when connected (SYSTIMESTAMP), otherwise the PC clock. The query runs in the main IDE session,
-    /// so it is skipped while the current window is executing (it would wait for the user's statement), and any
-    /// failure falls back to the PC clock instead of an error.
+    /// Database time when connected (SYSTIMESTAMP), otherwise the PC clock. The query runs in the session of the window's
+    /// connection, so it is skipped while the current window is executing (it would wait for the user's statement), and
+    /// any failure falls back to the PC clock instead of an error.
     /// </summary>
     private static (DateTimeOffset Now, string Source) Now()
     {
@@ -180,7 +185,8 @@ internal static class Editor
         {
             if (Ide.Connected && !Ide.WindowIsRunning)
             {
-                var s = Ide.QuerySingleValue("select to_char(systimestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.FF6TZH:TZM') from dual");
+                using var session = WindowSession.Open();
+                var s = session.Failed ? null : Ide.QuerySingleValue("select to_char(systimestamp, 'YYYY-MM-DD\"T\"HH24:MI:SS.FF6TZH:TZM') from dual");
                 if (s is not null && DateTimeOffset.TryParseExact(s, "yyyy-MM-dd'T'HH:mm:ss.ffffffzzz",
                         CultureInfo.InvariantCulture, DateTimeStyles.None, out var db))
                 {

@@ -44,5 +44,6 @@
   "settings.exported": "Regras salvas no arquivo",
   "settings.imported": "Regras lidas do arquivo, configurações definidas: ",
   "settings.fileError": "Não foi possível ler ou gravar o arquivo",
-  "dialog.filter": "Regras de formatação"
+  "dialog.filter": "Regras de formatação",
+  "session.failed": "Não foi possível abrir uma sessão para a conexão da janela"
 }

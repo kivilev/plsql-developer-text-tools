@@ -4,8 +4,8 @@ using TextTools.Core.Sql;
 namespace TextTools.Plugin;
 
 /// <summary>
-/// Package specifications from the database the IDE is connected to: read-only dictionary queries in the main
-/// session, only while the current window is not executing (the query would wait for the user's statement).
+/// Package specifications from the database of the current window: read-only dictionary queries in the session the
+/// caller opened (<see cref="WindowSession"/>), only while the window is not executing (the query would wait for the user's statement).
 /// Lookups are plain indexed ones (see <see cref="SpecQuery"/>): the window's own package by the owner the IDE knows,
 /// another package of the user (USER_SOURCE), then through a synonym. Results (also "no such package") are cached for
 /// a few seconds only: the developer edits and recompiles packages all the time.
@@ -19,19 +19,20 @@ internal sealed class DatabaseSpecs : ISpecSource
     private static readonly Dictionary<string, (DateTime At, string? Spec)> Cache = new(StringComparer.Ordinal);
 
     private readonly (string Owner, string Name)? _window;
+    private readonly int _connection;
     private readonly Stopwatch _database = new();
 
-    private DatabaseSpecs((string Owner, string Name)? window) => _window = window;
+    private DatabaseSpecs((string Owner, string Name)? window, int connection) => (_window, _connection) = (window, connection);
 
     /// <summary>Time spent in dictionary queries during this copy.</summary>
     public TimeSpan DatabaseTime => _database.Elapsed;
 
     /// <summary>A source when the IDE is connected and idle, otherwise null (constants from the editor only).</summary>
-    public static DatabaseSpecs? IfConnected()
+    public static DatabaseSpecs? IfConnected(WindowSession session)
     {
-        if (!Ide.Connected || Ide.WindowIsRunning) return null;
+        if (session.Failed || !Ide.Connected || Ide.WindowIsRunning) return null;
         var window = Ide.GetWindowObject();
-        return new DatabaseSpecs(window is { } w ? (w.Owner, w.Name) : null);
+        return new DatabaseSpecs(window is { } w ? (w.Owner, w.Name) : null, session.Connection);
     }
 
     public string? PackageSpec(string? owner, string package)
@@ -41,7 +42,7 @@ internal sealed class DatabaseSpecs : ISpecSource
         {
             owner = w.Owner;
         }
-        var key = $"{owner}.{package}";
+        var key = $"{_connection}:{owner}.{package}"; // another user may see another package of this name, or none
         if (Cache.TryGetValue(key, out var hit) && DateTime.UtcNow - hit.At < CacheTime) return hit.Spec;
 
         var spec = Load(owner, package);

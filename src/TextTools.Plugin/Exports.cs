@@ -22,6 +22,7 @@ internal static unsafe partial class Exports
         try
         {
             _pluginId = id;
+            Ide.PluginId = id;
             PinModule();
             return NativeStrings.Get(Menu.ProductName);
         }
