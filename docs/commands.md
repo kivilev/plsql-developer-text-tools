@@ -93,6 +93,7 @@ Lines are separated by `⏎` in the examples below.
 |---|---|---|
 | Copy SQL with constants resolved | `declare ⏎   c_new constant varchar2(3) := 'NEW'; ⏎   l_cnt number; ⏎ begin ⏎   select count(*) into l_cnt from orders where status = c_new; ⏎ end;` | `select count(*) from orders where status = 'NEW' /*c_new*/` |
 | Explain Plan with constants | (statement under the cursor) | `the IDE Plan Window with this statement, constants resolved` |
+| Copy SELECT * FROM object | `begin ⏎   delete from hr.employees where id = 1; ⏎ end;` | `select * from hr.employees` |
 
 ## Format Tools
 

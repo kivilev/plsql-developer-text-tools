@@ -89,8 +89,9 @@ public class MenuTests
     {
         var captions = Build(1600).Select(x => x.Caption).ToList();
         var copy = captions.IndexOf("SUBITEM=Copy SQL with constants resolved");
-        Assert.Equal(["SUBITEM=Copy SQL with constants resolved", "SUBITEM=Explain Plan with constants"], captions.Skip(copy).Take(2));
-        Assert.DoesNotContain("SUBITEM=-", captions.Skip(copy).Take(2));
+        Assert.Equal(
+            ["SUBITEM=Copy SQL with constants resolved", "SUBITEM=Explain Plan with constants", "SUBITEM=Copy SELECT * FROM object"],
+            captions.Skip(copy).Take(3));
         Assert.DoesNotContain("SUBITEM=Extended Explain Plan", captions);
     }
 

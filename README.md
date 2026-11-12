@@ -55,6 +55,7 @@ Put the cursor in a query inside a package, procedure or block and get a stateme
 - variables and parameters become bind variables (`:i_customer`), `INTO`, `BULK COLLECT INTO` and `RETURNING ... INTO` are removed
 - constants are found like PL/SQL does: block, package body, specification; other packages are read from the database when connected
 - **Explain Plan with constants**: the same statement in the IDE's Plan Window
+- **Copy SELECT * FROM object**: `select * from hr.employees` for the table or view name under the cursor
 
 <p align="center"><img src="docs/assets/copy-sql.png" alt="" width="880"></p>
 <p align="center"><img src="docs/assets/copy-sql-binds.png" alt="" width="880"></p>

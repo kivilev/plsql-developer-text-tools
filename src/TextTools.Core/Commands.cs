@@ -74,6 +74,7 @@ public static class Commands
     [
         "Copy SQL with constants resolved",
         "Explain Plan with constants",
+        "Copy SELECT * FROM object",
         "List -> IN (...)",
         "Escape quotes ( ' -> '' )",
         "Unescape quotes ( '' -> ' )",
@@ -87,6 +88,8 @@ public static class Commands
     private const string CopySample =
         "declare\n  c_new constant varchar2(3) := 'NEW';\n  l_cnt number;\nbegin\n" +
         "  select count(*) into l_cnt from orders where status = c_new;\nend;";
+
+    private const string SelectFromSample = "begin\n  delete from hr.employees where id = 1;\nend;";
 
     public static readonly IReadOnlyList<Command> All =
     [
@@ -142,6 +145,8 @@ public static class Commands
 
         new PlanCommand(SqlMenu, "Copy", "Explain Plan with constants", PlanView.IdeWindow),
         // Extended Explain Plan (PlanView.Extended) is not in the menu until it is stable: see the draft PR.
+        new CopyCommand(SqlMenu, "Copy", "Copy SELECT * FROM object", (r, _) => SelectFrom.Build(r),
+            SelectFromSample, SelectFromSample.IndexOf("employees", StringComparison.Ordinal)),
 
         T(FormatMenu, "Rules", "Apply formatting rules", t => PostFormatter.Format(t, PostFormatter.Current),
             "PROCEDURE p IS\n  v_a t.a%type;\nBEGIN\n  v_long_name:=nvl(i_x,0);\n  v_b:=1;\nEND;"),
