@@ -316,7 +316,14 @@ internal static class Scenarios
 
     private static string ClipboardText()
     {
-        if (!OpenClipboard(0)) return "<clipboard busy>";
+        // Another process (a clipboard manager, the remote desktop) may hold the clipboard for a moment: retry like the plug-in does.
+        var opened = OpenClipboard(0);
+        for (var i = 1; i < 50 && !opened; i++)
+        {
+            Thread.Sleep(20);
+            opened = OpenClipboard(0);
+        }
+        if (!opened) return "<clipboard busy>";
         try
         {
             var handle = GetClipboardData(13 /* CF_UNICODETEXT */);
