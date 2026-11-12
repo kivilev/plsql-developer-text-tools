@@ -55,6 +55,7 @@
 - переменные и параметры становятся bind-переменными (`:i_customer`), `INTO`, `BULK COLLECT INTO` и `RETURNING ... INTO` убираются
 - константы ищутся как в PL/SQL: блок, тело пакета, спецификация; чужие пакеты читаются из базы, если есть соединение
 - **Explain Plan with constants**: тот же оператор в окне плана IDE
+- **Copy SELECT * FROM object**: `select * from hr.employees` для имени таблицы или представления под курсором
 
 <p align="center"><img src="../assets/copy-sql.png" alt="" width="880"></p>
 <p align="center"><img src="../assets/copy-sql-binds.png" alt="" width="880"></p>

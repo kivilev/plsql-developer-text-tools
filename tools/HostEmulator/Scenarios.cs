@@ -191,7 +191,7 @@ internal static class Scenarios
         Check(copyPopups.Select(p => p.ObjectType).Order(StringComparer.Ordinal).SequenceEqual(["PROGRAMWINDOW", "SQLWINDOW", "TESTWINDOW"], StringComparer.Ordinal)
               && copyPopups.All(p => string.Equals(p.Name, "Copy SQL with constants resolved", StringComparison.Ordinal)),
             "Copy SQL is a top-level item of the editor context menu in Program, SQL and Test windows");
-        Check(FakeIde.PopupItems.Count == 10 * 3
+        Check(FakeIde.PopupItems.Count == 11 * 3
               && FakeIde.PopupItems.All(p => host.Menu.TryGetValue("SUBITEM=" + p.Name, out var i) && i == p.Index)
               && FakeIde.PopupItems.Any(p => string.Equals(p.Name, "List -> IN (...)", StringComparison.Ordinal)),
             "a short flat list of everyday commands in the context menu, each at its menu index");
@@ -228,6 +228,17 @@ internal static class Scenarios
               && string.Equals(ClipboardText(), clipboard, StringComparison.Ordinal)
               && FakeIde.LastStatus.Contains("put the cursor in a SQL statement", StringComparison.Ordinal),
             "Copy SQL without a statement: readable status, clipboard kept");
+
+        const string script = "begin\r\n  delete from hr.заказы where id = 1;\r\nend;";
+        Check(string.Equals(host.Click("Copy SELECT * FROM object", script, "", 20, 2), script, StringComparison.Ordinal)
+              && string.Equals(ClipboardText(), "select * from hr.заказы", StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("select * from hr.заказы", StringComparison.Ordinal),
+            "Copy SELECT * FROM object: the name under the cursor with its schema, editor unchanged");
+        clipboard = ClipboardText();
+        Check(string.Equals(host.Click("Copy SELECT * FROM object", script, "", 9, 2), script, StringComparison.Ordinal)
+              && string.Equals(ClipboardText(), clipboard, StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("put the cursor on a table or view name", StringComparison.Ordinal),
+            "Copy SELECT * FROM object on a keyword: readable status, clipboard kept");
 
         const string query = "select * from orders o where o.type_id = pkg_const.c_retail and o.state = pkg_const.c_unknown";
         host.Click("Copy SQL with constants resolved", query, "", 5, 1);

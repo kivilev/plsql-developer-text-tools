@@ -44,6 +44,7 @@
   "ISO duration -> INTERVAL": "Duração ISO -> INTERVAL",
   "Copy SQL with constants resolved": "Copiar SQL com constantes resolvidas",
   "Explain Plan with constants": "Explain Plan com constantes",
+  "Copy SELECT * FROM object": "Copiar SELECT * FROM objeto",
   "Extended Explain Plan": "Explain Plan estendido",
   "Format Tools": "Formatação",
   "Apply formatting rules": "Aplicar regras de formatação",

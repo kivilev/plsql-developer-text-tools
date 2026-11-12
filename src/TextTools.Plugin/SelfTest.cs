@@ -139,7 +139,11 @@ internal static unsafe partial class SelfTest
     {
         Ide.SetText(cmd.Sample);
         var input = Ide.GetText();
-        var offset = input.IndexOf("select", StringComparison.Ordinal);
+        // The IDE may turn LF into CRLF: find the sample's cursor by the word under it, not by its offset.
+        var rest = cmd.Sample[cmd.SampleCursor..];
+        var end = rest.IndexOfAny([' ', '\n']);
+        var word = end < 0 ? rest : rest[..end];
+        var offset = input.IndexOf(word, StringComparison.Ordinal);
         var (x, y) = SelectionLocator.ToPosition(input, offset);
         Ide.SetCursor(x, y);
         Clipboard.SetText(Ide.AppHandle, "");
