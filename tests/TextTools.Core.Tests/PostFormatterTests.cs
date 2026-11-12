@@ -27,7 +27,7 @@ public class PostFormatterTests
           PROCEDURE open_account(i_id IN NUMBER) IS
             v_acc account%ROWTYPE;
           BEGIN
-            v_x           := NVL(i_id, 0);
+            v_x := NVL(i_id, 0);
             v_longer_name := 1;
             EXECUTE IMMEDIATE
               'update t set a = 1 where b = 2 and c = 3 and d = 4 and e = 5 and f = 6';
@@ -90,14 +90,23 @@ public class PostFormatterTests
     {
         const string input = "BEGIN\n  a := 1;\n  long_name := 2;\n  IF x THEN\n    b := 3;\n    cc := 4;\n  END IF;\nEND;";
         const string expected = "BEGIN\n  a         := 1;\n  long_name := 2;\n  IF x THEN\n    b  := 3;\n    cc := 4;\n  END IF;\nEND;";
-        Assert.Equal(expected, PostFormatter.Format(input));
+        Assert.Equal(expected, PostFormatter.Format(input, FormatOptions.Default with { AlignAssignments = true }));
+    }
+
+    [Fact]
+    public void AssignmentsGetOneSpaceOnEachSideAndNoAlignmentByDefault()
+    {
+        const string input = "BEGIN\n  a         := 1;\n  long_name:=2;\nEND;";
+        Assert.Equal("BEGIN\n  a := 1;\n  long_name := 2;\nEND;", PostFormatter.Format(input));
+        Assert.Equal(input, PostFormatter.Format(input, FormatOptions.None with { AssignmentSingleSpace = false }));
     }
 
     [Fact]
     public void AMultiLineAssignmentEndsItsGroup()
     {
         const string input = "BEGIN\n  a := f('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',\n         'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');\n  bb := 3;\nEND;";
-        var result = PostFormatter.Format(input);
+        // Short arguments kept up to 120 would join the call into one line first: the case needs a call that stays broken.
+        var result = PostFormatter.Format(input, FormatOptions.Default with { AlignAssignments = true, KeepShortArguments = false });
         Assert.Contains("  a := f('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',", result, StringComparison.Ordinal);
         Assert.Contains("  bb := 3;", result, StringComparison.Ordinal); // a group of one: single spaces
     }

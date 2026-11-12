@@ -65,7 +65,25 @@ public sealed class FormatProfile
         WrapBetween: IsOn("wrapBetween"),
         AlignNamedArguments: IsOn("alignNamedArguments"),
         AlignDeclarations: IsOn("alignDeclarations"),
-        IndentComments: IsOn("indentComments"));
+        IndentComments: IsOn("indentComments"),
+        ConditionPerLine: IsOn("conditionPerLine"),
+        FillLiteralArguments: IsOn("fillLiteralArguments"),
+        WrapInLists: IsOn("wrapInLists"),
+        KeepShortArguments: IsOn("keepShortArguments"),
+        WrapArithmetic: IsOn("wrapArithmetic"),
+        TightUnaryMinus: IsOn("tightUnaryMinus"),
+        OneSpaceBeforeComment: IsOn("oneSpaceBeforeComment"),
+        TableAliasSingleSpace: IsOn("tableAliasSingleSpace"),
+        NoBlankAtBlockEdges: IsOn("noBlankAtBlockEdges"),
+        SelectListFill: IsOn("selectListFill"),
+        JsonArrayaggLayout: IsOn("jsonArrayaggLayout"),
+        BulkCollectOnOneLine: IsOn("bulkCollectOnOneLine"),
+        LowerCapitalNames: IsOn("lowerCapitalNames"),
+        UpperContextKeywords: IsOn("upperContextKeywords"),
+        CaseLayout: IsOn("caseLayout"),
+        TypeFieldsLayout: IsOn("typeFieldsLayout"),
+        JsonTableLayout: IsOn("jsonTableLayout"),
+        AssignmentSingleSpace: IsOn("assignmentSingleSpace"));
 
     /// <summary>{ "version": 1, "settings": { "margin": 76, "endWithName": true, ... } }, indented so that it diffs well in a repository.</summary>
     public string ToJson()

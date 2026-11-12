@@ -149,4 +149,129 @@ internal static partial class SelectListRule
 
     [GeneratedRegex(@"\b(?:FROM|INTO)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
     private static partial Regex ClauseEnd();
+
+    [GeneratedRegex(@"\bSELECT\s+(?:(?:DISTINCT|UNIQUE|ALL)\s+)?(?!\*)|^\s*(?:BULK\s+COLLECT\s+)?INTO\s+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex ListHead();
+
+    [GeneratedRegex(@"^\s*(?:FROM|INTO|BULK\s+COLLECT)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex ListEnd();
+
+    [GeneratedRegex(@"^\s*SELECT\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex SelectStart();
+
+    [GeneratedRegex(@"^SELECT\s+(?:DISTINCT|UNIQUE|ALL)\s", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex SelectModifier();
+
+    [GeneratedRegex(@"^\s*CREATE\b.*\bVIEW\b.*\(\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex ViewHeaderOpen();
+
+    /// <summary>
+    /// The column list of a SELECT and its INTO list packed up to the margin, the continuation under the first column (after
+    /// <c>SELECT DISTINCT</c> under DISTINCT); a multi-line item (CASE, subquery) keeps its lines, a list with a comment stays.
+    /// </summary>
+    public static string Fill(string text, int margin)
+    {
+        var (lines, masked) = LineText.Split(text);
+        var output = new List<string>(lines.Length);
+        var i = 0;
+        while (i < lines.Length)
+        {
+            var heads = ListHead().Matches(masked[i]);
+            var last = heads.Count > 0 ? heads[^1] : null;
+            var column = last is null ? -1 : last.Index + last.Length;
+            var j = i + 1;
+            var depth = last is null ? 0 : LineText.Net(masked[i][column..]);
+            while (last is not null && j < lines.Length && !(depth == 0 && ListEnd().IsMatch(masked[j])) && !masked[j].Contains(';', StringComparison.Ordinal))
+            {
+                depth += LineText.Net(masked[j]);
+                j++;
+            }
+            var ok = last is not null && j > i + 1 && j < lines.Length && depth == 0 && ListEnd().IsMatch(masked[j]) && !masked[i].Contains(';', StringComparison.Ordinal);
+            ok = ok && !Enumerable.Range(i + 1, Math.Max(0, j - i - 1)).Any(x => SelectStart().IsMatch(masked[x])); // INSERT / INTO t / SELECT ...: not a list
+            if (!ok || FromOrInto().IsMatch(masked[i][column..]) || Enumerable.Range(i, j - i).Any(x => LineText.HasComment(lines[x])))
+            {
+                output.Add(lines[i]);
+                i++;
+                continue;
+            }
+            var continuation = SelectModifier().IsMatch(masked[i][last!.Index..]) ? last.Index + 7 : column;
+            output.AddRange(FillRows(lines, masked, [.. Enumerable.Range(i, j - i)], column, margin, continuation));
+            i = j;
+        }
+        return string.Join('\n', output);
+    }
+
+    /// <summary>The column list in the header of a view (<c>CREATE VIEW v (</c> ... <c>)</c>) packed up to the margin.</summary>
+    public static string FillViewColumns(string text, int margin)
+    {
+        var (lines, masked) = LineText.Split(text);
+        var output = new List<string>(lines.Length);
+        var i = 0;
+        while (i < lines.Length)
+        {
+            output.Add(lines[i]);
+            i++;
+            if (!ViewHeaderOpen().IsMatch(masked[i - 1])) continue;
+            var j = i;
+            while (j < lines.Length && !masked[j].TrimStart().StartsWith(')') && !masked[j].Contains(';', StringComparison.Ordinal)) j++;
+            if (i < j && j < lines.Length && masked[j].TrimStart().StartsWith(')') && !Enumerable.Range(i, j - i).Any(x => LineText.HasComment(lines[x])))
+            {
+                var column = LineText.Indent(lines[i]);
+                output.AddRange(FillRows(lines, masked, [.. Enumerable.Range(i, j - i)], column, margin, column));
+                i = j;
+            }
+        }
+        return string.Join('\n', output);
+    }
+
+    /// <summary>The list items of <paramref name="rows"/> packed up to the margin, the continuation at <paramref name="continuation"/>; an item of several lines keeps them.</summary>
+    private static List<string> FillRows(string[] lines, string[] masked, List<int> rows, int column, int margin, int continuation)
+    {
+        var items = new List<List<int>>();
+        var item = new List<int>();
+        var depth = 0;
+        foreach (var x in rows)
+        {
+            depth += LineText.Net(x == rows[0] ? masked[x][column..] : masked[x]);
+            item.Add(x);
+            if (depth == 0 && masked[x].TrimEnd().EndsWith(','))
+            {
+                items.Add(item);
+                item = [];
+            }
+        }
+        if (item.Count > 0) items.Add(item);
+        var output = new List<string>();
+        var current = new System.Text.StringBuilder(lines[rows[0]][..column]);
+        var empty = true;
+        foreach (var it in items)
+        {
+            if (it.Count > 1)
+            {
+                if (!empty) output.Add(current.ToString());
+                output.AddRange(it.Select(x => lines[x]));
+                current.Clear().Append(' ', continuation);
+                empty = true;
+                continue;
+            }
+            var x = it[0];
+            var piece = x == rows[0] ? LineText.Squash(lines[x][column..], masked[x][column..]) : LineText.Squash(lines[x], masked[x]);
+            if (empty)
+            {
+                current.Append(piece);
+                empty = false;
+            }
+            else if (current.Length + 1 + piece.Length > margin)
+            {
+                output.Add(current.ToString());
+                current.Clear().Append(' ', continuation).Append(piece);
+            }
+            else
+            {
+                current.Append(' ').Append(piece);
+            }
+        }
+        if (!empty) output.Add(current.ToString());
+        return output;
+    }
 }

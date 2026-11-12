@@ -17,7 +17,12 @@ internal static partial class CaseRules
         "regexp_substr", "remainder", "replace", "round", "row_number", "rpad", "rtrim", "sign", "sin", "sinh", "soundex", "sqrt",
         "stddev", "substr", "sys_context", "sys_guid", "tan", "tanh", "to_char", "to_clob", "to_date", "to_nchar", "to_number",
         "to_timestamp", "translate", "trim", "trunc", "tz_offset", "upper", "userenv", "variance",
+        "json_array", "json_arrayagg", "json_exists", "json_object", "json_objectagg", "json_query", "json_serialize", "json_table",
+        "json_value",
     };
+
+    /// <summary>True for an Oracle SQL built-in function this rule knows (any case).</summary>
+    public static bool IsBuiltinFunction(string name) => SqlFunctions.Contains(name);
 
     [GeneratedRegex(@"(?<![\w$#.])(?<name>[A-Za-z_][A-Za-z_0-9]*)(?=\s*\()", RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
     private static partial Regex FunctionCall();

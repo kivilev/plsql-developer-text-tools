@@ -37,7 +37,7 @@ CREATE OR REPLACE PACKAGE BODY loan_kernel IS
     param.talubehu('fugeke_ud', '1');
     o_code := 200;
   EXCEPTION WHEN OTHERS THEN
-    o_code    := 400;
+    o_code := 400;
     o_message := 'zo onode idibafaf suzab fogokosoz zonodebidi';
   END set_logopaga_loan_param;
 
@@ -66,7 +66,7 @@ CREATE OR REPLACE PACKAGE BODY loan_kernel IS
     param.talubehu('kabo_aleh', i_code_vace);
     o_code := 200;
   EXCEPTION WHEN OTHERS THEN
-    o_code    := 400;
+    o_code := 400;
     o_message := 'zo onode idibafaf suzab fogokosoz zonodebidi';
   END set_nesasi_zepakomirac_param;
 
@@ -83,12 +83,11 @@ CREATE OR REPLACE PACKAGE BODY loan_kernel IS
        polezi (:o, :al, 1, 0, :veceh, :polez, 1, :ona, 1)'
     USING i_branch, i_loan_id, i_date, i_gefil, i_fuge_num;
 
-    o_code    := 200;
+    o_code := 200;
     o_message := 'ko';
-
   EXCEPTION
     WHEN OTHERS THEN
-      o_code    := 400;
+      o_code := 400;
       o_message := SUBSTR(SQLERRM,1,3000);
   END vop_vuvug;
 

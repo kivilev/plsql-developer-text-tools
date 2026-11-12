@@ -75,9 +75,11 @@ public class IcbsRuleTests
 
         const string into = "BEGIN\n  SELECT a.x,\n         a.y\n    INTO v_x,\n         v_y\n    FROM t a;\nEND;\n";
         Assert.Contains("SELECT a.x, a.y\n", PostFormatter.Format(into), StringComparison.Ordinal);
-        Assert.Equal(into, PostFormatter.Format(into, FormatOptions.Default with { SelectIntoOnOneLine = false }));
+        // The fill of the select list (on by default) puts the lists on one line too: both off leave the text as it is.
+        Assert.Equal(into, PostFormatter.Format(into, FormatOptions.Default with { SelectIntoOnOneLine = false, SelectListFill = false }));
 
-        const string decode = "BEGIN\n  v := DECODE(t.state, 0, 'Created', 1, 'Accepted for processing', 2, 'Rejected by the bank', 3, 'Paid', 'Unknown');\nEND;\n";
+        // Past 120: a DECODE of short arguments within 120 stays on its line (short arguments are kept).
+        const string decode = "BEGIN\n  v := DECODE(t.state, 0, 'Created', 1, 'Accepted for processing', 2, 'Rejected by the bank', 3, 'Paid', 4, 'Cancelled', 'Unknown');\nEND;\n";
         Assert.Contains("0, 'Created',\n", PostFormatter.Format(decode), StringComparison.Ordinal);
         Assert.DoesNotContain("0, 'Created',\n", PostFormatter.Format(decode, FormatOptions.Default with { WrapDecodeInPairs = false }), StringComparison.Ordinal);
 

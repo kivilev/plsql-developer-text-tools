@@ -8,6 +8,33 @@ namespace TextTools.Core.Formatting;
 /// </summary>
 internal static partial class SelectIntoRule
 {
+    [GeneratedRegex(@"^\s*BULK\s+COLLECT\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex BareBulkCollect();
+
+    [GeneratedRegex(@"^(?<indent>\s*)INTO\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
+    private static partial Regex IntoStart();
+
+    /// <summary><c>BULK COLLECT</c>, then <c>INTO x</c> on the next line: one line <c>BULK COLLECT INTO x</c> at the column of INTO.</summary>
+    public static string JoinBulkCollect(string text)
+    {
+        var (lines, masked) = LineText.Split(text);
+        var output = new List<string>(lines.Length);
+        var i = 0;
+        while (i < lines.Length)
+        {
+            var into = i + 1 < lines.Length ? IntoStart().Match(masked[i + 1]) : Match.Empty;
+            if (into.Success && BareBulkCollect().IsMatch(masked[i]))
+            {
+                output.Add(into.Groups["indent"].Value + "BULK COLLECT " + lines[i + 1].TrimStart());
+                i += 2;
+                continue;
+            }
+            output.Add(lines[i]);
+            i++;
+        }
+        return string.Join('\n', output);
+    }
+
     [GeneratedRegex(@"^(?<indent>\s*)INTO\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, Limits.RegexTimeoutMs)]
     private static partial Regex BareInto();
 

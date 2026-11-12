@@ -12,7 +12,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     v_zini fi_zini%ROWTYPE;
     v_sola fi_seculini%ROWTYPE;
   BEGIN
-    o_code := put_const.C_BAD_REQUEST;
+    o_code := put_const.c_bad_request;
     --
     v_zini := tariff_data.get_fi_zini_row(i_zini_id => i_data.zini_id);
     -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
@@ -31,7 +31,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     -- 4. se_opup.zisohe = ozolidu ipokep    > upoz { "ezano": "duvipo_episegop" }
     -- 5. pe obetifus de osiro_udihekef      > etifusi epo irokud hekefas pez_betifus_deposi
     --
-    o_code := put_const.C_OK;
+    o_code := put_const.c_ok;
   END check_fagaki_data;
 
   PROCEDURE check_duduva_data(i_data    IN  fi_seculini%ROWTYPE,
@@ -39,9 +39,9 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
                               o_message OUT VARCHAR2) IS
     v_zini          fi_zini%ROWTYPE;
     v_fi_seculini   fi_seculini%ROWTYPE;
-    v_kemulugi_rate ZEPAB_KEMULUGI%ROWTYPE;
+    v_kemulugi_rate zepab_kemulugi%ROWTYPE;
   BEGIN
-    o_code := put_const.C_BAD_REQUEST;
+    o_code := put_const.c_bad_request;
     --
     v_zini := tariff_data.get_fi_zini_row(i_zini_id => i_data.zini_id);
     -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
@@ -69,7 +69,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     --       inikas;
     --     uru os;
     --
-    o_code := put_const.C_OK;
+    o_code := put_const.c_ok;
   END check_duduva_data;
 
   PROCEDURE check_delete_data(i_data    IN  fi_seculini%ROWTYPE,
@@ -79,7 +79,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     v_fi_seculini   fi_seculini%ROWTYPE;
   --     o_olegamib_mabi iguda_uregisiv%kodoleg;
   BEGIN
-    o_code := put_const.C_BAD_REQUEST;
+    o_code := put_const.c_bad_request;
     --
     --     o_ifah := agukiv_licu.edu_ov_seso_ifa(a_afag_ki => c_vedu.ovus_so);
     -- 1. defe_ah sokofi ol bo_inas         > lahu { "fihol": "inas_pod_podef" }
@@ -107,7 +107,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     --       inikas;
     --     uru os;
     --
-    o_code := put_const.C_OK;
+    o_code := put_const.c_ok;
   END check_delete_data;
 
   PROCEDURE check_package_tariff(i_data    IN  zepab_kemulugi%ROWTYPE,
@@ -119,7 +119,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     --
     v_gid VARCHAR2(4000);
   BEGIN
-    o_code := put_const.C_BAD_REQUEST;
+    o_code := put_const.c_bad_request;
     --
     -- irahap
     client_check.faz_branch(i_data.branch, v_gid);
@@ -129,7 +129,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     END IF;
     -- ikitaze
     v_account.branch := i_data.branch;
-    v_account.id     := i_data.account;
+    v_account.id := i_data.account;
     account_data.get_account_data(io_cid => v_account);
     IF v_account.cid_raz IS NULL THEN
       o_message := 'pilufub_tet_litus';
@@ -147,7 +147,8 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     END IF;
     -- emirilif_pu;
     IF client_data.get_client_id(i_branch    => i_data.branch,
-                                 i_client_id => i_data.kemulugi_id) = 0 THEN
+                                 i_client_id => i_data.kemulugi_id) = 0
+    THEN
       o_message := 'cemonuba_ose_isini';
       RETURN;
     END IF;
@@ -161,7 +162,7 @@ CREATE OR REPLACE PACKAGE BODY tariff_check IS
     END IF;
 
     --
-    o_code := put_const.C_OK;
+    o_code := put_const.c_ok;
   END check_package_tariff;
 END tariff_check;
 /

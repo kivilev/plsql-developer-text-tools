@@ -49,10 +49,21 @@ public static class FormatSample
         "          OR i_currency IS NULL)\n" +
         "         AND a.operation_date BETWEEN i_period_begin_date_of_report AND i_period_end_date_of_report;\n" +
         "    OPEN c3 FOR\n" +
-        "      SELECT a.id          account_id,\n" +
+        "      SELECT a.id          account_id, -- key\n" +
         "             a.branch      branch_code,\n" +
         "             c.name        client_name\n" +
         "        FROM account a;\n" +
+        "    OPEN c4 FOR\n" +
+        "      SELECT\n" +
+        "      -- the key first\n" +
+        "             a.id,\n" +
+        "             a.branch\n" +
+        "        FROM account a;\n" +
+        "    SELECT a.id\n" +
+        "      INTO\n" +
+        "      v_id\n" +
+        "      FROM account a\n" +
+        "     WHERE a.id = i_id;\n" +
         "    IF v_acc.state = account_const.c_state_active AND v_acc.currency = i_currency\n" +
         "       OR i_currency IS NULL THEN\n" +
         "      v_text := DECODE(v_acc.state, 0, 'Created', 1, 'Accepted for processing', 2, 'Rejected by the bank', 3, 'Paid', 'Unknown');\n" +
@@ -61,6 +72,51 @@ public static class FormatSample
         "    v_text := 'Account ' || v_acc.id || ' of the client ' || v_acc.client || ' is closed on ' || v_date;\n" +
         "    EXECUTE IMMEDIATE 'update account set state = 1 where id = :1 and branch = :2' USING i_id;\n" +
         "    -- before end\n" +
+        "  END;\n" +
+        "  PROCEDURE demo_rules(i_branch IN VARCHAR2) IS\n" +
+        "    TYPE t_rec IS RECORD(\n" +
+        "      id   NUMBER,\n" +
+        "      name VARCHAR2(80));\n" +
+        "    v_flag NUMBER;\n" +
+        "  BEGIN\n" +
+        "\n" +
+        "    v_flag := 1;      -- set\n" +
+        "    SELECT CASE\n" +
+        "             WHEN a.state = 1 THEN\n" +
+        "              'A'\n" +
+        "             ELSE\n" +
+        "              'I'\n" +
+        "           END\n" +
+        "      INTO v_text\n" +
+        "      FROM ACCOUNT     a\n" +
+        "      JOIN client_data c\n" +
+        "        ON c.id = a.client\n" +
+        "     WHERE a.code IN (- 4068, - 4061)\n" +
+        "       AND rownum = 1;\n" +
+        "    SELECT a.id\n" +
+        "      BULK COLLECT\n" +
+        "      INTO v_ids\n" +
+        "      FROM account a;\n" +
+        "    SELECT jt.code\n" +
+        "      INTO v_code\n" +
+        "      FROM JSON_TABLE(v_json,\n" +
+        "                      '$'\n" +
+        "                      COLUMNS(code NUMBER PATH '$.code')) jt;\n" +
+        "    SELECT JSON_ARRAYAGG(JSON_OBJECT('id' VALUE a.id,\n" +
+        "                                     'data' VALUE a.data\n" +
+        "                                     FORMAT JSON))\n" +
+        "      INTO v_json\n" +
+        "      FROM account a;\n" +
+        "    some_pkg.init_all(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);\n" +
+        "    IF v_flag = 1 AND v_code = 2\n" +
+        "       AND v_rest = 3 THEN\n" +
+        "      v_flag := 3;\n" +
+        "    END IF;\n" +
+        "    IF v_code IN (-4068, -4061, -4065, -6508, -6512, -20001, -20002, -20003, -20004) THEN\n" +
+        "      v_flag := 2;\n" +
+        "    END IF;\n" +
+        "    v_text := deposit_checks.is_valid_new_book_dep_params(i_branch, i_filial, i_code);\n" +
+        "    v_total := account_data.get_saldo_out(i_branch, 3) + account_data.get_saldo_out(i_branch, 8) + v_rest;\n" +
         "  END;\n" +
         "\n" +
         "END;";
