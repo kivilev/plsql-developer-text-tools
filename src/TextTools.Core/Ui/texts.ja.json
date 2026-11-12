@@ -44,5 +44,6 @@
   "settings.exported": "ルールをファイルに保存しました",
   "settings.imported": "ファイルからルールを読み込みました。設定数：",
   "settings.fileError": "ファイルを読み書きできません",
-  "dialog.filter": "書式ルール"
+  "dialog.filter": "書式ルール",
+  "session.failed": "ウィンドウの接続のセッションを開けません"
 }

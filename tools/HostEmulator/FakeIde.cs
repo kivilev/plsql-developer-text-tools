@@ -59,7 +59,91 @@ internal static unsafe class FakeIde
         register(48, (nint)(delegate* unmanaged[Cdecl]<byte*>)&SqlError);
         register(107, (nint)(delegate* unmanaged[Cdecl]<byte*, byte*, byte*, byte*, int>)&ShowHtml);
         register(108, (nint)(delegate* unmanaged[Cdecl]<byte*, byte*, int, int>)&RefreshHtml);
+        register(12, (nint)(delegate* unmanaged[Cdecl]<byte**, byte**, byte**, void>)&MainConnectionInfo);
+        register(39, (nint)(delegate* unmanaged[Cdecl]<int, int>)&Perform);
+        register(50, (nint)(delegate* unmanaged[Cdecl]<int, int>)&UsePlugInSession);
+        register(51, (nint)(delegate* unmanaged[Cdecl]<int, void>)&UseDefaultSession);
+        register(57, (nint)(delegate* unmanaged[Cdecl]<int, byte*, byte*, byte*, byte*, int>)&SetPlugInSession);
+        register(240, (nint)(delegate* unmanaged[Cdecl]<int, byte**, byte**, byte**, byte**, int>)&ConnectionInfoEx);
+        register(245, (nint)(delegate* unmanaged[Cdecl]<int>)&GetWindowConnection);
+        register(246, (nint)(delegate* unmanaged[Cdecl]<int, int>)&SetWindowConnection);
     }
+
+    // The IDE's connections: 0 is the main one, 1 belongs to a window opened before the main connection was switched.
+    private static readonly (nint User, nint Password, nint Database, nint ConnectAs)[] Connections =
+    [
+        (Marshal.StringToCoTaskMemUTF8("IY00444"), Marshal.StringToCoTaskMemUTF8("main-secret"), Marshal.StringToCoTaskMemUTF8("BANK"), Marshal.StringToCoTaskMemUTF8("")),
+        (Marshal.StringToCoTaskMemUTF8("ACBS"), Marshal.StringToCoTaskMemUTF8("window-secret"), Marshal.StringToCoTaskMemUTF8("BANK"), Marshal.StringToCoTaskMemUTF8("")),
+    ];
+
+    /// <summary>The connection of the current window (IDE_GetWindowConnection) and whether a session for it can be opened.</summary>
+    public static int WindowConnection { get; set; }
+    public static bool SessionOpens { get; set; } = true;
+
+    /// <summary>The session each query ran in ("main", or "user/password" of the plug-in session), and the order of the window calls.</summary>
+    public static List<string> QuerySessions { get; } = [];
+    public static List<string> Events { get; } = [];
+    private static string _session = "main";
+    private static string _pluginSession = "main";
+
+    /// <summary>The session the next query would use: "main" once the plug-in has gone back to the default one.</summary>
+    public static string CurrentSession => _session;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void MainConnectionInfo(byte** user, byte** password, byte** database)
+    {
+        *user = (byte*)Connections[0].User;
+        *password = (byte*)Connections[0].Password;
+        *database = (byte*)Connections[0].Database;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int ConnectionInfoEx(int ix, byte** user, byte** password, byte** database, byte** connectAs)
+    {
+        if ((uint)ix >= (uint)Connections.Length) return 0;
+        var c = Connections[ix];
+        *user = (byte*)c.User;
+        *password = (byte*)c.Password;
+        *database = (byte*)c.Database;
+        *connectAs = (byte*)c.ConnectAs;
+        return 1;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int GetWindowConnection() => WindowConnection;
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SetWindowConnection(int ix)
+    {
+        Events.Add($"set connection {ix}");
+        return 1;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int Perform(int param)
+    {
+        Events.Add($"perform {param}");
+        return 1;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int SetPlugInSession(int pluginId, byte* user, byte* password, byte* database, byte* connectAs)
+    {
+        if (!SessionOpens) return 0;
+        _pluginSession = $"{Read(user)}/{Read(password)}";
+        return 1;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static int UsePlugInSession(int pluginId)
+    {
+        if (!SessionOpens) return 0;
+        _session = _pluginSession;
+        return 1;
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static void UseDefaultSession(int pluginId) => _session = "main";
 
     /// <summary>The current window type (IDE_GetWindowType) and the HTML windows shown: (url, title, id).</summary>
     public static int CurrentWindowType { get; set; } = 1;
@@ -99,6 +183,7 @@ internal static unsafe class FakeIde
     private static void CreateWindow(int type, byte* text, int execute)
     {
         CreatedWindows.Add((type, Read(text)));
+        Events.Add($"create window {type} execute {execute}");
         CurrentWindowType = type;
         (Text, Selected, X, Y) = (Read(text), "", 1, 1);
     }
@@ -128,6 +213,7 @@ internal static unsafe class FakeIde
     private static int SqlExecute(byte* sql)
     {
         Queries.Add(Read(sql));
+        QuerySessions.Add(_session);
         _row = 0;
         return Connected ? 0 : 3114; // ORA-03114: not connected
     }

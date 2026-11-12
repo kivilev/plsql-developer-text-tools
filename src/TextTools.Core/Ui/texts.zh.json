@@ -44,5 +44,6 @@
   "settings.exported": "规则已保存到文件",
   "settings.imported": "已从文件读取规则，设置项数：",
   "settings.fileError": "无法读取或写入文件",
-  "dialog.filter": "格式规则"
+  "dialog.filter": "格式规则",
+  "session.failed": "无法为窗口的连接打开会话"
 }

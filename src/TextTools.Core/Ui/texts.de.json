@@ -44,5 +44,6 @@
   "settings.exported": "Regeln in der Datei gespeichert",
   "settings.imported": "Regeln aus der Datei gelesen, Einstellungen gesetzt: ",
   "settings.fileError": "Datei konnte nicht gelesen oder geschrieben werden",
-  "dialog.filter": "Formatierungsregeln"
+  "dialog.filter": "Formatierungsregeln",
+  "session.failed": "Sitzung für die Verbindung des Fensters konnte nicht geöffnet werden"
 }

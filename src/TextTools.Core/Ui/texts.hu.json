@@ -44,5 +44,6 @@
   "settings.exported": "A szabályok fájlba mentve",
   "settings.imported": "Szabályok beolvasva a fájlból, beállítva: ",
   "settings.fileError": "A fájl nem olvasható vagy nem írható",
-  "dialog.filter": "Formázási szabályok"
+  "dialog.filter": "Formázási szabályok",
+  "session.failed": "Nem sikerült munkamenetet nyitni az ablak kapcsolatához"
 }

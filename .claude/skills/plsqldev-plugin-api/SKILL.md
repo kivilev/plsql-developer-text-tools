@@ -48,6 +48,10 @@ Other available events (not used yet): `OnCreate`, `OnDeactivate`, `OnDestroy`, 
 | 34 | IDE_SetText | `Bool(char*)` **replaces the whole text** |
 | 35 | IDE_SetStatusMessage | `Bool(char*)` |
 | 40/42/44 | SQL_Execute / SQL_Eof / SQL_Field | `int(char*)` 0 = ok, else ORA code / `Bool()` / `char*(int field, 0-based)`; main session by default |
+| 12 | IDE_GetConnectionInfo | `void(char** user, char** password, char** database)` the main connection |
+| 39 | IDE_Perform | `Bool(int)` 1 = Execute |
+| 50/51/57 | SQL_UsePlugInSession / SQL_UseDefaultSession / SQL_SetPlugInSession | `Bool(int id)` / `void(int id)` / `Bool(int id, user, password, database, connectAs)`; see `WindowSession` |
+| 240/245/246 | IDE_GetConnectionInfoEx / GetWindowConnection / SetWindowConnection | `Bool(int ix, char** user, password, database, connectAs)` / `int()` / `Bool(int ix)` |
 | 84 | IDE_WindowIsRunning | `Bool()` |
 | 141/142/143 | IDE_GetCursorX / Y / SetCursor | 1-based char / line |
 | 153 | IDE_WindowHasEditor | `Bool(Bool codeEditor)` |

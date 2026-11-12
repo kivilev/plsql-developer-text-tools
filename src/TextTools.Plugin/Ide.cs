@@ -48,7 +48,7 @@ internal static unsafe class Ide
     {
         if (Has(35)) WithNative(text, p => ((delegate* unmanaged[Cdecl]<byte*, int>)Fn(35))(p));
     }
-    // 40, 42, 44: runs in the main IDE session; field indices are 0-based, the first row is current right after execute.
+    // 40, 42, 44: runs in the main IDE session (see WindowSession); field indices are 0-based, the first row is current right after execute.
     public static string? QuerySingleValue(string sql)
     {
         if (!Has(40) || !Has(42) || !Has(44)) return null;
@@ -162,6 +162,50 @@ internal static unsafe class Ide
             var result = ((delegate* unmanaged[Cdecl]<byte*, byte*>)Fn(162))(p);
             return result == null ? null : FromNative(result);
         });
+    }
+
+    /// <summary>The id the IDE gave this plug-in in IdentifyPlugIn.</summary>
+    public static int PluginId { get; set; }
+
+    // 39: IDE_Perform(Param) - as if the menu item was selected, 1 = Execute.
+    public static void PerformExecute()
+    {
+        if (Has(39)) ((delegate* unmanaged[Cdecl]<int, int>)Fn(39))(1);
+    }
+    // 246: IDE_SetWindowConnection(ix) - the connection of the current window.
+    public static bool SetWindowConnection(int ix) =>
+        Has(246) && ((delegate* unmanaged[Cdecl]<int, int>)Fn(246))(ix) != 0;
+    // 245, 240, 12: the connection of the current window when it is another user or database than the main connection
+    // (12), otherwise -1 (also when the IDE cannot tell). Only names are compared; the passwords are not looked at.
+    public static int OtherWindowConnection()
+    {
+        if (!Has(245) || !Has(240) || !Has(12)) return -1;
+        var ix = ((delegate* unmanaged[Cdecl]<int>)Fn(245))();
+        byte* user = null, password = null, database = null, connectAs = null;
+        if (ix < 0 || ((delegate* unmanaged[Cdecl]<int, byte**, byte**, byte**, byte**, int>)Fn(240))(ix, &user, &password, &database, &connectAs) == 0) return -1;
+        var windowUser = FromNative(user);
+        var windowDatabase = FromNative(database);
+        byte* mainUser = null, mainPassword = null, mainDatabase = null;
+        ((delegate* unmanaged[Cdecl]<byte**, byte**, byte**, void>)Fn(12))(&mainUser, &mainPassword, &mainDatabase);
+        return windowUser.Length == 0
+            || (string.Equals(windowUser, FromNative(mainUser), StringComparison.OrdinalIgnoreCase)
+                && string.Equals(windowDatabase, FromNative(mainDatabase), StringComparison.OrdinalIgnoreCase))
+            ? -1 : ix;
+    }
+    // 240, 57, 50: the SQL functions of this plug-in go to a private session of that connection. The password goes from
+    // the IDE straight back to the IDE as its own pointer: it never becomes a managed string.
+    public static bool UseConnectionSession(int ix)
+    {
+        if (!Has(240) || !Has(57) || !Has(50)) return false;
+        byte* user = null, password = null, database = null, connectAs = null;
+        return ((delegate* unmanaged[Cdecl]<int, byte**, byte**, byte**, byte**, int>)Fn(240))(ix, &user, &password, &database, &connectAs) != 0
+            && ((delegate* unmanaged[Cdecl]<int, byte*, byte*, byte*, byte*, int>)Fn(57))(PluginId, user, password, database, connectAs) != 0
+            && ((delegate* unmanaged[Cdecl]<int, int>)Fn(50))(PluginId) != 0;
+    }
+    // 51: SQL_UseDefaultSession - the SQL functions are back in the main session.
+    public static void UseDefaultSession()
+    {
+        if (Has(51)) ((delegate* unmanaged[Cdecl]<int, void>)Fn(51))(PluginId);
     }
 
     private static string FromNative(byte* p) => p == null ? "" : Marshal.PtrToStringUTF8((nint)p) ?? "";

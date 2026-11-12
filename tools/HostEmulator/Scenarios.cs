@@ -257,11 +257,73 @@ internal static class Scenarios
         host.Click("Copy SQL with constants resolved", query, "", 5, 1);
         (FakeIde.Connected, FakeIde.Rows) = (false, []);
         Check(FakeIde.Queries.Count == 1, "Copy SQL again within 5 seconds: the specification comes from the cache");
+        WindowConnection(host, query);
+    }
+
+    /// <summary>Issue 33: a window that keeps its own connection after the main one was switched to another user.</summary>
+    private static void WindowConnection(PluginHost host, string query)
+    {
+        const string windowSession = "ACBS/window-secret";
+        var spec = new[] { "package pkg_const is\n", "  c_retail constant number := 10;\n", "end;\n" };
+
+        void Click(string command)
+        {
+            (FakeIde.Connected, FakeIde.Rows) = (true, spec);
+            FakeIde.Queries.Clear();
+            FakeIde.QuerySessions.Clear();
+            FakeIde.Events.Clear();
+            host.Click(command, query, "", 5, 1);
+            FakeIde.Connected = false;
+            FakeIde.Rows = [];
+        }
+
+        FakeIde.WindowConnection = 1;
+        Click("Copy SQL with constants resolved");
+        Check(FakeIde.QuerySessions.Count == 1 && string.Equals(FakeIde.QuerySessions[0], windowSession, StringComparison.Ordinal)
+              && ClipboardText().Contains("10 /*pkg_const.c_retail*/", StringComparison.Ordinal),
+            "Window connection: the specification is read in a session of the window's connection, not from the main one's cache");
+        Check(string.Equals(FakeIde.CurrentSession, "main", StringComparison.Ordinal), "Window connection: back to the default session afterwards");
+
+        Click("Explain Plan with constants");
+        Check(string.Equals(string.Join(" | ", FakeIde.Events), "create window 5 execute 0 | set connection 1 | perform 1", StringComparison.Ordinal),
+            "Window connection: the Plan Window gets the window's connection before it executes");
+        FakeIde.CurrentWindowType = 1;
+
+        FakeIde.WindowConnection = 0;
+        Click("Explain Plan with constants");
+        Check(string.Equals(string.Join(" | ", FakeIde.Events), "create window 5 execute 1", StringComparison.Ordinal),
+            "Main connection: the Plan Window simply executes");
+        FakeIde.CurrentWindowType = 1;
+
+        FakeIde.WindowConnection = -1;
+        Click("Copy SQL with constants resolved");
+        Check(FakeIde.QuerySessions.TrueForAll(s => string.Equals(s, "main", StringComparison.Ordinal)), "No window connection known: the main session");
+        FakeIde.WindowConnection = 0;
+
+        const string other = "select * from orders o where o.type_id = pkg_other.c_retail";
+        FakeIde.WindowConnection = 1;
+        FakeIde.SessionOpens = false;
+        (FakeIde.Connected, FakeIde.Rows) = (true, spec);
+        FakeIde.Queries.Clear();
+        host.Click("Copy SQL with constants resolved", other, "", 5, 1);
+        (FakeIde.Connected, FakeIde.Rows) = (false, []);
+        Check(FakeIde.Queries.Count == 0 && string.Equals(ClipboardText(), "select * from orders o where o.type_id = :c_retail", StringComparison.Ordinal)
+              && FakeIde.LastStatus.Contains("session", StringComparison.Ordinal),
+            "Window session cannot be opened: no queries as the wrong user, a bind and a status message");
+        FakeIde.SessionOpens = true;
+        FakeIde.WindowConnection = 0;
     }
 
     private static string ClipboardText()
     {
-        if (!OpenClipboard(0)) return "<clipboard busy>";
+        // Another process (a clipboard manager, the remote desktop) may hold the clipboard for a moment: retry like the plug-in does.
+        var opened = OpenClipboard(0);
+        for (var i = 1; i < 50 && !opened; i++)
+        {
+            Thread.Sleep(20);
+            opened = OpenClipboard(0);
+        }
+        if (!opened) return "<clipboard busy>";
         try
         {
             var handle = GetClipboardData(13 /* CF_UNICODETEXT */);
