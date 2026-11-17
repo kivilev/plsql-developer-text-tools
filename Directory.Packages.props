@@ -7,8 +7,8 @@
 
   <!-- Static analyzers for every project. -->
   <ItemGroup>
-    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.317" />
-    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
+    <GlobalPackageReference Include="Meziantou.Analyzer" Version="3.0.341" />
+    <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.36.0.15337" />
   </ItemGroup>
 
   <!-- Tests. -->
